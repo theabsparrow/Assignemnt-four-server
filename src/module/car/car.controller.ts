@@ -1,25 +1,20 @@
 import { Request, Response } from 'express';
 import { carService } from './car.service';
+import { catchAsync } from '../../utills/catchAsync';
+import { sendResponse } from '../../utills/sendResponse';
+import { StatusCodes } from 'http-status-codes';
 
 // create a car data controller
-const createCar = async (req: Request, res: Response) => {
-  try {
-    const payloade = req.body;
-    const result = await carService.createCar(payloade);
-
-    res.status(200).json({
-      success: true,
-      message: 'Car created successfully',
-      data: result,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: false,
-      message: 'something went wrong',
-      error: err,
-    });
-  }
-};
+const createCar = catchAsync(async (req: Request, res: Response) => {
+  const payloade = req.body;
+  const result = await carService.createCar(payloade);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: 'Academic department created successfully',
+    data: result,
+  });
+});
 
 // get all cars controller
 const getAllCars = async (req: Request, res: Response) => {
