@@ -12,3 +12,17 @@ export const isUserExists = async (id: string) => {
   }
   return result;
 };
+
+export const isUserExistByEmail = async (email: string) => {
+  const result = await User.findOne({ email: email });
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
+  }
+  if (result?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
+  }
+  if (result?.status === 'deactive') {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'you are not authorized');
+  }
+  return result;
+};

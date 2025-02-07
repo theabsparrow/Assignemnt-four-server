@@ -28,6 +28,48 @@ const login = catchAsync(
   },
 );
 
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const user = req.user;
+    const result = await authService.changePassword(payload, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'password changed successfully',
+      data: result,
+    });
+  },
+);
+
+const generateAccessToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { refreshToken } = req.cookies;
+    const result = await authService.generateAccessToken(refreshToken);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'access token generated successfully',
+      data: result,
+    });
+  },
+);
+
+const forgetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+    const result = await authService.forgetPassword(email);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'generate otp successfully',
+      data: result,
+    });
+  },
+);
 export const authController = {
   login,
+  changePassword,
+  generateAccessToken,
+  forgetPassword,
 };

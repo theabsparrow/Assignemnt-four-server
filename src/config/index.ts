@@ -19,4 +19,8 @@ export default {
   super_admin_first_name: process.env.SUPER_ADMIN_FIRST_NAME,
   super_admin_middle_name: process.env.SUPER_ADMIN_MIDDLE_NAME,
   super_admin_last_name: process.env.SUPER_ADMIN_LAST_NAME,
+  email_app_password: process.env.EMAIL_APP_PASSWORD,
+  email_sent_from: process.env.EMAIL_SENT_FROM,
+  smtp_host: process.env.SMTP_HOST,
+  smtp_port: process.env.SMTP_PORT,
 };

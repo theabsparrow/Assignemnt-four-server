@@ -21,72 +21,77 @@ const userNameSchema = new Schema<TUSerName>({
   },
 });
 
-const userSchema = new Schema<TUser>({
-  name: {
-    type: userNameSchema,
-    required: [true, 'name is required'],
+const userSchema = new Schema<TUser>(
+  {
+    name: {
+      type: userNameSchema,
+      required: [true, 'name is required'],
+    },
+    email: {
+      type: String,
+      required: [true, 'email is required'],
+      trim: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: [true, 'password is required'],
+    },
+    phoneNumber: {
+      type: String,
+      unique: true,
+      required: [true, 'phone number is required'],
+      trim: true,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'others'],
+      required: [true, 'gender is required'],
+    },
+    dateOfBirth: {
+      type: String,
+      required: [true, 'birth date is required'],
+    },
+    profileImage: {
+      type: String,
+      default: '',
+    },
+    coverImage: {
+      type: String,
+      default: '',
+    },
+    status: {
+      type: String,
+      default: 'active',
+    },
+    role: {
+      type: String,
+      default: 'user',
+    },
+    homeTown: {
+      type: String,
+      default: '',
+    },
+    currentAddress: {
+      type: String,
+      default: '',
+    },
+    verifyWithEmail: {
+      type: Boolean,
+      default: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    passwordChangedAt: {
+      type: Date,
+    },
   },
-  email: {
-    type: String,
-    required: [true, 'email is required'],
-    trim: true,
-    unique: true,
+  {
+    timestamps: true,
   },
-  password: {
-    type: String,
-    required: [true, 'password is required'],
-  },
-  phoneNumber: {
-    type: String,
-    unique: true,
-    required: [true, 'phone number is required'],
-    trim: true,
-  },
-  gender: {
-    type: String,
-    enum: ['male', 'female', 'others'],
-    required: [true, 'gender is required'],
-  },
-  dateOfBirth: {
-    type: String,
-    required: [true, 'birth date is required'],
-  },
-  profileImage: {
-    type: String,
-    default: '',
-  },
-  coverImage: {
-    type: String,
-    default: '',
-  },
-  status: {
-    type: String,
-    default: 'active',
-  },
-  role: {
-    type: String,
-    default: 'user',
-  },
-  homeTown: {
-    type: String,
-    default: '',
-  },
-  currentAddress: {
-    type: String,
-    default: '',
-  },
-  verifyWithEmail: {
-    type: Boolean,
-    default: false,
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
-  passwordChangedAt: {
-    type: Date,
-  },
-});
+);
 
 userSchema.pre('save', async function (next) {
   const user = this;
