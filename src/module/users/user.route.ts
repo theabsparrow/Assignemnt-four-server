@@ -2,6 +2,8 @@ import { Router } from 'express';
 import validateRequest from '../../middlewire/validateRequest';
 import { userValidation } from './user.validation';
 import { userController } from './user.controller';
+import { auth } from '../../middlewire/auth';
+import { USER_ROLE } from './user.constant';
 
 const router = Router();
 
@@ -10,7 +12,7 @@ router.post(
   validateRequest(userValidation.userValidationSchema),
   userController.createUSer,
 );
-router.get('/', userController.getAllUsers);
+router.get('/', auth(USER_ROLE.user), userController.getAllUsers);
 router.get('/:id', userController.getASingleUSer);
 router.patch(
   '/change-status/:id',

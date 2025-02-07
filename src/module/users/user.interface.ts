@@ -1,3 +1,5 @@
+import { USER_ROLE } from './user.constant';
+
 export type TUSerName = {
   firstName: string;
   middleName?: string;
@@ -21,3 +23,5 @@ export type TUser = {
   isDeleted: boolean;
   passwordChangedAt?: Date;
 };
+
+export type TUSerRole = keyof typeof USER_ROLE;
