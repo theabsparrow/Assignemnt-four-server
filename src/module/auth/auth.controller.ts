@@ -6,18 +6,13 @@ import { authService } from './auth.service';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import config from '../../config';
+import { cookieOptions } from './auth.const';
 
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const result = await authService.login(payload);
     const { access, refresh } = result;
-    const cookieOptions: CookieOptions = {
-      secure: config.NODE_ENV === 'production',
-      httpOnly: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 365,
-    };
     res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {
       success: true,
@@ -67,9 +62,42 @@ const forgetPassword = catchAsync(
     });
   },
 );
+
+const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { otp } = req.body;
+    const user = req.user;
+    const result = await authService.resetPassword(user, otp);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'password reset successfully',
+      data: result,
+    });
+  },
+);
+
+const setNewPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { newPassword } = req.body;
+    const user = req.user;
+    const result = await authService.setNewPassword(user, newPassword);
+    const { access, refresh } = result;
+    res.cookie('refreshToken', refresh, cookieOptions);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'new password set successfully',
+      data: access,
+    });
+  },
+);
+
 export const authController = {
   login,
   changePassword,
   generateAccessToken,
   forgetPassword,
+  resetPassword,
+  setNewPassword,
 };

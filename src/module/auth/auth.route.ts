@@ -27,5 +27,16 @@ router.post(
   validateRequest(authValidation.forgetPasswordValidationSchema),
   authController.forgetPassword,
 );
-
+router.post(
+  '/reset-password',
+  validateRequest(authValidation.resetPasswordValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.resetPassword,
+);
+router.post(
+  '/set-newPassword',
+  validateRequest(authValidation.setNewPasswordValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.setNewPassword,
+);
 export const authRoute = router;

@@ -14,7 +14,6 @@ import config from '../../config';
 import { JwtPayload } from 'jsonwebtoken';
 import { isUserExistByEmail } from '../users/user.utills';
 import { sendEmail } from '../../utills/sendEmail';
-import { Otp } from '../otp/otp.model';
 import { otpEmailTemplate } from '../../utills/otpEmailTemplate';
 
 const login = async (payload: TLogin) => {
@@ -121,29 +120,81 @@ const generateAccessToken = async (refreshToken: string) => {
 
 const forgetPassword = async (email: string) => {
   const result = await isUserExistByEmail(email);
+  const otp = generateOTP().toString();
   const jwtPayload = {
     userEmail: result?.email,
     userRole: result?.role,
+    otp,
   };
   const resetAccessToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
     '5m',
   );
-  const otp = generateOTP().toString();
-  const user = result?._id;
+
   const userEmail = result?.email;
   if (resetAccessToken && otp) {
     const resetToken = `Bearer ${resetAccessToken}`;
     sendEmail(userEmail, otpEmailTemplate(otp));
-    await Otp.findOneAndUpdate(
-      { user },
-      { otp },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
-    );
     return resetToken;
   } else {
     throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
+  }
+};
+
+const resetPassword = async (user: JwtPayload, oneTimePass: string) => {
+  const { userEmail, otp } = user;
+  const userInfo = await isUserExistByEmail(userEmail);
+  const jwtPayload = {
+    userEmail: userInfo?.email,
+    userRole: userInfo?.role,
+  };
+  const tokenForSetNewPass = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '30m',
+  );
+  if (otp !== oneTimePass) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'the otp you have provided is wrong',
+    );
+  }
+  const setPassToken = `Bearer ${tokenForSetNewPass}`;
+  return setPassToken;
+};
+
+const setNewPassword = async (user: JwtPayload, newPassword: string) => {
+  const { userEmail } = user;
+  const saltNumber = Number(config.bcrypt_salt_round);
+  const userInfo = await isUserExistByEmail(userEmail);
+  const _id = userInfo?._id;
+  const jwtPayload = {
+    userEmail: userInfo?.email,
+    userRole: userInfo?.role,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
+  const hashedPassword = await bcrypt.hash(newPassword, saltNumber);
+  const result = await User.findByIdAndUpdate(
+    _id,
+    { password: hashedPassword, passwordChangedAt: new Date() },
+    { new: true },
+  );
+  if (result) {
+    const access = `Bearer ${accessToken}`;
+    const refresh = `Bearer ${refreshToken}`;
+    return { access, refresh };
+  } else {
+    throw new AppError(StatusCodes.GATEWAY_TIMEOUT, 'time out');
   }
 };
 export const authService = {
@@ -151,4 +202,6 @@ export const authService = {
   changePassword,
   generateAccessToken,
   forgetPassword,
+  resetPassword,
+  setNewPassword,
 };
