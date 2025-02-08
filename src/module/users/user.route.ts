@@ -45,5 +45,10 @@ router.patch(
   validateRequest(userValidation.userRoleValidationSchema),
   userController.makeAdmin,
 );
-
+router.patch(
+  '/update-info',
+  validateRequest(userValidation.updateUserInfoValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  userController.updateUserInfo,
+);
 export const userRoute = router;

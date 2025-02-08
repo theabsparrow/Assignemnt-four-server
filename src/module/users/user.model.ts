@@ -31,7 +31,7 @@ const userSchema = new Schema<TUser>(
       type: String,
       required: [true, 'email is required'],
       trim: true,
-      unique: true,
+      // unique: true,
     },
     password: {
       type: String,
@@ -39,7 +39,7 @@ const userSchema = new Schema<TUser>(
     },
     phoneNumber: {
       type: String,
-      unique: true,
+      // unique: true,
       required: [true, 'phone number is required'],
       trim: true,
     },
@@ -51,6 +51,10 @@ const userSchema = new Schema<TUser>(
     dateOfBirth: {
       type: String,
       required: [true, 'birth date is required'],
+    },
+    age: {
+      type: Number,
+      required: [true, 'age is required'],
     },
     profileImage: {
       type: String,

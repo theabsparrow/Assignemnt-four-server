@@ -13,6 +13,7 @@ export type TUser = {
   phoneNumber: string;
   gender: 'male' | 'female' | 'others';
   dateOfBirth: string;
+  age: number;
   profileImage?: string;
   coverImage?: string;
   status: 'active' | 'deactive';
@@ -28,5 +29,14 @@ export type TUserStatus = {
   status: string;
   userRole: string;
 };
+type TUpdatedResult = {
+  updateResult: TUser;
+};
+type TUpdateResult2 = {
+  updateResult: TUser;
+  access: string;
+  refresh: string;
+};
 
+export type TUpdatedResultInterface = TUpdatedResult | TUpdateResult2;
 export type TUSerRole = keyof typeof USER_ROLE;

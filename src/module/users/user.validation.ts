@@ -13,6 +13,21 @@ const userNameValidationSchema = z.object({
     .max(30, { message: 'last name can`t be more than 30 character' }),
 });
 
+const updateUSerNameValidationSchema = z.object({
+  firstName: z
+    .string()
+    .max(30, { message: 'first  name can`t be more than 30 character' })
+    .optional(),
+  middleName: z
+    .string()
+    .max(30, { message: 'middle name can`t be more than 30 character' })
+    .optional(),
+  lastName: z
+    .string()
+    .max(30, { message: 'last name can`t be more than 30 character' })
+    .optional(),
+});
+
 const userValidationSchema = z.object({
   name: userNameValidationSchema,
   email: z.string().email(),
@@ -41,14 +56,39 @@ const userValidationSchema = z.object({
   profileImage: z.string().optional(),
 });
 
+const updateUserInfoValidationSchema = z.object({
+  name: updateUSerNameValidationSchema.optional(),
+  email: z.string().email().optional(),
+  phoneNumber: z
+    .string()
+    .min(14, { message: 'phone number can`t be less than 14 character' })
+    .max(14, { message: 'phone number can`t be more than 14 character' })
+    .refine((value) => /^\+880\d{10}$/.test(value), {
+      message: 'password shpould be start with +880',
+    })
+    .optional(),
+  dateOfBirth: z
+    .string({
+      invalid_type_error: 'date must be string',
+    })
+    .optional(),
+  profileImage: z.string().optional(),
+  coverImage: z.string().optional(),
+  homeTown: z.string().optional(),
+  currentAddress: z.string().optional(),
+});
+
 const userStatusValidationSchema = z.object({
   status: z.enum(['active', 'deactive'] as [string, ...string[]]),
 });
+
 const userRoleValidationSchema = z.object({
   role: z.enum(['user', 'admin'] as [string, ...string[]]),
 });
+
 export const userValidation = {
   userValidationSchema,
   userStatusValidationSchema,
   userRoleValidationSchema,
+  updateUserInfoValidationSchema,
 };

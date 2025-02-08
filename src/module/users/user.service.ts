@@ -2,9 +2,11 @@ import { StatusCodes } from 'http-status-codes';
 import AppError from '../../error/AppError';
 import { TUser, TUserStatus } from './user.interface';
 import { User } from './user.model';
-import { isUserExistByEmail, isUserExists } from './user.utills';
+import { calculateAge, isUserExistByEmail, isUserExists } from './user.utills';
 import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLE } from './user.constant';
+import { createToken } from '../auth/auth.utills';
+import config from '../../config';
 
 const createUser = async (payload: TUser) => {
   payload.name.firstName =
@@ -19,13 +21,17 @@ const createUser = async (payload: TUser) => {
     payload.name.lastName.charAt(0).toUpperCase() +
     payload.name.lastName.slice(1);
 
-  const isEmailExists = await User.findOne({ email: payload.email });
+  const isEmailExists = await User.findOne({
+    email: payload.email,
+    isDeleted: false,
+  });
   if (isEmailExists) {
     throw new AppError(StatusCodes.CONFLICT, 'this email is already in used');
   }
 
   const isPhoneExists = await User.findOne({
     phoneNumber: payload.phoneNumber,
+    isDeleted: false,
   });
   if (isPhoneExists) {
     throw new AppError(
@@ -33,14 +39,18 @@ const createUser = async (payload: TUser) => {
       'this phone number is already in used',
     );
   }
+  const age = calculateAge(payload.dateOfBirth);
+  payload.age = age;
   const result = await User.create(payload);
   return result;
 };
 
-const getAllUser = async () => {
-  const result = await User.find({ isDeleted: false }).select(
-    'name email status role',
-  );
+const getAllUser = async (role: string) => {
+  let filter = {};
+  if (role === USER_ROLE.admin) {
+    filter = { isDeleted: false };
+  }
+  const result = await User.find(filter).select('name email status role');
   return result;
 };
 
@@ -126,6 +136,65 @@ const getMe = async (user: JwtPayload) => {
   const result = await isUserExistByEmail(userEmail);
   return result;
 };
+
+const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
+  const { name, email, phoneNumber, ...remainingInfo } = payload;
+  const { userEmail, userRole } = user;
+  const modifiedData: Record<string, unknown> = { ...remainingInfo };
+  const isEmailExists = await User.findOne({ email: email, isDeleted: false });
+  if (isEmailExists) {
+    throw new AppError(StatusCodes.CONFLICT, 'this email is already exists');
+  }
+  const isPhoneNumberExists = await User.findOne({
+    phoneNumber: phoneNumber,
+    isDeleted: false,
+  });
+  if (isPhoneNumberExists) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      'this phone number is already exists',
+    );
+  }
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedData[`name.${key}`] = value;
+    }
+  }
+  if (email) modifiedData.email = email;
+  if (phoneNumber) modifiedData.phoneNumber = phoneNumber;
+  const updateResult = await User.findOneAndUpdate(
+    { email: userEmail, isDeleted: false },
+    modifiedData,
+    { new: true, runValidators: true },
+  );
+
+  if (!updateResult) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found.');
+  }
+
+  if (email && email !== userEmail) {
+    const jwtPayload = {
+      userEmail: email,
+      userRole,
+    };
+    const accessToken = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      config.jwt_access_expires_in as string,
+    );
+    const refreshToken = createToken(
+      jwtPayload,
+      config.jwt_refresh_secret as string,
+      config.jwt_refresh_expires_in as string,
+    );
+    const access = `Bearer ${accessToken}`;
+    const refresh = `Bearer ${refreshToken}`;
+    return { updateResult, access, refresh };
+  } else {
+    return updateResult;
+  }
+};
+
 export const userSrevice = {
   createUser,
   getAllUser,
@@ -134,4 +203,5 @@ export const userSrevice = {
   deleteUser,
   makeAdmin,
   getMe,
+  updateUserInfo,
 };

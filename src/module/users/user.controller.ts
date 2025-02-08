@@ -5,6 +5,9 @@ import { catchAsync } from '../../utills/catchAsync';
 import { userSrevice } from './user.service';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
+import { cookieOptions } from '../auth/auth.const';
+import { TUser } from './user.interface';
 
 const createUSer = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +24,9 @@ const createUSer = catchAsync(
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await userSrevice.getAllUser();
+    const user = req.user;
+    const { userRole } = user as JwtPayload;
+    const result = await userSrevice.getAllUser(userRole);
     sendResponse(res, {
       success: true,
       statusCode: result.length > 0 ? StatusCodes.OK : StatusCodes.NOT_FOUND,
@@ -109,6 +114,33 @@ const getMe = catchAsync(
   },
 );
 
+const updateUserInfo = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const user = req.user;
+    const result = await userSrevice.updateUserInfo(user, payload);
+    if ('access' in result && 'refresh' in result) {
+      const access = result?.access;
+      const refresh = result?.refresh;
+      const data = result?.updateResult;
+      res.cookie('refreshToken', refresh, cookieOptions);
+      sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'User info updated successfully',
+        data: { data, access },
+      });
+    } else {
+      sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: 'User info updated successfully',
+        data: { result },
+      });
+    }
+  },
+);
+
 export const userController = {
   createUSer,
   getAllUsers,
@@ -117,4 +149,5 @@ export const userController = {
   deleteUser,
   makeAdmin,
   getMe,
+  updateUserInfo,
 };
