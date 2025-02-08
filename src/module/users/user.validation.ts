@@ -45,7 +45,7 @@ const userStatusValidationSchema = z.object({
   status: z.enum(['active', 'deactive'] as [string, ...string[]]),
 });
 const userRoleValidationSchema = z.object({
-  status: z.enum(['user', 'admin'] as [string, ...string[]]),
+  role: z.enum(['user', 'admin'] as [string, ...string[]]),
 });
 export const userValidation = {
   userValidationSchema,

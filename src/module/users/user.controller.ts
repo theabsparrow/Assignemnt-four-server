@@ -37,7 +37,8 @@ const getAllUsers = catchAsync(
 const getASingleUSer = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const result = await userSrevice.getASingleUSer(id);
+    const user = req.user;
+    const result = await userSrevice.getASingleUSer(id, user);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -51,7 +52,13 @@ const updateUserStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const { status } = req.body;
-    const result = await userSrevice.updateUSerStatus(id, status);
+    const user = req.user;
+    const { userRole } = user;
+    const payload = {
+      status,
+      userRole,
+    };
+    const result = await userSrevice.updateUSerStatus(id, payload);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -64,7 +71,8 @@ const updateUserStatus = catchAsync(
 const deleteUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const result = await userSrevice.deleteUser(id);
+    const user = req.user;
+    const result = await userSrevice.deleteUser(id, user);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -87,6 +95,20 @@ const makeAdmin = catchAsync(
     });
   },
 );
+
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await userSrevice.getMe(user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'user info is retrived successfully',
+      data: result,
+    });
+  },
+);
+
 export const userController = {
   createUSer,
   getAllUsers,
@@ -94,4 +116,5 @@ export const userController = {
   updateUserStatus,
   deleteUser,
   makeAdmin,
+  getMe,
 };

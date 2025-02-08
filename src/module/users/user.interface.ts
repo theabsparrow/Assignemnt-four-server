@@ -24,4 +24,9 @@ export type TUser = {
   passwordChangedAt?: Date;
 };
 
+export type TUserStatus = {
+  status: string;
+  userRole: string;
+};
+
 export type TUSerRole = keyof typeof USER_ROLE;
