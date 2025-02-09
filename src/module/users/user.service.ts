@@ -4,9 +4,10 @@ import { TUser, TUserStatus } from './user.interface';
 import { User } from './user.model';
 import { calculateAge, isUserExistByEmail, isUserExists } from './user.utills';
 import { JwtPayload } from 'jsonwebtoken';
-import { USER_ROLE } from './user.constant';
+import { searchableFields, USER_ROLE } from './user.constant';
 import { createToken } from '../auth/auth.utills';
 import config from '../../config';
+import QueryBuilder from '../../builder/QUeryBuilder';
 
 const createUser = async (payload: TUser) => {
   payload.name.firstName =
@@ -45,13 +46,22 @@ const createUser = async (payload: TUser) => {
   return result;
 };
 
-const getAllUser = async (role: string) => {
+const getAllUser = async (role: string, query: Record<string, unknown>) => {
   let filter = {};
   if (role === USER_ROLE.admin) {
     filter = { isDeleted: false };
   }
-  const result = await User.find(filter).select('name email status role');
-  return result;
+  const usersQuery = new QueryBuilder(User.find(filter), query)
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginateQuery()
+    .fields();
+
+  const result = await usersQuery.modelQuery;
+  const meta = await usersQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getASingleUSer = async (id: string, user: JwtPayload) => {
@@ -155,6 +165,19 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       'this phone number is already exists',
     );
   }
+  if (name && name?.firstName) {
+    name.firstName =
+      name.firstName.charAt(0).toUpperCase() + name.firstName.slice(1);
+  }
+  if (name && name?.middleName) {
+    name.middleName =
+      name.middleName.charAt(0).toUpperCase() + name.middleName.slice(1);
+  }
+  if (name && name?.lastName) {
+    name.lastName =
+      name.lastName.charAt(0).toUpperCase() + name.lastName.slice(1);
+  }
+
   if (name && Object.keys(name).length) {
     for (const [key, value] of Object.entries(name)) {
       modifiedData[`name.${key}`] = value;

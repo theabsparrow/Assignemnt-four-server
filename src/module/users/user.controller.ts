@@ -25,16 +25,19 @@ const createUSer = catchAsync(
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
+    const query = req.query;
     const { userRole } = user as JwtPayload;
-    const result = await userSrevice.getAllUser(userRole);
+    const result = await userSrevice.getAllUser(userRole, query);
     sendResponse(res, {
       success: true,
-      statusCode: result.length > 0 ? StatusCodes.OK : StatusCodes.NOT_FOUND,
+      statusCode:
+        result?.result.length > 0 ? StatusCodes.OK : StatusCodes.NOT_FOUND,
       message:
-        result.length > 0
+        result?.result.length > 0
           ? 'users are retrived successfully'
           : 'no user right now',
-      data: result,
+      meta: result?.meta,
+      data: result?.result,
     });
   },
 );
