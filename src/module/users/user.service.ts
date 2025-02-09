@@ -5,7 +5,7 @@ import { User } from './user.model';
 import { calculateAge, isUserExistByEmail, isUserExists } from './user.utills';
 import { JwtPayload } from 'jsonwebtoken';
 import { searchableFields, USER_ROLE } from './user.constant';
-import { createToken } from '../auth/auth.utills';
+import { createToken, passwordMatching } from '../auth/auth.utills';
 import config from '../../config';
 import QueryBuilder from '../../builder/QUeryBuilder';
 
@@ -218,6 +218,27 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
   }
 };
 
+const deleteAccount = async (password: string, user: JwtPayload) => {
+  const { userEmail } = user;
+  const userInfo = await isUserExistByEmail(userEmail);
+  const userPass = userInfo?.password;
+  const isPasswordMatched = await passwordMatching(password, userPass);
+  if (!isPasswordMatched) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'the password you have provided is wrong',
+    );
+  }
+  const result = await User.findOneAndUpdate(
+    { email: userEmail },
+    { isDeleted: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'account delation failed');
+  }
+  return null;
+};
 export const userSrevice = {
   createUser,
   getAllUser,
@@ -227,4 +248,5 @@ export const userSrevice = {
   makeAdmin,
   getMe,
   updateUserInfo,
+  deleteAccount,
 };

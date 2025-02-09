@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 const loginValidationSchema = z.object({
   email: z.string().email(),
-  password: z.string(),
+  password: z
+    .string()
+    .min(6, { message: 'password can`t be less than 6 character' })
+    .max(20, { message: 'password can`t be more than 20 character' }),
 });
 
 const changePassowrdValidationSchema = z.object({

@@ -144,6 +144,21 @@ const updateUserInfo = catchAsync(
   },
 );
 
+const deleteAccount = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { oldPassword } = req.user;
+    const user = req.user;
+    const result = await userSrevice.deleteAccount(oldPassword, user);
+    res.clearCookie('refreshToken', cookieOptions);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'account deleted successfully',
+      data: result,
+    });
+  },
+);
+
 export const userController = {
   createUSer,
   getAllUsers,
@@ -153,4 +168,5 @@ export const userController = {
   makeAdmin,
   getMe,
   updateUserInfo,
+  deleteAccount,
 };

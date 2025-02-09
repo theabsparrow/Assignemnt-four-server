@@ -51,4 +51,10 @@ router.patch(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   userController.updateUserInfo,
 );
+router.delete(
+  '/delete-account',
+  validateRequest(userValidation.accountDelationValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  userController.deleteAccount,
+);
 export const userRoute = router;

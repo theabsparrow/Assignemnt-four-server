@@ -86,9 +86,16 @@ const userRoleValidationSchema = z.object({
   role: z.enum(['user', 'admin'] as [string, ...string[]]),
 });
 
+const accountDelationValidationSchema = z.object({
+  password: z
+    .string()
+    .min(6, { message: 'password can`t be less than 6 character' })
+    .max(20, { message: 'password can`t be more than 20 character' }),
+});
 export const userValidation = {
   userValidationSchema,
   userStatusValidationSchema,
   userRoleValidationSchema,
   updateUserInfoValidationSchema,
+  accountDelationValidationSchema,
 };
