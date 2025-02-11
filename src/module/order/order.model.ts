@@ -30,6 +30,13 @@ const orderSchema = new Schema<Torder>(
       enum: orderStatus,
       default: 'Pending',
     },
+    orderID: String,
+    transactionStatus: String,
+    bank_status: String,
+    sp_code: String,
+    sp_message: String,
+    method: String,
+    date_time: String,
     isDeleted: {
       type: Boolean,
       default: false,

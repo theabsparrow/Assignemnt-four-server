@@ -10,8 +10,14 @@ const router = Router();
 router.post(
   '/create-order',
   validateRequest(orderValidation.orderValidationSchema),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  auth(USER_ROLE.user),
   orderController.createOrder,
+);
+
+router.get(
+  '/verify-order',
+  auth(USER_ROLE.user),
+  orderController.verifyPayment,
 );
 
 router.get(

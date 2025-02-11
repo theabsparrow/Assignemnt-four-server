@@ -5,3 +5,14 @@ export const orderStatus = [
   'Completed',
   'Cancelled',
 ];
+
+type TPaymentStatus = {
+  success: 'Success';
+  failed: 'Failed';
+  cancel: 'Cancel';
+};
+export const paymentStatus: TPaymentStatus = {
+  success: 'Success',
+  failed: 'Failed',
+  cancel: 'Cancel',
+};

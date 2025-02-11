@@ -4,16 +4,22 @@ import { Torder } from './order.interface';
 import Car from '../car/car.model';
 import AppError from '../../error/AppError';
 import { StatusCodes } from 'http-status-codes';
-import { isUserExistByEmail } from '../users/user.utills';
 import QueryBuilder from '../../builder/QueryBuilder';
 import Order from './order.model';
 import { USER_ROLE } from '../users/user.constant';
+import { User } from '../users/user.model';
+import { orderUtills } from './order.utills';
+import { paymentStatus } from './order.const';
 
 // create an order service
-const createOrder = async (payload: Partial<Torder>, user: JwtPayload) => {
+const createOrder = async (
+  payload: Partial<Torder>,
+  user: JwtPayload,
+  client_ip: string,
+) => {
   const { userEmail } = user;
-  const isUSerExists = await isUserExistByEmail(userEmail);
-  const userID = isUSerExists?._id;
+  const isUser = await User.findOne({ email: userEmail });
+  const userID = isUser?._id;
   const { car } = payload;
   const carData = await Car.findById(car);
   const quantity = payload?.quantity as number;
@@ -33,16 +39,84 @@ const createOrder = async (payload: Partial<Torder>, user: JwtPayload) => {
   payload.totalPrice = totalPrice;
   payload.userEmail = userEmail;
   payload.userID = userID;
-  const result = await Order.create(payload);
-  if (result) {
-    const newQuantity = carData.quantity - quantity;
+
+  const order = await Order.create(payload);
+  if (!order) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
+  }
+  const id = order._id;
+  const shurjopayPayload = {
+    amount: totalPrice,
+    order_id: id,
+    currency: 'BDT',
+    customer_name: `${isUser?.name?.firstName} ${isUser?.name?.lastName}`,
+    customer_address: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+    customer_email: isUser?.email,
+    customer_phone: isUser?.phoneNumber,
+    customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+    client_ip,
+  };
+  const paymentResult = await orderUtills.makePayment(shurjopayPayload);
+  if (paymentResult?.transactionStatus) {
+    await Order.findByIdAndUpdate(
+      id,
+      {
+        orderID: paymentResult?.sp_order_id,
+        transactionStatus: paymentResult?.transactionStatus,
+      },
+      { new: true },
+    );
+  }
+  return paymentResult.checkout_url;
+};
+
+const verifyPayment = async (order_id: string) => {
+  const verifiedPayment = await orderUtills.verifyPayment(order_id);
+  if (!verifiedPayment || verifiedPayment.length === 0) {
+    throw new Error('No verified payment found.');
+  }
+  const paymentInfo = {
+    transactionStatus: verifiedPayment[0].bank_status,
+    bank_status: verifiedPayment[0].sp_code,
+    sp_code: verifiedPayment[0].sp_message,
+    sp_message: verifiedPayment[0].transaction_status,
+    method: verifiedPayment[0].method,
+    date_time: verifiedPayment[0].date_time,
+  };
+  const status =
+    verifiedPayment[0].bank_status == paymentStatus.success
+      ? 'Paid'
+      : verifiedPayment[0].bank_status == paymentStatus.failed
+        ? 'Pending'
+        : verifiedPayment[0].bank_status == paymentStatus.cancel
+          ? 'Cancelled'
+          : '';
+  const updatedData = await Order.findOneAndUpdate(
+    { orderID: order_id },
+    { $set: { ...paymentInfo, status } },
+    { new: true, runValidators: true },
+  );
+  if (!updatedData) {
+    throw new AppError(
+      StatusCodes.BAD_GATEWAY,
+      'Order not found or update failed.',
+    );
+  }
+  const quantity = updatedData?.quantity as number;
+  const carID = updatedData?.car;
+  const carData = await Car.findById(carID).select('quantity');
+  if (
+    carData?.quantity &&
+    verifiedPayment[0].bank_status == paymentStatus.success
+  ) {
+    const newQuantity = carData?.quantity - quantity;
     const updatedData = {
       quantity: newQuantity,
       inStock: newQuantity > 0 ? true : false,
     };
-    await Car.findByIdAndUpdate(car, updatedData, { new: true });
+    await Car.findByIdAndUpdate(carID, updatedData, { new: true });
   }
-  return result;
+  return verifiedPayment;
 };
 
 const getAllOrder = async (query: Record<string, unknown>) => {
@@ -122,4 +196,5 @@ export const orderService = {
   deleteOrder,
   deleteMyOwnOrder,
   deleteAllOrders,
+  verifyPayment,
 };
