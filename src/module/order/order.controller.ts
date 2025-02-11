@@ -13,8 +13,90 @@ const createOrder = catchAsync(
     const result = await orderService.createOrder(payload, user);
     sendResponse(res, {
       success: true,
-      statusCode: StatusCodes.OK,
+      statusCode: StatusCodes.CREATED,
       message: 'order created successfully',
+      data: result,
+    });
+  },
+);
+
+const getAllOrder = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await orderService.getAllOrder(query);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'orders are retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const getMyOwnOrders = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const user = req.user;
+    const result = await orderService.getMyOwnOrders(query, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'orders are retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const getASingleOrder = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const user = req.user;
+    const result = await orderService.getASingleOrder(id, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'order is retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const deleteOrder = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await orderService.deleteOrder(id);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'order is deleted successfully',
+      data: result,
+    });
+  },
+);
+
+const deleteMyOwnOrder = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const user = req.user;
+    const result = await orderService.deleteMyOwnOrder(id, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'order is deleted successfully',
+      data: result,
+    });
+  },
+);
+
+const deleteAllOrders = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { ids } = req.body;
+    const user = req.user;
+    const result = await orderService.deleteAllOrders(ids, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'orders are deleted successfully',
       data: result,
     });
   },
@@ -22,4 +104,10 @@ const createOrder = catchAsync(
 
 export const orderController = {
   createOrder,
+  getAllOrder,
+  getMyOwnOrders,
+  getASingleOrder,
+  deleteOrder,
+  deleteMyOwnOrder,
+  deleteAllOrders,
 };

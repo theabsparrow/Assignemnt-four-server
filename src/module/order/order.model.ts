@@ -30,6 +30,10 @@ const orderSchema = new Schema<Torder>(
       enum: orderStatus,
       default: 'Pending',
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

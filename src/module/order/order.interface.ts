@@ -8,4 +8,5 @@ export type Torder = {
   quantity: number;
   totalPrice: number;
   status: TOrderStatus;
+  isDeleted: boolean;
 };
