@@ -1,104 +1,102 @@
-import { Request, Response } from 'express';
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextFunction, Request, Response } from 'express';
 import { carService } from './car.service';
 import { catchAsync } from '../../utills/catchAsync';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 
 // create a car data controller
-const createCar = catchAsync(async (req: Request, res: Response) => {
-  const payloade = req.body;
-  const result = await carService.createCar(payloade);
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.CREATED,
-    message: 'Academic department created successfully',
-    data: result,
-  });
-});
+const createCar = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payloade = req.body;
+    const result = await carService.createCar(payloade);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.CREATED,
+      message: 'Car info created successfully',
+      data: result,
+    });
+  },
+);
 
 // get all cars controller
-const getAllCars = async (req: Request, res: Response) => {
-  try {
-    const queryData = req.query;
-    const result = await carService.getAllCars(queryData);
-
-    res.json({
-      message: 'Car retrieved successfully',
+const getAllCars = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await carService.getAllCars(query);
+    sendResponse(res, {
       success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars info are retrived successfully',
       data: result,
     });
-  } catch (error) {
-    res.json({
-      status: false,
-      message: 'something went wrong',
-      error,
-    });
-  }
-};
+  },
+);
 
 // get a specefic car controller
-const getSingleCar = async (req: Request, res: Response) => {
-  try {
-    const payload = req.params.carId;
-    const result = await carService.getSingleCar(payload);
-    res.json({
-      message: 'Car retrieved successfully',
+const getSingleCar = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await carService.getSingleCar(id);
+    sendResponse(res, {
       success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars info is retrived successfully',
       data: result,
     });
-  } catch (error) {
-    res.json({
-      status: false,
-      message: 'something went wrong',
-      error,
-    });
-  }
-};
+  },
+);
 
-// update a car
-const updateCar = async (req: Request, res: Response) => {
-  try {
-    const payload = req.params.id;
-    const data = req.body;
-
-    const result = await carService.updateCar(payload, data);
-    res.status(200).json({
-      message: 'Car updated successfully',
+// update a car info
+const updatCarInfo = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const payload = req.body;
+    const result = await carService.updateCarInfo(id, payload);
+    sendResponse(res, {
       success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars info is updated successfully',
       data: result,
     });
-  } catch (err) {
-    res.status(500).json({
-      status: false,
-      message: 'something went wrong',
-      error: err,
+  },
+);
+
+// update car image info
+const updatedCarImage = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const id = req.params.id;
+    const result = await carService.updateCarImage(id, payload);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars image is updated successfully',
+      data: result,
     });
-  }
-};
+  },
+);
 
 // delete a car data
-const deleteCar = async (req: Request, res: Response) => {
-  try {
-    const carId = req.params.id;
-    const result = carService.deleteCar(carId);
-    res.status(200).json({
-      message: 'Car deleted successfully',
+const deleteCar = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = carService.deleteCar(id);
+    sendResponse(res, {
       success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars info is deleted successfully',
       data: result,
     });
-  } catch (error) {
-    res.status(500).json({
-      status: false,
-      message: 'something went wrong',
-      error: error,
-    });
-  }
-};
+  },
+);
 
 export const carController = {
   createCar,
   getAllCars,
   getSingleCar,
-  updateCar,
+  updatCarInfo,
   deleteCar,
+  updatedCarImage,
 };

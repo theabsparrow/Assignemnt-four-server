@@ -1,90 +1,121 @@
 import { Schema, model } from 'mongoose';
-import { Tcar } from './car.interface';
+import { TCar, TGalleryImage } from './car.interface';
+import { carBrand, carCategory, seatingCapacity } from './car.const';
 
-const carSchema = new Schema<Tcar>({
-  brand: {
+const carImageGallerySchema = new Schema<TGalleryImage>({
+  url: {
     type: String,
-    required: [true, 'Car Brand name is required'],
-    maxlength: [15, 'Brand name can`t be more than 15 character'],
-    minlength: [1, 'Brand name can`t be less than 1 character'],
-    trim: true,
   },
-  model: {
+  title: {
     type: String,
-    required: [true, 'Car model name is required'],
-    maxlength: [30, 'Model name can`t be more that 30 character'],
-    minlength: [5, 'Model name can`t be less that 5 character'],
-    unique: true,
-    trim: true,
   },
-  year: {
-    type: Number,
-    required: [true, 'Car manufacturing year is required'],
-    validate: {
-      validator: function (value: number) {
-        const currentYear = new Date().getFullYear();
-        const minYear = currentYear - 10;
-        return value >= minYear && value <= currentYear;
-      },
-      message: `{VALUE} is not between  ${new Date().getFullYear() - 10} and ${new Date().getFullYear()}`,
-    },
-  },
-  price: {
-    type: Number,
-    required: [true, 'Price is required'],
-    min: [1, 'Price must be greater than 0'],
-  },
-  category: {
-    type: String,
-    enum: {
-      values: ['Sedan', 'SUV', 'Truck', 'Coupe', 'Convertible'],
-      message:
-        "{VALUE} is not valid. It should be anything of the following 'Sedan', 'SUV', 'Truck', 'Coupe', 'Convertible' ",
-    },
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-    maxlength: [1000, 'description can`t be more than 1000 character'],
-    minlength: [10, 'description can`t be less than 10 character'],
-    trim: true,
-  },
-  quantity: {
-    type: Number,
-    required: [true, 'Quantity is reuired'],
-    min: [0, 'quantity can`t be a negative number'],
-  },
-  inStock: {
+  isDeleted: {
     type: Boolean,
-    required: true,
-    default: true,
-  },
-  createdAt: {
-    type: Date,
-  },
-  updatedAt: {
-    type: Date,
+    default: false,
   },
 });
 
-carSchema.pre('save', function (this, next) {
-  const now = new Date();
-  const localTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-  if (!this.createdAt) {
-    this.createdAt = localTime;
-  }
-  this.updatedAt = localTime;
-  next();
-});
+const carSchema = new Schema<TCar>(
+  {
+    carEngine: {
+      type: Schema.Types.ObjectId,
+      ref: 'CarEngine',
+    },
+    registrationData: {
+      type: Schema.Types.ObjectId,
+      ref: 'RegistrationData',
+    },
+    serviceHistory: {
+      type: Schema.Types.ObjectId,
+      ref: 'ServiceHistory',
+    },
+    safetyFeature: {
+      type: Schema.Types.ObjectId,
+      ref: 'ServiceHistory',
+    },
+    brand: {
+      type: String,
+      required: [true, 'Car Brand name is required'],
+      enum: carBrand,
+    },
+    model: {
+      type: String,
+      required: [true, 'Car model name is required'],
+      trim: true,
+      unique: true,
+    },
+    year: {
+      type: Number,
+      required: [true, 'Car manufacturing year is required'],
+    },
+    price: {
+      type: String,
+      required: [true, 'Price is required'],
+    },
+    category: {
+      type: String,
+      required: [true, 'Car category is required'],
+      enum: carCategory,
+    },
+    color: {
+      type: [String],
+      required: [true, 'color is required'],
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      required: [true, 'Quantity is reuired'],
+    },
+    inStock: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+    // condition: {
+    //   type: String,
+    //   enum: condition,
+    //   required: [true, 'condition is required'],
+    // },
+    madeIn: {
+      type: String,
+      required: [true, 'made in is required'],
+    },
+    country: {
+      type: String,
+      required: [true, 'country is required'],
+    },
+    // car image schema
+    image: {
+      type: String,
+      required: [true, 'car image is required'],
+    },
+    galleryImage: {
+      type: [carImageGallerySchema],
+      validate: {
+        validator: function (value: string[]) {
+          return value.length <= 5;
+        },
+        message: 'You can upload a maximum of 5 images in the gallery.',
+      },
+    },
+    carBrandLogo: {
+      type: String,
+      required: [true, 'car brand logo is required'],
+    },
+    seatingCapacity: {
+      type: String,
+      enum: seatingCapacity,
+      required: [true, 'seating capacity is required'],
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-carSchema.pre('findOneAndUpdate', function (this, next) {
-  const now = new Date();
-  const localTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-
-  this.set({ updatedAt: localTime });
-  next();
-});
-
-const CarModel = model<Tcar>('Car', carSchema);
-export default CarModel;
+const Car = model<TCar>('Car', carSchema);
+export default Car;

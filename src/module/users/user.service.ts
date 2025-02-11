@@ -7,7 +7,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { searchableFields, USER_ROLE } from './user.constant';
 import { createToken, passwordMatching } from '../auth/auth.utills';
 import config from '../../config';
-import QueryBuilder from '../../builder/QUeryBuilder';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createUser = async (payload: TUser) => {
   payload.name.firstName =

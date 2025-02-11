@@ -39,7 +39,7 @@ class QueryBuilder<T> {
     const sortOrder = this?.query?.sortOrder === 'desc' ? '-' : '';
     const sortingData = this?.query?.sort
       ? (this.query.sort as string).split(',')?.join(' ')
-      : '-_v';
+      : '-createdAt';
     let sort;
     sort = sortingData || 'createdAt';
     if (sortOrder) {

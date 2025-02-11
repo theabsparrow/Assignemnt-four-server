@@ -19,7 +19,9 @@ import { otpEmailTemplate } from '../../utills/otpEmailTemplate';
 const login = async (payload: TLogin) => {
   const email = payload.email;
   const password = payload.password;
-  const isUserExistence = await User.findOne({ email: email });
+  const isUserExistence = await User.findOne({ email: email }).select(
+    '+password',
+  );
   if (!isUserExistence) {
     throw new AppError(
       StatusCodes.NOT_FOUND,
@@ -41,6 +43,7 @@ const login = async (payload: TLogin) => {
     );
   }
   const userPass = isUserExistence?.password;
+
   const isPasswordMatched = await passwordMatching(password, userPass);
   if (!isPasswordMatched) {
     throw new AppError(

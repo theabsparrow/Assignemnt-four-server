@@ -36,6 +36,7 @@ const userSchema = new Schema<TUser>(
     password: {
       type: String,
       required: [true, 'password is required'],
+      select: 0,
     },
     phoneNumber: {
       type: String,
