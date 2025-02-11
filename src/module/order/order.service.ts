@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from 'jsonwebtoken';
 
 import { Torder } from './order.interface';
@@ -10,6 +11,7 @@ import { USER_ROLE } from '../users/user.constant';
 import { User } from '../users/user.model';
 import { orderUtills } from './order.utills';
 import { paymentStatus } from './order.const';
+import mongoose from 'mongoose';
 
 // create an order service
 const createOrder = async (
@@ -35,39 +37,53 @@ const createOrder = async (
       'stock is insufficient right now',
     );
   }
-  const totalPrice = carData?.price * quantity;
-  payload.totalPrice = totalPrice;
-  payload.userEmail = userEmail;
-  payload.userID = userID;
 
-  const order = await Order.create(payload);
-  if (!order) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const totalPrice = carData?.price * quantity;
+    payload.totalPrice = totalPrice;
+    payload.userEmail = userEmail;
+    payload.userID = userID;
+
+    const order = await Order.create([payload], { session });
+    if (!order.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
+    }
+    const id = order[0]._id;
+    const shurjopayPayload = {
+      amount: totalPrice,
+      order_id: id,
+      currency: 'BDT',
+      customer_name: `${isUser?.name?.firstName} ${isUser?.name?.lastName}`,
+      customer_address: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+      customer_email: isUser?.email,
+      customer_phone: isUser?.phoneNumber,
+      customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+      client_ip,
+    };
+    const paymentResult = await orderUtills.makePayment(shurjopayPayload);
+    if (paymentResult?.transactionStatus) {
+      const updatePayment = await Order.findByIdAndUpdate(
+        id,
+        {
+          orderID: paymentResult?.sp_order_id,
+          transactionStatus: paymentResult?.transactionStatus,
+        },
+        { new: true, runValidators: true, session },
+      );
+      if (!updatePayment) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
+      }
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return paymentResult.checkout_url;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-  const id = order._id;
-  const shurjopayPayload = {
-    amount: totalPrice,
-    order_id: id,
-    currency: 'BDT',
-    customer_name: `${isUser?.name?.firstName} ${isUser?.name?.lastName}`,
-    customer_address: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
-    customer_email: isUser?.email,
-    customer_phone: isUser?.phoneNumber,
-    customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
-    client_ip,
-  };
-  const paymentResult = await orderUtills.makePayment(shurjopayPayload);
-  if (paymentResult?.transactionStatus) {
-    await Order.findByIdAndUpdate(
-      id,
-      {
-        orderID: paymentResult?.sp_order_id,
-        transactionStatus: paymentResult?.transactionStatus,
-      },
-      { new: true },
-    );
-  }
-  return paymentResult.checkout_url;
 };
 
 const verifyPayment = async (order_id: string) => {
@@ -91,32 +107,47 @@ const verifyPayment = async (order_id: string) => {
         : verifiedPayment[0].bank_status == paymentStatus.cancel
           ? 'Cancelled'
           : '';
-  const updatedData = await Order.findOneAndUpdate(
-    { orderID: order_id },
-    { $set: { ...paymentInfo, status } },
-    { new: true, runValidators: true },
-  );
-  if (!updatedData) {
-    throw new AppError(
-      StatusCodes.BAD_GATEWAY,
-      'Order not found or update failed.',
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const updatedData = await Order.findOneAndUpdate(
+      { orderID: order_id },
+      { $set: { ...paymentInfo, status } },
+      { new: true, session, runValidators: true },
     );
+    if (!updatedData) {
+      throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
+    }
+    const quantity = updatedData?.quantity as number;
+    const carID = updatedData?.car;
+    const carData = await Car.findById(carID).select('quantity');
+    if (
+      carData?.quantity &&
+      verifiedPayment[0].bank_status == paymentStatus.success
+    ) {
+      const newQuantity = carData?.quantity - quantity;
+      const updatedData = {
+        quantity: newQuantity,
+        inStock: newQuantity > 0 ? true : false,
+      };
+      const updatecarData = await Car.findByIdAndUpdate(carID, updatedData, {
+        new: true,
+        session,
+        runValidators: true,
+      });
+      if (!updatecarData) {
+        throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
+      }
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return verifiedPayment;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-  const quantity = updatedData?.quantity as number;
-  const carID = updatedData?.car;
-  const carData = await Car.findById(carID).select('quantity');
-  if (
-    carData?.quantity &&
-    verifiedPayment[0].bank_status == paymentStatus.success
-  ) {
-    const newQuantity = carData?.quantity - quantity;
-    const updatedData = {
-      quantity: newQuantity,
-      inStock: newQuantity > 0 ? true : false,
-    };
-    await Car.findByIdAndUpdate(carID, updatedData, { new: true });
-  }
-  return verifiedPayment;
 };
 
 const getAllOrder = async (query: Record<string, unknown>) => {
