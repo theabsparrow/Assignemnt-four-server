@@ -1,50 +1,50 @@
-import CarModel from '../car/car.model';
+import { JwtPayload } from 'jsonwebtoken';
+
 import { Torder } from './order.interface';
 import OrderModel from './order.model';
+import Car from '../car/car.model';
+import AppError from '../../error/AppError';
+import { StatusCodes } from 'http-status-codes';
+import { isUserExistByEmail } from '../users/user.utills';
 
 // create an order service
-const createOrder = async (payload: Torder) => {
-  const { car, quantity } = payload;
-  const carData = await CarModel.findById(car);
+const createOrder = async (payload: Partial<Torder>, user: JwtPayload) => {
+  const { userEmail } = user;
+  const isUSerExists = await isUserExistByEmail(userEmail);
+  const userID = isUSerExists?._id;
 
-  //   check if the car is not available
+  const { car } = payload;
+  const carData = await Car.findById(car);
+  const quantity = payload?.quantity as number;
   if (!carData) {
-    throw new Error('This car is not available right now');
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      'This car is not available right now',
+    );
   }
-
-  //    check if there is enough car quantity
-  if (quantity > carData.quantity) {
-    throw new Error('stock is insufficient right now');
+  if (quantity > carData?.quantity) {
+    throw new AppError(
+      StatusCodes.EXPECTATION_FAILED,
+      'stock is insufficient right now',
+    );
   }
-
-  //   create the order
-  const totalPrice = carData.price * quantity;
+  const totalPrice = carData?.price * quantity;
   payload.totalPrice = totalPrice;
-  const orderCreation = await OrderModel.create(payload);
+  payload.userEmail = userEmail;
+  payload.userID = userID;
+  const result = await OrderModel.create(payload);
 
-  //   update the quantity and inStock from he Cars collection
-  if (orderCreation) {
+  if (result) {
     const newQuantity = carData.quantity - quantity;
     const updatedData = {
       quantity: newQuantity,
       inStock: newQuantity > 0 ? true : false,
     };
-    await CarModel.findByIdAndUpdate(car, updatedData, { new: true });
+    await Car.findByIdAndUpdate(car, updatedData, { new: true });
   }
-  return orderCreation;
-};
-
-// create the total reveneu service
-const totalReveneu = async () => {
-  const calculateReveneu = await OrderModel.aggregate([
-    { $group: { _id: null, totalreveneu: { $sum: '$totalPrice' } } },
-  ]);
-
-  const result = calculateReveneu[0].totalreveneu;
   return result;
 };
 
 export const orderService = {
   createOrder,
-  totalReveneu,
 };

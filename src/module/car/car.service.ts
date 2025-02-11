@@ -61,6 +61,7 @@ const updateCarImage = async (id: string, payload: TGalleryImage[]) => {
   const deleteImageURL = payload
     .filter((element) => element.url && element.isDeleted)
     .map((ele) => ele.url);
+
   const deleteImageFromGallery = await Car.findByIdAndUpdate(
     id,
     {
@@ -91,6 +92,22 @@ const updateCarImage = async (id: string, payload: TGalleryImage[]) => {
   return updatedImage;
 };
 
+const updateQuantity = async (id: string, payload: { quantity: number }) => {
+  const { quantity } = payload;
+  const isCarExists = await Car.findById(id);
+  if (!isCarExists) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
+  }
+  const updateQuantity: { quantity: number; inStock?: boolean } = {
+    quantity,
+  };
+  if (quantity === 0) {
+    updateQuantity.inStock = false as boolean;
+  }
+  const result = await Car.findByIdAndUpdate(id, updateQuantity, { new: true });
+  return result;
+};
+
 // delete a car
 const deleteCar = async (id: string) => {
   const result = await Car.findByIdAndDelete(id);
@@ -104,4 +121,5 @@ export const carService = {
   updateCarInfo,
   deleteCar,
   updateCarImage,
+  updateQuantity,
 };

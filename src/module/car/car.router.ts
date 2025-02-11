@@ -13,6 +13,7 @@ router.post(
   auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   carController.createCar,
 );
+
 router.get('/get-allCars', carController.getAllCars);
 router.get(
   '/:id',
@@ -34,8 +35,15 @@ router.patch(
   carController.updatedCarImage,
 );
 
+router.patch(
+  '/update-quantity/:id',
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  carController.updateQuantity,
+);
+
 router.delete(
   'delete/:id',
+  validateRequest(carValidation.updateQuantityVAlidationSchema),
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   carController.deleteCar,
 );

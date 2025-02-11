@@ -49,7 +49,7 @@ const carSchema = new Schema<TCar>(
       required: [true, 'Car manufacturing year is required'],
     },
     price: {
-      type: String,
+      type: Number,
       required: [true, 'Price is required'],
     },
     category: {

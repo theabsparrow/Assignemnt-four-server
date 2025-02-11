@@ -1,8 +1,11 @@
+import { Types } from 'mongoose';
+
+type TOrderStatus = 'Pending' | 'Paid' | 'Shipped' | 'Completed' | 'Cancelled';
 export type Torder = {
-  email: string;
-  car: string;
+  userID: Types.ObjectId;
+  userEmail: string;
+  car: Types.ObjectId;
   quantity: number;
-  totalPrice?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  totalPrice: number;
+  status: TOrderStatus;
 };

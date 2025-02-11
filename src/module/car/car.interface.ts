@@ -40,7 +40,7 @@ export type TCar = {
   brand: TCarBrand;
   model: string;
   year: number;
-  price: string;
+  price: number;
   category: TCategory;
   color: string[];
   description: string;

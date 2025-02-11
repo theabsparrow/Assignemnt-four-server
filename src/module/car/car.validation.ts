@@ -34,7 +34,7 @@ export const carValidationSchema = z.object({
       .max(new Date().getFullYear(), {
         message: 'Year cannot be in the future',
       }),
-    price: z.string().nonempty({ message: 'Price is required' }),
+    price: z.number().min(1, { message: 'Price is required' }),
     category: z.enum([...carCategory] as [string, ...string[]], {
       required_error: 'Category is required',
     }),
@@ -194,6 +194,7 @@ const updateCArInfoValidationSchema = z.object({
   seatingCapacity: z
     .enum([...seatingCapacity] as [string, ...string[]])
     .optional(),
+  image: z.string().url({ message: 'Invalid image URL' }).optional(),
 });
 
 const updateCarImageValidationSchema = z.object({
@@ -201,8 +202,14 @@ const updateCarImageValidationSchema = z.object({
     .array(carImageGallerySchema)
     .max(5, { message: 'You can upload a maximum of 5 images' }),
 });
+
+const updateQuantityVAlidationSchema = z.object({
+  quantity: z.number().min(1, { message: 'Quantity must be at least 1' }),
+});
+
 export const carValidation = {
   carValidationSchema,
   updateCArInfoValidationSchema,
   updateCarImageValidationSchema,
+  updateQuantityVAlidationSchema,
 };
