@@ -77,8 +77,8 @@ const changePassword = async (payload: TChangePassword, user: JwtPayload) => {
   const { userEmail } = user;
   const { oldPassword, newPassword } = payload;
   const saltNumber = Number(config.bcrypt_salt_round);
-  const userInfo = await isUserExistByEmail(userEmail);
-  const userPass = userInfo?.password;
+  const userInfo = await User.findOne({ email: userEmail }).select('password');
+  const userPass = userInfo?.password as string;
   const isPasswordMatched = await passwordMatching(oldPassword, userPass);
   if (!isPasswordMatched) {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'password doesn`t match');

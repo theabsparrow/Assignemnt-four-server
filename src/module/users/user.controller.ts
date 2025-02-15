@@ -12,12 +12,14 @@ import { TUser } from './user.interface';
 const createUSer = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const result = await userSrevice.createUser(payload);
+    const dataInfo = await userSrevice.createUser(payload);
+    const { access, refresh, result } = dataInfo;
+    res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
       message: 'user created successfully',
-      data: result,
+      data: { access, result },
     });
   },
 );

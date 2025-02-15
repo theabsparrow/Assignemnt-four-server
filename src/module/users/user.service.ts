@@ -43,7 +43,24 @@ const createUser = async (payload: TUser) => {
   const age = calculateAge(payload.dateOfBirth);
   payload.age = age;
   const result = await User.create(payload);
-  return result;
+
+  const jwtPayload = {
+    userEmail: result?.email,
+    userRole: result?.role,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
+  const access = `Bearer ${accessToken}`;
+  const refresh = `Bearer ${refreshToken}`;
+  return { result, access, refresh };
 };
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {
@@ -220,8 +237,8 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
 
 const deleteAccount = async (password: string, user: JwtPayload) => {
   const { userEmail } = user;
-  const userInfo = await isUserExistByEmail(userEmail);
-  const userPass = userInfo?.password;
+  const userInfo = await User.findOne({ email: userEmail }).select('password');
+  const userPass = userInfo?.password as string;
   const isPasswordMatched = await passwordMatching(password, userPass);
   if (!isPasswordMatched) {
     throw new AppError(
