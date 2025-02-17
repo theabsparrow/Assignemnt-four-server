@@ -44,10 +44,10 @@ const userValidationSchema = z.object({
     ),
   phoneNumber: z
     .string()
-    .min(14, { message: 'phone number can`t be less than 14 character' })
+    .min(10, { message: 'phone number can`t be less than 10 character' })
     .max(14, { message: 'phone number can`t be more than 14 character' })
-    .refine((value) => /^\+880\d{10}$/.test(value), {
-      message: 'password shpould be start with +880',
+    .refine((value) => /^\d{10,14}$/.test(value), {
+      message: 'Phone number must contain only digits (10-14 characters)',
     }),
   gender: z.enum(['male', 'female', 'others'] as [string, ...string[]]),
   dateOfBirth: z.string({
@@ -61,10 +61,10 @@ const updateUserInfoValidationSchema = z.object({
   email: z.string().email().optional(),
   phoneNumber: z
     .string()
-    .min(14, { message: 'phone number can`t be less than 14 character' })
-    .max(14, { message: 'phone number can`t be more than 14 character' })
-    .refine((value) => /^\+880\d{10}$/.test(value), {
-      message: 'password shpould be start with +880',
+    .min(10, { message: "Phone number can't be less than 10 characters" })
+    .max(14, { message: "Phone number can't be more than 14 characters" })
+    .refine((value) => /^\d{10,14}$/.test(value), {
+      message: 'Phone number must contain only digits (10-14 characters)',
     })
     .optional(),
   dateOfBirth: z

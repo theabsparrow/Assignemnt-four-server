@@ -41,6 +41,12 @@ const createUser = async (payload: TUser) => {
     );
   }
   const age = calculateAge(payload.dateOfBirth);
+  if (age < 18) {
+    throw new AppError(
+      StatusCodes.CONFLICT,
+      'You must be at least 18 years old.',
+    );
+  }
   payload.age = age;
   const result = await User.create(payload);
 

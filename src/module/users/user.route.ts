@@ -9,7 +9,6 @@ const router = Router();
 
 router.post(
   '/register',
-  auth(USER_ROLE.superAdmin),
   validateRequest(userValidation.userValidationSchema),
   userController.createUSer,
 );
