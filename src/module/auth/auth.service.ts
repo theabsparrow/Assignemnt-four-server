@@ -77,7 +77,7 @@ const changePassword = async (payload: TChangePassword, user: JwtPayload) => {
   const { userEmail } = user;
   const { oldPassword, newPassword } = payload;
   const saltNumber = Number(config.bcrypt_salt_round);
-  const userInfo = await User.findOne({ email: userEmail }).select('password');
+  const userInfo = await User.findOne({ email: userEmail }).select('+password');
   const userPass = userInfo?.password as string;
   const isPasswordMatched = await passwordMatching(oldPassword, userPass);
   if (!isPasswordMatched) {
@@ -89,7 +89,23 @@ const changePassword = async (payload: TChangePassword, user: JwtPayload) => {
     { password: hashedPassword, passwordChangedAt: new Date() },
     { new: true },
   );
-  return null;
+  const jwtPayload = {
+    userEmail: userInfo?.email as string,
+    userRole: userInfo?.role as string,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
+  const access = `Bearer ${accessToken}`;
+  const refresh = `Bearer ${refreshToken}`;
+  return { access, refresh };
 };
 
 const generateAccessToken = async (refreshToken: string) => {

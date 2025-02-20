@@ -171,7 +171,7 @@ const getMe = async (user: JwtPayload) => {
 };
 
 const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
-  const { name, email, phoneNumber, ...remainingInfo } = payload;
+  const { name, email, phoneNumber, dateOfBirth, ...remainingInfo } = payload;
   const { userEmail, userRole } = user;
   const modifiedData: Record<string, unknown> = { ...remainingInfo };
   const isEmailExists = await User.findOne({ email: email, isDeleted: false });
@@ -187,6 +187,18 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       StatusCodes.CONFLICT,
       'this phone number is already exists',
     );
+  }
+  if (dateOfBirth) {
+    const age = calculateAge(dateOfBirth);
+    if (age < 18) {
+      throw new AppError(
+        StatusCodes.CONFLICT,
+        'You must be at least 18 years old.',
+      );
+    } else {
+      modifiedData.dateOfBirth = dateOfBirth;
+      modifiedData.age = age;
+    }
   }
   if (name && name?.firstName) {
     name.firstName =

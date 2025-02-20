@@ -23,16 +23,27 @@ const login = catchAsync(
   },
 );
 
+const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie('refreshToken', cookieOptions);
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, message: 'successfully logged out' });
+  },
+);
+
 const changePassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const user = req.user;
     const result = await authService.changePassword(payload, user);
+    const { access, refresh } = result;
+    res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'password changed successfully',
-      data: result,
+      data: access,
     });
   },
 );
@@ -100,4 +111,5 @@ export const authController = {
   forgetPassword,
   resetPassword,
   setNewPassword,
+  logout,
 };

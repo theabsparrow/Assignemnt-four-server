@@ -72,6 +72,9 @@ const updateUserInfoValidationSchema = z.object({
       invalid_type_error: 'date must be string',
     })
     .optional(),
+  gender: z
+    .enum(['male', 'female', 'others'] as [string, ...string[]])
+    .optional(),
   profileImage: z.string().optional(),
   coverImage: z.string().optional(),
   homeTown: z.string().optional(),
