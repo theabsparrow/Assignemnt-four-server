@@ -134,7 +134,8 @@ const generateAccessToken = async (refreshToken: string) => {
     config.jwt_access_secret as string,
     config.jwt_access_expires_in as string,
   );
-  return accessToken;
+  const access = `Bearer ${accessToken}`;
+  return access;
 };
 
 const forgetPassword = async (email: string) => {
