@@ -33,11 +33,6 @@ router.patch(
   validateRequest(userValidation.userStatusValidationSchema),
   userController.updateUserStatus,
 );
-router.delete(
-  '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
-  userController.deleteUser,
-);
 router.patch(
   '/update-role/:id',
   auth(USER_ROLE.superAdmin),
@@ -56,4 +51,10 @@ router.delete(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   userController.deleteAccount,
 );
+router.delete(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  userController.deleteUser,
+);
+
 export const userRoute = router;

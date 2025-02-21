@@ -148,9 +148,9 @@ const updateUserInfo = catchAsync(
 
 const deleteAccount = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { oldPassword } = req.user;
+    const { password } = req.body;
     const user = req.user;
-    const result = await userSrevice.deleteAccount(oldPassword, user);
+    const result = await userSrevice.deleteAccount(password, user);
     res.clearCookie('refreshToken', cookieOptions);
     sendResponse(res, {
       success: true,
