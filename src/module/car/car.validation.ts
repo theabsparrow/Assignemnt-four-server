@@ -14,7 +14,6 @@ import { carBrand, carCategory, seatingCapacity } from './car.const';
 
 const carImageGallerySchema = z.object({
   url: z.string().url({ message: 'Invalid URL format' }),
-  title: z.string().min(1, { message: 'Title is required' }),
   isDeleted: z.boolean(),
 });
 
@@ -45,7 +44,6 @@ export const carValidationSchema = z.object({
       .string()
       .min(10, { message: 'Description must be at least 10 characters' })
       .nonempty({ message: 'Description is required' }),
-    quantity: z.number().min(1, { message: 'Quantity must be at least 1' }),
     madeIn: z.string().nonempty({ message: 'Made in is required' }),
     country: z.string().nonempty({ message: 'Country is required' }),
     image: z.string().url({ message: 'Invalid image URL' }),
@@ -203,13 +201,8 @@ const updateCarImageValidationSchema = z.object({
     .max(5, { message: 'You can upload a maximum of 5 images' }),
 });
 
-const updateQuantityVAlidationSchema = z.object({
-  quantity: z.number().min(1, { message: 'Quantity must be at least 1' }),
-});
-
 export const carValidation = {
   carValidationSchema,
   updateCArInfoValidationSchema,
   updateCarImageValidationSchema,
-  updateQuantityVAlidationSchema,
 };

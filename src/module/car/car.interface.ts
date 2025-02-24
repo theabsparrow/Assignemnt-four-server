@@ -25,7 +25,6 @@ export type TCategory =
 
 export type TGalleryImage = {
   url: string;
-  title: string;
   isDeleted: boolean;
 };
 export type TSeatingCapacity = '2' | '4' | '5' | '6' | '7' | '8' | '9' | '10+';
@@ -44,7 +43,6 @@ export type TCar = {
   category: TCategory;
   color: string[];
   description: string;
-  quantity: number;
   inStock: boolean;
   // condition: TCondition;
   seatingCapacity: TSeatingCapacity;

@@ -6,9 +6,6 @@ const carImageGallerySchema = new Schema<TGalleryImage>({
   url: {
     type: String,
   },
-  title: {
-    type: String,
-  },
   isDeleted: {
     type: Boolean,
     default: false,
@@ -65,10 +62,6 @@ const carSchema = new Schema<TCar>(
       type: String,
       required: true,
       trim: true,
-    },
-    quantity: {
-      type: Number,
-      required: [true, 'Quantity is reuired'],
     },
     inStock: {
       type: Boolean,

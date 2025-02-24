@@ -24,24 +24,23 @@ const createOrder = async (
   const userID = isUser?._id;
   const { car } = payload;
   const carData = await Car.findById(car);
-  const quantity = payload?.quantity as number;
   if (!carData) {
     throw new AppError(
       StatusCodes.NOT_FOUND,
       'This car is not available right now',
     );
   }
-  if (quantity > carData?.quantity) {
+  if (!carData?.inStock) {
     throw new AppError(
       StatusCodes.EXPECTATION_FAILED,
-      'stock is insufficient right now',
+      'this car isn`t in stock right now',
     );
   }
 
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    const totalPrice = carData?.price * quantity;
+    const totalPrice = carData?.price;
     payload.totalPrice = totalPrice;
     payload.userEmail = userEmail;
     payload.userID = userID;
@@ -119,23 +118,18 @@ const verifyPayment = async (order_id: string) => {
     if (!updatedData) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
     }
-    const quantity = updatedData?.quantity as number;
+
     const carID = updatedData?.car;
-    const carData = await Car.findById(carID).select('quantity');
-    if (
-      carData?.quantity &&
-      verifiedPayment[0].bank_status == paymentStatus.success
-    ) {
-      const newQuantity = carData?.quantity - quantity;
-      const updatedData = {
-        quantity: newQuantity,
-        inStock: newQuantity > 0 ? true : false,
-      };
-      const updatecarData = await Car.findByIdAndUpdate(carID, updatedData, {
-        new: true,
-        session,
-        runValidators: true,
-      });
+    if (verifiedPayment[0].bank_status == paymentStatus.success) {
+      const updatecarData = await Car.findByIdAndUpdate(
+        carID,
+        { inStock: false },
+        {
+          new: true,
+          session,
+          runValidators: true,
+        },
+      );
       if (!updatecarData) {
         throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
       }
