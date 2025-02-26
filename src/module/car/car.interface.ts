@@ -38,13 +38,13 @@ export type TCar = {
   safetyFeature?: Types.ObjectId;
   brand: TCarBrand;
   model: string;
-  year: number;
+  year: string;
   price: number;
   category: TCategory;
-  color: string[];
+  color: string;
   description: string;
   inStock: boolean;
-  // condition: TCondition;
+  condition: TCondition;
   seatingCapacity: TSeatingCapacity;
   madeIn: string;
   country: string;

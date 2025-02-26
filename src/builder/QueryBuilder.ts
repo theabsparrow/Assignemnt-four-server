@@ -29,8 +29,17 @@ class QueryBuilder<T> {
       'limit',
       'page',
       'fields',
+      'minPrice',
+      'maxPrice',
     ];
     excludeFields.forEach((element) => delete queryObject[element]);
+
+    const minPrice = Number(this.query.minPrice) || 0;
+    const maxPrice = Number(this.query.maxPrice) || 100000000;
+
+    if (!isNaN(minPrice) && !isNaN(maxPrice) && minPrice <= maxPrice) {
+      queryObject.price = { $gte: minPrice, $lte: maxPrice };
+    }
     this.modelQuery = this.modelQuery.find(queryObject);
     return this;
   }

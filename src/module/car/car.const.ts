@@ -1,6 +1,6 @@
 export const carBrand: string[] = [
   'Toyota',
-  'Hundai',
+  'Hyundai',
   'Nissan',
   'Audi',
   'Tesla',

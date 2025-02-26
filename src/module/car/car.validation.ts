@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { carBrand, carCategory, seatingCapacity } from './car.const';
+import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
 // import {
 //   accelaration,
 //   driveTrain,
@@ -14,7 +14,6 @@ import { carBrand, carCategory, seatingCapacity } from './car.const';
 
 const carImageGallerySchema = z.object({
   url: z.string().url({ message: 'Invalid URL format' }),
-  isDeleted: z.boolean(),
 });
 
 export const carValidationSchema = z.object({
@@ -27,19 +26,20 @@ export const carValidationSchema = z.object({
       .min(1, { message: 'Car model must be at least 1 character' })
       .max(25, { message: 'Car model must be less than 25 characters' })
       .nonempty({ message: 'Car model is required' }),
-    year: z
-      .number()
-      .min(2010, { message: 'Year must be after 2010' })
-      .max(new Date().getFullYear(), {
-        message: 'Year cannot be in the future',
-      }),
+    year: z.string().max(new Date().getFullYear(), {
+      message: 'Year cannot be in the future',
+    }),
     price: z.number().min(1, { message: 'Price is required' }),
     category: z.enum([...carCategory] as [string, ...string[]], {
       required_error: 'Category is required',
     }),
+    condition: z.enum([...condition] as [string, ...string[]], {
+      required_error: 'condition is required',
+    }),
     color: z
-      .array(z.string())
-      .min(1, { message: 'At least one color is required' }),
+      .string()
+      .min(3, { message: 'min character should be 3' })
+      .max(15, { message: 'max character should be 30' }),
     description: z
       .string()
       .min(10, { message: 'Description must be at least 10 characters' })
@@ -174,15 +174,23 @@ const updateCArInfoValidationSchema = z.object({
     .max(25, { message: 'Car model must be less than 25 characters' })
     .optional(),
   year: z
-    .number()
-    .min(2010, { message: 'Year must be after 2010' })
+    .string()
+
     .max(new Date().getFullYear(), {
       message: 'Year cannot be in the future',
     })
     .optional(),
   price: z.string().optional(),
   category: z.enum([...carCategory] as [string, ...string[]]).optional(),
-  color: z.array(z.string()).optional(),
+  condition: z
+    .enum([...condition] as [string, ...string[]], {
+      required_error: 'condition is required',
+    })
+    .optional(),
+  color: z
+    .string()
+    .min(3, { message: 'min character should be 3' })
+    .max(15, { message: 'max character should be 30' }),
   description: z
     .string()
     .min(10, { message: 'Description must be at least 10 characters' })
