@@ -78,6 +78,20 @@ const updatedCarImage = catchAsync(
   },
 );
 
+const deleteImageFromGallery = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const id = req.params.id;
+    const result = await carService.deleteImageFromGallery(id, payload);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars image is deleted successfully',
+      data: result,
+    });
+  },
+);
+
 // delete a car data
 const deleteCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -99,4 +113,5 @@ export const carController = {
   updatCarInfo,
   deleteCar,
   updatedCarImage,
+  deleteImageFromGallery,
 };

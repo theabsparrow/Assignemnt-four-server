@@ -62,21 +62,6 @@ const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   if (!isCarExists) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
   }
-  // const deleteImageURL = payload
-  //   .filter((element) => element.url && element.isDeleted)
-  //   .map((ele) => ele.url);
-
-  // const deleteImageFromGallery = await Car.findByIdAndUpdate(
-  //   id,
-  //   {
-  //     $pull: { galleryImage: { $in: deleteImageURL } },
-  //   },
-  //   { new: true },
-  // );
-  // if (!deleteImageFromGallery) {
-  //   throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete image');
-  // }
-
   if (isCarExists?.galleryImage && isCarExists?.galleryImage.length === 5) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
@@ -92,6 +77,7 @@ const updateCarImage = async (id: string, payload: Partial<TCar>) => {
     },
     {
       new: true,
+      runValidators: true,
     },
   );
   if (!addImageToGallery) {
@@ -99,6 +85,26 @@ const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   }
   const updatedImage = await Car.findById(id).select('galleryImage');
   return updatedImage;
+};
+
+const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
+  const isCarExists = await Car.findById(id);
+  if (!isCarExists) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
+  }
+
+  const deleteImageURL = payload?.galleryImage!.map((ele) => ele.url);
+  const deleteImageFromGallery = await Car.findByIdAndUpdate(
+    id,
+    {
+      $pull: { galleryImage: { $in: deleteImageURL } },
+    },
+    { new: true, runValidators: true },
+  );
+  if (!deleteImageFromGallery) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete image');
+  }
+  return deleteImageFromGallery;
 };
 
 // delete a car
@@ -112,6 +118,7 @@ export const carService = {
   getAllCars,
   getSingleCar,
   updateCarInfo,
+  deleteImageFromGallery,
   deleteCar,
   updateCarImage,
 };
