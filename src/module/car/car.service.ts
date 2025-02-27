@@ -6,7 +6,7 @@ import { TRegistrationdata } from '../registrationData/registrationData.interfac
 import { TSafetyFeature } from '../safetyFeatures/safetyFeature.interface';
 import { TserviceHistory } from '../serviceHistory/serviceHistory.interface';
 import { carBrandLogo, carSearchAbleFields } from './car.const';
-import { TCar, TCarBrand, TGalleryImage } from './car.interface';
+import { TCar, TCarBrand } from './car.interface';
 import Car from './car.model';
 
 type TcarInfoPayload = {
@@ -47,38 +47,47 @@ const getSingleCar = async (id: string) => {
 
 // update a car data
 const updateCarInfo = async (id: string, payload: Partial<TCar>) => {
+  if (payload.brand) {
+    const logo = carBrandLogo[payload.brand as TCarBrand];
+    payload.carBrandLogo = logo as string;
+  }
   const result = await Car.findByIdAndUpdate(id, payload, {
     new: true,
   });
   return result;
 };
 
-const updateCarImage = async (id: string, payload: TGalleryImage[]) => {
+const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   const isCarExists = await Car.findById(id);
   if (!isCarExists) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
   }
-  const deleteImageURL = payload
-    .filter((element) => element.url && element.isDeleted)
-    .map((ele) => ele.url);
+  // const deleteImageURL = payload
+  //   .filter((element) => element.url && element.isDeleted)
+  //   .map((ele) => ele.url);
 
-  const deleteImageFromGallery = await Car.findByIdAndUpdate(
-    id,
-    {
-      $pull: { galleryImage: { $in: deleteImageURL } },
-    },
-    { new: true },
-  );
-  if (!deleteImageFromGallery) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete image');
+  // const deleteImageFromGallery = await Car.findByIdAndUpdate(
+  //   id,
+  //   {
+  //     $pull: { galleryImage: { $in: deleteImageURL } },
+  //   },
+  //   { new: true },
+  // );
+  // if (!deleteImageFromGallery) {
+  //   throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete image');
+  // }
+
+  if (isCarExists?.galleryImage && isCarExists?.galleryImage.length === 5) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'maximum 5 photos can be stored',
+    );
   }
-
-  const addImageURL = payload.filter((element) => !element.isDeleted);
   const addImageToGallery = await Car.findByIdAndUpdate(
     id,
     {
       $addToSet: {
-        galleryImage: { $each: addImageURL },
+        galleryImage: { $each: payload?.galleryImage },
       },
     },
     {

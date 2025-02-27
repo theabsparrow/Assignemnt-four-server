@@ -172,7 +172,7 @@ const resetPassword = async (user: JwtPayload, oneTimePass: string) => {
   const tokenForSetNewPass = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    '30m',
+    '5m',
   );
   if (otp !== oneTimePass) {
     throw new AppError(

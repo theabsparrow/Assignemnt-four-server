@@ -190,7 +190,8 @@ const updateCArInfoValidationSchema = z.object({
   color: z
     .string()
     .min(3, { message: 'min character should be 3' })
-    .max(15, { message: 'max character should be 30' }),
+    .max(15, { message: 'max character should be 30' })
+    .optional(),
   description: z
     .string()
     .min(10, { message: 'Description must be at least 10 characters' })

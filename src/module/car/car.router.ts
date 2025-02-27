@@ -22,7 +22,7 @@ router.get(
 );
 
 router.patch(
-  'update-info/:id',
+  '/update-info/:id',
   validateRequest(carValidation.updateCArInfoValidationSchema),
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   carController.updatCarInfo,
