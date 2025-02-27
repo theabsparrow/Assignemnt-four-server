@@ -93,11 +93,12 @@ const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
     throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
   }
 
-  const deleteImageURL = payload?.galleryImage!.map((ele) => ele.url);
+  const deleteImageURL = payload?.galleryImage!.map((ele) => ele.url) || [];
+
   const deleteImageFromGallery = await Car.findByIdAndUpdate(
     id,
     {
-      $pull: { galleryImage: { $in: deleteImageURL } },
+      $pull: { galleryImage: { url: { $in: deleteImageURL } } },
     },
     { new: true, runValidators: true },
   );
