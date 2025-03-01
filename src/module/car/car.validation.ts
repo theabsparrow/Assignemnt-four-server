@@ -175,7 +175,6 @@ const updateCArInfoValidationSchema = z.object({
     .optional(),
   year: z
     .string()
-
     .max(new Date().getFullYear(), {
       message: 'Year cannot be in the future',
     })

@@ -15,11 +15,7 @@ router.post(
 );
 
 router.get('/get-allCars', carController.getAllCars);
-router.get(
-  '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
-  carController.getSingleCar,
-);
+router.get('/:id', carController.getSingleCar);
 
 router.patch(
   '/update-info/:id',
