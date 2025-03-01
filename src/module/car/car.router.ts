@@ -39,7 +39,7 @@ router.delete(
 );
 
 router.delete(
-  'delete/:id',
+  '/delete/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   carController.deleteCar,
 );
