@@ -32,8 +32,7 @@ const getAllUsers = catchAsync(
     const result = await userSrevice.getAllUser(userRole, query);
     sendResponse(res, {
       success: true,
-      statusCode:
-        result?.result.length > 0 ? StatusCodes.OK : StatusCodes.NOT_FOUND,
+      statusCode: StatusCodes.OK,
       message:
         result?.result.length > 0
           ? 'users are retrived successfully'

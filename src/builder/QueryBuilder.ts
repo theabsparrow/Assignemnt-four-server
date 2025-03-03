@@ -23,7 +23,6 @@ class QueryBuilder<T> {
     const queryObject = { ...this.query };
     const excludeFields = [
       'searchTerm',
-      'filter',
       'sort',
       'sortOrder',
       'limit',
@@ -34,11 +33,13 @@ class QueryBuilder<T> {
     ];
     excludeFields.forEach((element) => delete queryObject[element]);
 
-    const minPrice = Number(this.query.minPrice) || 0;
-    const maxPrice = Number(this.query.maxPrice) || 100000000;
-
-    if (!isNaN(minPrice) && !isNaN(maxPrice) && minPrice <= maxPrice) {
+    if (this.query.minPrice && this.query.maxPrice) {
+      const minPrice = Number(this.query.minPrice);
+      const maxPrice = Number(this.query.maxPrice);
       queryObject.price = { $gte: minPrice, $lte: maxPrice };
+    }
+    if (this.query.isDeleted) {
+      queryObject.isDeleted = this.query.isDeleted === 'true' ? true : false;
     }
     this.modelQuery = this.modelQuery.find(queryObject);
     return this;

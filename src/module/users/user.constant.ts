@@ -7,8 +7,6 @@ export const USER_ROLE = {
 export const searchableFields: string[] = [
   'email',
   'phoneNumber',
-  'homeTown',
-  'currentAddress',
   'name.firstName',
   'name.lastName',
   'name.middleName',

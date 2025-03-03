@@ -70,11 +70,13 @@ const createUser = async (payload: TUser) => {
 };
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {
-  let filter = {};
+  const filter: Record<string, unknown> = {};
   if (role === USER_ROLE.admin) {
-    filter = { isDeleted: false };
+    filter.isDeleted = false;
+    filter.role = USER_ROLE.user;
   }
-  const usersQuery = new QueryBuilder(User.find(filter), query)
+  query = { ...query, ...filter };
+  const usersQuery = new QueryBuilder(User.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
@@ -131,13 +133,16 @@ const deleteUser = async (id: string, user: JwtPayload) => {
   const { userRole } = user;
   const userInfo = await isUserExists(id);
   const role = userInfo?.role;
+  if (userRole === USER_ROLE.superAdmin && role === USER_ROLE.superAdmin) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Super Admin can`t be delete');
+  }
   if (
     userRole === USER_ROLE.admin &&
     (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
   ) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
-      'you can`t an admin as well as super admin',
+      'you can`t delete an admin as well as super admin',
     );
   }
   const result = await User.findByIdAndUpdate(
@@ -150,6 +155,12 @@ const deleteUser = async (id: string, user: JwtPayload) => {
 
 const makeAdmin = async (id: string, payload: string) => {
   const userExistence = await isUserExists(id);
+  if (userExistence?.role === USER_ROLE.superAdmin) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'role super admin can`t be change ',
+    );
+  }
   if (userExistence?.role === payload) {
     throw new AppError(
       StatusCodes.CONFLICT,
