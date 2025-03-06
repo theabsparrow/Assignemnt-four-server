@@ -133,17 +133,11 @@ const deleteUser = async (id: string, user: JwtPayload) => {
   const { userRole } = user;
   const userInfo = await isUserExists(id);
   const role = userInfo?.role;
-  if (userRole === USER_ROLE.superAdmin && role === USER_ROLE.superAdmin) {
+  if (role === USER_ROLE.superAdmin) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Super Admin can`t be delete');
   }
-  if (
-    userRole === USER_ROLE.admin &&
-    (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
-  ) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      'you can`t delete an admin as well as super admin',
-    );
+  if (userRole === USER_ROLE.admin && role === USER_ROLE.admin) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'you can`t delete an admin ');
   }
   const result = await User.findByIdAndUpdate(
     id,

@@ -38,9 +38,6 @@ class QueryBuilder<T> {
       const maxPrice = Number(this.query.maxPrice);
       queryObject.price = { $gte: minPrice, $lte: maxPrice };
     }
-    if (this.query.isDeleted) {
-      queryObject.isDeleted = this.query.isDeleted === 'true' ? true : false;
-    }
     this.modelQuery = this.modelQuery.find(queryObject);
     return this;
   }

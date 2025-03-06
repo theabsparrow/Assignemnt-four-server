@@ -43,6 +43,19 @@ const getAllUsers = catchAsync(
   },
 );
 
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await userSrevice.getMe(user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'user info is retrived successfully',
+      data: result,
+    });
+  },
+);
+
 const getASingleUSer = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -77,20 +90,6 @@ const updateUserStatus = catchAsync(
   },
 );
 
-const deleteUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-    const user = req.user;
-    const result = await userSrevice.deleteUser(id, user);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'user is deleted successfully',
-      data: result,
-    });
-  },
-);
-
 const makeAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -100,19 +99,6 @@ const makeAdmin = catchAsync(
       success: true,
       statusCode: StatusCodes.OK,
       message: 'user role is updated successfully',
-      data: result,
-    });
-  },
-);
-
-const getMe = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-    const result = await userSrevice.getMe(user);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'user info is retrived successfully',
       data: result,
     });
   },
@@ -142,6 +128,20 @@ const updateUserInfo = catchAsync(
         data: { result },
       });
     }
+  },
+);
+
+const deleteUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const user = req.user;
+    const result = await userSrevice.deleteUser(id, user);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'user is deleted successfully',
+      data: result,
+    });
   },
 );
 
