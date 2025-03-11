@@ -1,6 +1,24 @@
 import { Schema, model } from 'mongoose';
-import { Torder } from './order.interface';
-import { orderStatus } from './order.const';
+import { Torder, TTrackingInfo } from './order.interface';
+import {
+  deliveryMethod,
+  orderStatus,
+  paymentMethod,
+  trackingStatus,
+} from './order.const';
+
+const trackingSchema = new Schema<TTrackingInfo>({
+  trackingID: {
+    type: String,
+    required: [true, 'tracking id is required'],
+    unique: true,
+  },
+  trackingStatus: {
+    type: String,
+    enum: trackingStatus,
+    default: 'Pending',
+  },
+});
 
 const orderSchema = new Schema<Torder>(
   {
@@ -15,6 +33,7 @@ const orderSchema = new Schema<Torder>(
     car: {
       type: Schema.Types.ObjectId,
       required: [true, 'Car Id is required'],
+      unique: true,
     },
     quantity: {
       type: Number,
@@ -37,6 +56,28 @@ const orderSchema = new Schema<Torder>(
     sp_message: String,
     method: String,
     date_time: String,
+    deliveryMethod: {
+      type: String,
+      enum: deliveryMethod,
+      required: [true, 'delivery method is required'],
+    },
+    tracking: trackingSchema,
+    location: String,
+    nearestDealer: String,
+    phoneNumber: String,
+    deliveryCost: {
+      type: String,
+      required: [true, 'delivery cost is required'],
+    },
+    estimatedDeliveryTime: {
+      type: String,
+      required: [true, 'delivery time is required'],
+    },
+    paymentMethod: {
+      type: String,
+      enum: paymentMethod,
+      required: [true, 'payment method is required'],
+    },
     isDeleted: {
       type: Boolean,
       default: false,

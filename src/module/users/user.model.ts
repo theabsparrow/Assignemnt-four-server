@@ -53,10 +53,6 @@ const userSchema = new Schema<TUser>(
       type: String,
       required: [true, 'birth date is required'],
     },
-    age: {
-      type: Number,
-      required: [true, 'age is required'],
-    },
     profileImage: {
       type: String,
       default: '',

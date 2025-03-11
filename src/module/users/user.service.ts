@@ -47,7 +47,6 @@ const createUser = async (payload: TUser) => {
       'You must be at least 18 years old.',
     );
   }
-  payload.age = age;
   const result = await User.create(payload);
 
   const jwtPayload = {
@@ -202,7 +201,6 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       );
     } else {
       modifiedData.dateOfBirth = dateOfBirth;
-      modifiedData.age = age;
     }
   }
   if (name && name?.firstName) {

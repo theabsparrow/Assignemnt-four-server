@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from 'jsonwebtoken';
 
-import { Torder } from './order.interface';
+import { Torder, TTrackingInfo } from './order.interface';
 import Car from '../car/car.model';
 import AppError from '../../error/AppError';
 import { StatusCodes } from 'http-status-codes';
@@ -9,21 +9,20 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import Order from './order.model';
 import { USER_ROLE } from '../users/user.constant';
 import { User } from '../users/user.model';
-import { orderUtills } from './order.utills';
+import { createTrackingID, orderUtills } from './order.utills';
 import { paymentStatus } from './order.const';
 import mongoose from 'mongoose';
 
 // create an order service
 const createOrder = async (
-  payload: Partial<Torder>,
-  user: JwtPayload,
-  client_ip: string,
+  orderData: Partial<Torder>,
+  payload: { id: string; ip: string; user: JwtPayload },
 ) => {
+  const { ip, id, user } = payload;
   const { userEmail } = user;
-  const isUser = await User.findOne({ email: userEmail });
+  const isUser = await User.findOne({ email: userEmail, isDeleted: false });
   const userID = isUser?._id;
-  const { car } = payload;
-  const carData = await Car.findById(car);
+  const carData = await Car.findById(id);
   if (!carData) {
     throw new AppError(
       StatusCodes.NOT_FOUND,
@@ -40,12 +39,22 @@ const createOrder = async (
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    const totalPrice = carData?.price;
-    payload.totalPrice = totalPrice;
-    payload.userEmail = userEmail;
-    payload.userID = userID;
+    let totalPrice;
+    if (orderData.deliveryCost !== 'free') {
+      totalPrice = carData?.price + Number(orderData.deliveryCost);
+    }
+    orderData.totalPrice = totalPrice;
+    orderData.userEmail = userEmail;
+    orderData.userID = userID;
+    orderData.quantity = 1;
+    orderData.car = carData._id;
+    const trackingID = await createTrackingID();
 
-    const order = await Order.create([payload], { session });
+    const tracking: TTrackingInfo = {
+      trackingID: trackingID,
+    };
+    orderData.tracking = tracking;
+    const order = await Order.create([orderData], { session });
     if (!order.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
     }
@@ -59,7 +68,7 @@ const createOrder = async (
       customer_email: isUser?.email,
       customer_phone: isUser?.phoneNumber,
       customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
-      client_ip,
+      client_ip: ip,
     };
     const paymentResult = await orderUtills.makePayment(shurjopayPayload);
     if (paymentResult?.transactionStatus) {
@@ -90,6 +99,7 @@ const verifyPayment = async (order_id: string) => {
   if (!verifiedPayment || verifiedPayment.length === 0) {
     throw new Error('No verified payment found.');
   }
+
   const paymentInfo = {
     transactionStatus: verifiedPayment[0].bank_status,
     bank_status: verifiedPayment[0].sp_code,
@@ -103,10 +113,7 @@ const verifyPayment = async (order_id: string) => {
       ? 'Paid'
       : verifiedPayment[0].bank_status == paymentStatus.failed
         ? 'Pending'
-        : verifiedPayment[0].bank_status == paymentStatus.cancel
-          ? 'Cancelled'
-          : '';
-
+        : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
   const session = await mongoose.startSession();
   try {
     session.startTransaction();

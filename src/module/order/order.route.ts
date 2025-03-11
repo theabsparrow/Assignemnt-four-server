@@ -8,7 +8,7 @@ import { USER_ROLE } from '../users/user.constant';
 const router = Router();
 
 router.post(
-  '/create-order',
+  '/create-order/:id',
   validateRequest(orderValidation.orderValidationSchema),
   auth(USER_ROLE.user),
   orderController.createOrder,

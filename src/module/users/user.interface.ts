@@ -13,7 +13,6 @@ export type TUser = {
   phoneNumber: string;
   gender: 'male' | 'female' | 'others';
   dateOfBirth: string;
-  age: number;
   profileImage?: string;
   coverImage?: string;
   status: 'active' | 'deactive';

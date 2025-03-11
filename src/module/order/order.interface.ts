@@ -1,6 +1,19 @@
 import { Types } from 'mongoose';
 
 type TOrderStatus = 'Pending' | 'Paid' | 'Completed' | 'Cancelled';
+export type TDeliveryMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
+export type TTrackingStatus =
+  | 'Processing'
+  | 'Pending'
+  | 'Shipped'
+  | 'Out for Delivery'
+  | 'Delivered'
+  | 'Cancelled';
+export type TTrackingInfo = {
+  trackingID: string;
+  trackingStatus?: TTrackingStatus;
+};
+export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
 export type Torder = {
   userID: Types.ObjectId;
   userEmail: string;
@@ -15,5 +28,13 @@ export type Torder = {
   sp_message: string;
   method: string;
   date_time: string;
+  deliveryMethod: TDeliveryMethod;
+  tracking: TTrackingInfo;
+  location?: string;
+  estimatedDeliveryTime: string;
+  nearestDealer?: string;
+  phoneNumber: string;
+  deliveryCost: string;
+  paymentMethod: TPaymentMethod;
   isDeleted: boolean;
 };

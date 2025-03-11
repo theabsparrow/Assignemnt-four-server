@@ -3,15 +3,22 @@ import { orderService } from './order.service';
 import { catchAsync } from '../../utills/catchAsync';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 const createOrder = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
+    const id = req.params.id;
+    const orderData = req.body;
     const user = req.user;
-    const ip = req.ip;
-    const result = await orderService.createOrder(payload, user, ip!);
+    const ip = req.ip as string;
+    const payload: { id: string; ip: string; user: JwtPayload } = {
+      id,
+      ip,
+      user,
+    };
+    const result = await orderService.createOrder(orderData, payload);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
