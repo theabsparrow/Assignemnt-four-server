@@ -5,10 +5,43 @@ export const carBrand: string[] = [
   'Audi',
   'Tesla',
   'Ford',
-  'Land-rover',
+  'Land Rover',
   'Honda',
   'Suzuki',
   'Mitsubishi',
+  'BMW',
+  'Mercedes Benz',
+  'Volkswagen',
+  'Porsche',
+  'Chevrolet',
+  'Lexus',
+  'Jaguar',
+  'Kia',
+  'Mazda',
+  'Subaru',
+  'Bentley',
+  'Peugeot',
+  'Renault',
+  'Volvo',
+  'Jeep',
+  'Chrysler',
+  'Dodge',
+  'Cadillac',
+  'GMC',
+  'Acura',
+  'Infiniti',
+  'Alfa Romeo',
+  'Maserati',
+  'Lincoln',
+  'Citroën',
+  'Fiat',
+  'Mini',
+  'Skoda',
+  'Genesis',
+  'RAM',
+  'Hummer',
+  'Saab',
+  'Seat',
 ] as const;
 
 export const carCategory: string[] = [
@@ -17,10 +50,30 @@ export const carCategory: string[] = [
   'Coupe',
   'Convertible',
   'Electric',
-  'Sports-car',
+  'Sports Car',
   'Hybrid',
   'Jeep',
   'Luxury',
+  'Hatchback',
+  'Pickup Truck',
+  'Van',
+  'Minivan',
+  'Wagon',
+  'Crossover',
+  'Muscle Car',
+  'Roadster',
+  'Diesel',
+  'Off-Road',
+  'Supercar',
+  'Classic Car',
+  'Limousine',
+  'Station Wagon',
+  'Microcar',
+  'Targa Top',
+  'Camper Van',
+  'Utility Vehicle',
+  'Compact Car',
+  'Pony Car',
 ] as const;
 
 export const condition: string[] = [
@@ -39,8 +92,32 @@ export const seatingCapacity: string[] = [
   '9',
   '10+',
 ] as const;
+export const paymentMethod: string[] = [
+  'Cash on Delivery',
+  'Online Payment',
+] as const;
+export const paymentOptions: string[] = [
+  'SSLCommerz',
+  'Stripe',
+  'SurjoPay',
+] as const;
 
-type TCarBrandLogo = Record<string, unknown>;
+export const methods: string[] = [
+  'Home Delivery',
+  'Pickup',
+  'Express Delivery',
+];
+export const estimatedTimes: string[] = [
+  '24 hours',
+  '2 days',
+  '5 days',
+  '6 days',
+  '8 days',
+  '9 days',
+  '10 days',
+];
+
+type TCarBrandLogo = Record<string, string>;
 export const carBrandLogo: TCarBrandLogo = {
   Audi: 'https://i.ibb.co.com/twsHWLjS/audi.png',
   Ford: 'https://i.ibb.co.com/rXJfkMD/ford.png',

@@ -1,5 +1,14 @@
 import { z } from 'zod';
-import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
+import {
+  carBrand,
+  carCategory,
+  condition,
+  estimatedTimes,
+  methods,
+  paymentMethod,
+  paymentOptions,
+  seatingCapacity,
+} from './car.const';
 // import {
 //   accelaration,
 //   driveTrain,
@@ -14,6 +23,21 @@ import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
 
 const carImageGallerySchema = z.object({
   url: z.string().url({ message: 'Invalid URL format' }),
+});
+const deliveryMethodValidationSchema = z.object({
+  method: z.enum([...methods] as [string, ...string[]]),
+  estimatedTime: z.enum([...estimatedTimes] as [string, ...string[]]),
+  deliveryCost: z
+    .number()
+    .max(50000, {
+      message: 'delivery cost can`t be more than fifty thousands',
+    }),
+});
+const paymentMethodValidationSchema = z.object({
+  method: z.enum([...paymentMethod] as [string, ...string[]]),
+});
+const paymentOptionValidationSchema = z.object({
+  option: z.enum([...paymentOptions] as [string, ...string[]]),
 });
 
 export const carValidationSchema = z.object({
@@ -54,7 +78,11 @@ export const carValidationSchema = z.object({
     seatingCapacity: z.enum([...seatingCapacity] as [string, ...string[]], {
       required_error: 'Seating capacity is required',
     }),
+    paymentMethod: z.array(paymentMethodValidationSchema),
+    paymentOption: z.array(paymentOptionValidationSchema),
+    deliveryMethod: z.array(deliveryMethodValidationSchema),
   }),
+
   // engineInfo: z.object({
   //   engine: z.enum([...engine] as [string, ...string[]], {
   //     required_error: 'Engine is required',

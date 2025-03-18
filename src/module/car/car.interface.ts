@@ -1,34 +1,112 @@
 import { Types } from 'mongoose';
 
-export type TCarBrand =
+type TCarBrand =
   | 'Toyota'
   | 'Hyundai'
   | 'Nissan'
   | 'Audi'
   | 'Tesla'
   | 'Ford'
-  | 'Land-rover'
+  | 'Land Rover'
   | 'Honda'
   | 'Suzuki'
-  | 'Mitsubishi';
+  | 'Mitsubishi'
+  | 'BMW'
+  | 'Mercedes Benz'
+  | 'Volkswagen'
+  | 'Porsche'
+  | 'Chevrolet'
+  | 'Lexus'
+  | 'Jaguar'
+  | 'Kia'
+  | 'Mazda'
+  | 'Subaru'
+  | 'Bentley'
+  | 'Peugeot'
+  | 'Renault'
+  | 'Volvo'
+  | 'Jeep'
+  | 'Chrysler'
+  | 'Dodge'
+  | 'Cadillac'
+  | 'GMC'
+  | 'Acura'
+  | 'Infiniti'
+  | 'Alfa Romeo'
+  | 'Maserati'
+  | 'Lincoln'
+  | 'Citroën'
+  | 'Fiat'
+  | 'Mini'
+  | 'Skoda'
+  | 'Genesis'
+  | 'RAM'
+  | 'Hummer'
+  | 'Saab'
+  | 'Seat';
 
-export type TCategory =
+type TCategory =
   | 'Sedan'
   | 'SUV'
   | 'Coupe'
   | 'Convertible'
   | 'Electric'
-  | 'Sports-car'
+  | 'Sports Car'
   | 'Hybrid'
   | 'Jeep'
-  | 'Luxury';
+  | 'Luxury'
+  | 'Hatchback'
+  | 'Pickup Truck'
+  | 'Van'
+  | 'Minivan'
+  | 'Wagon'
+  | 'Crossover'
+  | 'Muscle Car'
+  | 'Roadster'
+  | 'Diesel'
+  | 'Off-Road'
+  | 'Supercar'
+  | 'Classic Car'
+  | 'Limousine'
+  | 'Station Wagon'
+  | 'Microcar'
+  | 'Targa Top'
+  | 'Camper Van'
+  | 'Utility Vehicle'
+  | 'Compact Car'
+  | 'Pony Car';
 
 export type TGalleryImage = {
   url: string;
-  isDeleted: boolean;
 };
 export type TSeatingCapacity = '2' | '4' | '5' | '6' | '7' | '8' | '9' | '10+';
 export type TCondition = 'New' | 'Used' | 'Certified Pre-Owned';
+export type TPaymentMethod = {
+  method: 'Cash on Delivery' | 'Online Payment';
+  isDeleted: boolean;
+};
+export type TPaymentOptions = {
+  option: 'SSLCommerz' | 'Stripe' | 'SurjoPay';
+  isDeleted: boolean;
+};
+
+export type TMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
+
+export type TEstimatedTime =
+  | '24 hours'
+  | '2 days'
+  | '5 days'
+  | '6 days'
+  | '8 days'
+  | '9 days'
+  | '10 days';
+
+export type TDeliveryMethod = {
+  method: TMethod;
+  estimatedTime: TEstimatedTime;
+  deliveryCost: number;
+  isDeleted: boolean;
+};
 
 export type TCar = {
   // basic car info
@@ -51,5 +129,9 @@ export type TCar = {
   // car image
   image: string;
   galleryImage?: TGalleryImage[];
+  // delivery and payment
+  paymentMethod: TPaymentMethod[];
+  paymentOption: TPaymentOptions[];
+  deliveryMethod: TDeliveryMethod[];
   carBrandLogo: string;
 };
