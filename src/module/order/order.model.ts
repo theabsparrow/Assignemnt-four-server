@@ -4,6 +4,7 @@ import {
   deliveryMethod,
   orderStatus,
   paymentMethod,
+  paymentOption,
   trackingStatus,
 } from './order.const';
 
@@ -64,7 +65,10 @@ const orderSchema = new Schema<Torder>(
     tracking: trackingSchema,
     location: String,
     nearestDealer: String,
-    phoneNumber: String,
+    phoneNumber: {
+      type: String,
+      required: [true, 'phone number is required'],
+    },
     deliveryCost: {
       type: String,
       required: [true, 'delivery cost is required'],
@@ -77,6 +81,11 @@ const orderSchema = new Schema<Torder>(
       type: String,
       enum: paymentMethod,
       required: [true, 'payment method is required'],
+    },
+    paymentOption: {
+      type: String,
+      enum: paymentOption,
+      required: [true, 'payment option is required'],
     },
     isDeleted: {
       type: Boolean,

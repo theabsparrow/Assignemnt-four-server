@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { deliveryMethod, paymentMethod } from './order.const';
+import { deliveryMethod, paymentMethod, paymentOption } from './order.const';
 
 const orderValidationSchema = z.object({
   deliveryMethod: z.enum([...deliveryMethod] as [string, ...string[]]),
@@ -9,6 +9,7 @@ const orderValidationSchema = z.object({
   phoneNumber: z.string(),
   deliveryCost: z.number(),
   paymentMethod: z.enum([...paymentMethod] as [string, ...string[]]),
+  paymentOption: z.enum([...paymentOption] as [string, ...string[]]),
 });
 
 export const orderValidation = {

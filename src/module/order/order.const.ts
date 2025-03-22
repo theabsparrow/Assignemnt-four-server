@@ -32,3 +32,4 @@ export const trackingStatus: string[] = [
 ];
 
 export const paymentMethod: string[] = ['Cash on Delivery', 'Online Payment'];
+export const paymentOption: string[] = ['SSLCommerz', 'Stripe', 'SurjoPay'];

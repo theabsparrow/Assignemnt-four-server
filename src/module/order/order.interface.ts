@@ -14,6 +14,7 @@ export type TTrackingInfo = {
   trackingStatus?: TTrackingStatus;
 };
 export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
+export type TPaymentOption = 'SSLCommerz' | 'Stripe' | 'SurjoPay';
 export type Torder = {
   userID: Types.ObjectId;
   userEmail: string;
@@ -31,10 +32,11 @@ export type Torder = {
   deliveryMethod: TDeliveryMethod;
   tracking: TTrackingInfo;
   location?: string;
-  estimatedDeliveryTime: string;
   nearestDealer?: string;
+  estimatedDeliveryTime: string;
   phoneNumber: string;
   deliveryCost: string;
   paymentMethod: TPaymentMethod;
+  paymentOption: TPaymentOption;
   isDeleted: boolean;
 };
