@@ -164,7 +164,6 @@ const carSchema = new Schema<TCar>(
     },
     paymentOption: {
       type: [paymentOptionSchema],
-      required: [true, 'payment optios are required'],
     },
     deliveryMethod: {
       type: [deliveryMethodSchema],

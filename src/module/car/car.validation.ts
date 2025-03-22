@@ -27,11 +27,9 @@ const carImageGallerySchema = z.object({
 const deliveryMethodValidationSchema = z.object({
   method: z.enum([...methods] as [string, ...string[]]),
   estimatedTime: z.enum([...estimatedTimes] as [string, ...string[]]),
-  deliveryCost: z
-    .number()
-    .max(50000, {
-      message: 'delivery cost can`t be more than fifty thousands',
-    }),
+  deliveryCost: z.number().max(50000, {
+    message: 'delivery cost can`t be more than fifty thousands',
+  }),
 });
 const paymentMethodValidationSchema = z.object({
   method: z.enum([...paymentMethod] as [string, ...string[]]),
@@ -79,7 +77,7 @@ export const carValidationSchema = z.object({
       required_error: 'Seating capacity is required',
     }),
     paymentMethod: z.array(paymentMethodValidationSchema),
-    paymentOption: z.array(paymentOptionValidationSchema),
+    paymentOption: z.array(paymentOptionValidationSchema).optional(),
     deliveryMethod: z.array(deliveryMethodValidationSchema),
   }),
 

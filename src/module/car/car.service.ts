@@ -21,7 +21,8 @@ const createCar = async (payload: TcarInfoPayload) => {
   const { basicInfo } = payload;
   const logo = carBrandLogo[basicInfo.brand as TCarBrand];
   basicInfo.carBrandLogo = logo as string;
-
+  basicInfo.model =
+    basicInfo.model.charAt(0).toUpperCase() + basicInfo.model.slice(1);
   const result = await Car.create(basicInfo);
   return result;
 };

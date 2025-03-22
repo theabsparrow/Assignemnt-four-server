@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-type TCarBrand =
+export type TCarBrand =
   | 'Toyota'
   | 'Hyundai'
   | 'Nissan'
@@ -14,7 +14,6 @@ type TCarBrand =
   | 'BMW'
   | 'Mercedes Benz'
   | 'Volkswagen'
-  | 'Porsche'
   | 'Chevrolet'
   | 'Lexus'
   | 'Jaguar'
@@ -43,7 +42,10 @@ type TCarBrand =
   | 'RAM'
   | 'Hummer'
   | 'Saab'
-  | 'Seat';
+  | 'Seat'
+  | 'Proton'
+  | 'Tata'
+  | 'Opel';
 
 type TCategory =
   | 'Sedan'
