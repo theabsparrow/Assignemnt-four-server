@@ -23,7 +23,7 @@ const createOrder = catchAsync(
       success: true,
       statusCode: StatusCodes.CREATED,
       message: 'order created successfully',
-      data: 'nothing',
+      data: result,
     });
   },
 );

@@ -84,3 +84,16 @@ export const createTrackingID = async () => {
   const increment = (Number(currentID) + 1).toString().padStart(4, '0');
   return increment;
 };
+
+export const dateFormat = (estimatedTime: string) => {
+  const daysToAdd = parseFloat(estimatedTime);
+  const today = new Date();
+  const futureDate = new Date(today);
+  futureDate.setDate(today.getDate() + daysToAdd);
+  const formatedDate = futureDate.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  return formatedDate;
+};

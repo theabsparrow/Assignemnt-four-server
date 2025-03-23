@@ -9,7 +9,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import Order from './order.model';
 import { USER_ROLE } from '../users/user.constant';
 import { User } from '../users/user.model';
-import { createTrackingID, orderUtills } from './order.utills';
+import { createTrackingID, dateFormat, orderUtills } from './order.utills';
 import { paymentStatus } from './order.const';
 import mongoose from 'mongoose';
 
@@ -35,14 +35,13 @@ const createOrder = async (
       'this car isn`t in stock right now',
     );
   }
-
+  orderData.estimatedDeliveryTime = dateFormat(
+    orderData?.estimatedDeliveryTime as string,
+  );
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    let totalPrice;
-    if (orderData.deliveryCost !== 'free') {
-      totalPrice = carData?.price + Number(orderData.deliveryCost);
-    }
+    const totalPrice = carData?.price + orderData.deliveryCost!;
     orderData.totalPrice = totalPrice;
     orderData.userEmail = userEmail;
     orderData.userID = userID;
@@ -64,7 +63,9 @@ const createOrder = async (
       order_id: id,
       currency: 'BDT',
       customer_name: `${isUser?.name?.firstName} ${isUser?.name?.lastName}`,
-      customer_address: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+      customer_address: orderData?.location
+        ? orderData?.location
+        : orderData?.nearestDealer,
       customer_email: isUser?.email,
       customer_phone: isUser?.phoneNumber,
       customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
@@ -114,6 +115,7 @@ const verifyPayment = async (order_id: string) => {
       : verifiedPayment[0].bank_status == paymentStatus.failed
         ? 'Pending'
         : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
+
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -141,6 +143,7 @@ const verifyPayment = async (order_id: string) => {
         throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
       }
     }
+
     await session.commitTransaction();
     await session.endSession();
     return verifiedPayment;

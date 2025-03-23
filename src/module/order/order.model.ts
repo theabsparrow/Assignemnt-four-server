@@ -34,7 +34,6 @@ const orderSchema = new Schema<Torder>(
     car: {
       type: Schema.Types.ObjectId,
       required: [true, 'Car Id is required'],
-      unique: true,
     },
     quantity: {
       type: Number,
@@ -70,7 +69,7 @@ const orderSchema = new Schema<Torder>(
       required: [true, 'phone number is required'],
     },
     deliveryCost: {
-      type: String,
+      type: Number,
       required: [true, 'delivery cost is required'],
     },
     estimatedDeliveryTime: {

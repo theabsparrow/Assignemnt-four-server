@@ -35,7 +35,7 @@ export type Torder = {
   nearestDealer?: string;
   estimatedDeliveryTime: string;
   phoneNumber: string;
-  deliveryCost: string;
+  deliveryCost: number;
   paymentMethod: TPaymentMethod;
   paymentOption: TPaymentOption;
   isDeleted: boolean;
