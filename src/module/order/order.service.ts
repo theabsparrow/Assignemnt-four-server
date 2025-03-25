@@ -12,6 +12,9 @@ import { User } from '../users/user.model';
 import { createTrackingID, dateFormat, orderUtills } from './order.utills';
 import { paymentStatus } from './order.const';
 import mongoose from 'mongoose';
+import { generateOrderHTML } from '../../utills/orderPdfTemplate';
+// import { generateOrderPdf } from '../../utills/generateOrderPdf';
+// import { sendEmail } from '../../utills/sendEmail';
 
 // create an order service
 const createOrder = async (
@@ -43,7 +46,6 @@ const createOrder = async (
     session.startTransaction();
     const totalPrice = carData?.price + orderData.deliveryCost!;
     orderData.totalPrice = totalPrice;
-    orderData.userEmail = userEmail;
     orderData.userID = userID;
     orderData.quantity = 1;
     orderData.car = carData._id;
@@ -100,14 +102,13 @@ const verifyPayment = async (order_id: string) => {
   if (!verifiedPayment || verifiedPayment.length === 0) {
     throw new Error('No verified payment found.');
   }
-
   const paymentInfo = {
-    transactionStatus: verifiedPayment[0].bank_status,
-    bank_status: verifiedPayment[0].sp_code,
-    sp_code: verifiedPayment[0].sp_message,
-    sp_message: verifiedPayment[0].transaction_status,
-    method: verifiedPayment[0].method,
-    date_time: verifiedPayment[0].date_time,
+    transactionStatus: verifiedPayment[0]?.bank_status,
+    bank_status: verifiedPayment[0]?.bank_status,
+    sp_code: verifiedPayment[0]?.sp_code,
+    sp_message: verifiedPayment[0]?.sp_message,
+    method: verifiedPayment[0]?.method,
+    date_time: verifiedPayment[0]?.date_time,
   };
   const status =
     verifiedPayment[0].bank_status == paymentStatus.success
@@ -124,12 +125,50 @@ const verifyPayment = async (order_id: string) => {
       { $set: { ...paymentInfo, status } },
       { new: true, session, runValidators: true },
     );
+
     if (!updatedData) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
     }
+    const isUser = await User.findById(updatedData?.userID);
+    if (!isUser) {
+      throw new AppError(StatusCodes.BAD_GATEWAY, 'no user found');
+    }
 
     const carID = updatedData?.car;
-    if (verifiedPayment[0].bank_status == paymentStatus.success) {
+    const carInfo = await Car.findById(carID);
+    if (!carInfo) {
+      throw new AppError(StatusCodes.BAD_GATEWAY, 'no car data found found');
+    }
+
+    const html = generateOrderHTML({
+      userInfo: isUser,
+      carInfo,
+      orderInfo: updatedData,
+    });
+    console.log(html);
+
+    // if (updatedData?.status === 'Paid') {
+    //   const html = generateOrderHTML({
+    //     userInfo: isUser,
+    //     carInfo,
+    //     orderInfo: updatedData,
+    //   });
+    //   // const pdfPath = await generateOrderPdf(html, updatedData?.orderID);
+    //   await sendEmail({
+    //     to: isUser?.email,
+    //     subject: 'Your order document',
+    //     text: 'your full order information is here print it for future use',
+    //     html,
+    //     // attachments: [
+    //     //   {
+    //     //     filename: `${order_id}.pdf`,
+    //     //     path: pdfPath,
+    //     //   },
+    //     // ],
+    //   });
+    // }
+
+    if (verifiedPayment[0].bank_status === paymentStatus.success) {
       const updatecarData = await Car.findByIdAndUpdate(
         carID,
         { inStock: false },
@@ -143,7 +182,6 @@ const verifyPayment = async (order_id: string) => {
         throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
       }
     }
-
     await session.commitTransaction();
     await session.endSession();
     return verifiedPayment;

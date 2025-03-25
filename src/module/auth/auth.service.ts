@@ -155,7 +155,13 @@ const forgetPassword = async (email: string) => {
   const userEmail = result?.email;
   if (resetAccessToken && otp) {
     const resetToken = `Bearer ${resetAccessToken}`;
-    sendEmail(userEmail, otpEmailTemplate(otp));
+    const html = otpEmailTemplate(otp);
+    await sendEmail({
+      to: userEmail,
+      html,
+      subject: 'Your one time password(OTP)',
+      text: 'This one time password is valid for only 5 minutes',
+    });
     return resetToken;
   } else {
     throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');

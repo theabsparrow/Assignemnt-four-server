@@ -23,10 +23,6 @@ const trackingSchema = new Schema<TTrackingInfo>({
 
 const orderSchema = new Schema<Torder>(
   {
-    userEmail: {
-      type: String,
-      required: [true, 'use email is required'],
-    },
     userID: {
       type: Schema.Types.ObjectId,
       required: [true, 'userID is required'],

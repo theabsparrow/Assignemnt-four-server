@@ -17,7 +17,6 @@ export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
 export type TPaymentOption = 'SSLCommerz' | 'Stripe' | 'SurjoPay';
 export type Torder = {
   userID: Types.ObjectId;
-  userEmail: string;
   car: Types.ObjectId;
   quantity: number;
   totalPrice: number;
