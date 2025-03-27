@@ -1,10 +1,4 @@
-export const orderStatus = [
-  'Pending',
-  'Paid',
-  'Shipped',
-  'Completed',
-  'Cancelled',
-];
+export const orderStatus = ['Pending', 'Paid', 'Completed', 'Cancelled'];
 
 type TPaymentStatus = {
   success: 'Success';
@@ -25,7 +19,6 @@ export const deliveryMethod: string[] = [
 export const trackingStatus: string[] = [
   'Processing',
   'Pending',
-  'Cancelled',
   'Shipped',
   'Out for Delivery',
   'Delivered',

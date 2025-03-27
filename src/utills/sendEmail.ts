@@ -58,5 +58,5 @@ export const sendEmail = async ({
     mailOptions.attachments = attachments;
   }
 
-  await transporter.sendMail(mailOptions);
+  return await transporter.sendMail(mailOptions);
 };

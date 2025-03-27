@@ -45,7 +45,10 @@ const orderSchema = new Schema<Torder>(
       enum: orderStatus,
       default: 'Pending',
     },
-    orderID: String,
+    orderID: {
+      type: String,
+      unique: true,
+    },
     transactionStatus: String,
     bank_status: String,
     sp_code: String,

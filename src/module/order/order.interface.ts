@@ -7,8 +7,7 @@ export type TTrackingStatus =
   | 'Pending'
   | 'Shipped'
   | 'Out for Delivery'
-  | 'Delivered'
-  | 'Cancelled';
+  | 'Delivered';
 export type TTrackingInfo = {
   trackingID: string;
   trackingStatus?: TTrackingStatus;

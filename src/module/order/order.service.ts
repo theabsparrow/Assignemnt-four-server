@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from 'jsonwebtoken';
-
 import { Torder, TTrackingInfo } from './order.interface';
 import Car from '../car/car.model';
 import AppError from '../../error/AppError';
 import { StatusCodes } from 'http-status-codes';
 import QueryBuilder from '../../builder/QueryBuilder';
 import Order from './order.model';
-import { USER_ROLE } from '../users/user.constant';
 import { User } from '../users/user.model';
 import { createTrackingID, dateFormat, orderUtills } from './order.utills';
 import { paymentStatus } from './order.const';
 import mongoose from 'mongoose';
 import { generateOrderHTML } from '../../utills/orderPdfTemplate';
-// import { generateOrderPdf } from '../../utills/generateOrderPdf';
-// import { sendEmail } from '../../utills/sendEmail';
+import { generateOrderPdf } from '../../utills/generateOrderPdf';
+import { sendEmail } from '../../utills/sendEmail';
+import fs from 'fs/promises';
+import { USER_ROLE } from '../users/user.constant';
 
 // create an order service
 const createOrder = async (
@@ -97,6 +97,7 @@ const createOrder = async (
   }
 };
 
+// verify order
 const verifyPayment = async (order_id: string) => {
   const verifiedPayment = await orderUtills.verifyPayment(order_id);
   if (!verifiedPayment || verifiedPayment.length === 0) {
@@ -117,12 +118,25 @@ const verifyPayment = async (order_id: string) => {
         ? 'Pending'
         : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
 
+  const trackingStatus =
+    status === 'Paid'
+      ? 'Processing'
+      : status === 'Pending'
+        ? 'Pending'
+        : status === 'Cancelled'
+          ? 'Cancelled'
+          : undefined;
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
     const updatedData = await Order.findOneAndUpdate(
       { orderID: order_id },
-      { $set: { ...paymentInfo, status } },
+      {
+        $set: {
+          ...paymentInfo,
+          status,
+        },
+      },
       { new: true, session, runValidators: true },
     );
 
@@ -140,35 +154,51 @@ const verifyPayment = async (order_id: string) => {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'no car data found found');
     }
 
-    const html = generateOrderHTML({
-      userInfo: isUser,
-      carInfo,
-      orderInfo: updatedData,
-    });
-    console.log(html);
+    let pdfPath;
 
-    // if (updatedData?.status === 'Paid') {
-    //   const html = generateOrderHTML({
-    //     userInfo: isUser,
-    //     carInfo,
-    //     orderInfo: updatedData,
-    //   });
-    //   // const pdfPath = await generateOrderPdf(html, updatedData?.orderID);
-    //   await sendEmail({
-    //     to: isUser?.email,
-    //     subject: 'Your order document',
-    //     text: 'your full order information is here print it for future use',
-    //     html,
-    //     // attachments: [
-    //     //   {
-    //     //     filename: `${order_id}.pdf`,
-    //     //     path: pdfPath,
-    //     //   },
-    //     // ],
-    //   });
-    // }
+    if (updatedData?.status === 'Paid' && carInfo?.inStock) {
+      const html = generateOrderHTML({
+        userInfo: isUser,
+        carInfo,
+        orderInfo: updatedData,
+      });
+      pdfPath = await generateOrderPdf(html, updatedData?.orderID);
+    }
 
-    if (verifiedPayment[0].bank_status === paymentStatus.success) {
+    if (pdfPath) {
+      const info = await sendEmail({
+        to: isUser?.email,
+        subject: 'Your order document',
+        text: 'your full order information is here print it for future use',
+        attachments: [
+          {
+            filename: `${order_id}.pdf`,
+            path: pdfPath,
+          },
+        ],
+      });
+      if (info.accepted.length > 0) {
+        await fs.unlink(pdfPath);
+        console.log('file deleted successfully');
+      }
+    }
+    if (updatedData?.tracking?.trackingStatus === 'Pending') {
+      const updateTracking = await Order.findOneAndUpdate(
+        { orderID: order_id },
+        {
+          'tracking.trackingStatus': trackingStatus,
+        },
+        { new: true, session, runValidators: true },
+      );
+      if (!updateTracking) {
+        throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
+      }
+    }
+
+    if (
+      verifiedPayment[0].bank_status === paymentStatus.success &&
+      carInfo?.inStock
+    ) {
       const updatecarData = await Car.findByIdAndUpdate(
         carID,
         { inStock: false },
@@ -192,6 +222,7 @@ const verifyPayment = async (order_id: string) => {
   }
 };
 
+// get all orders by admin superadmin
 const getAllOrder = async (query: Record<string, unknown>) => {
   const orderQuery = new QueryBuilder(Order.find(), query)
     .search(['userEmail'])
@@ -209,8 +240,10 @@ const getMyOwnOrders = async (
   user: JwtPayload,
 ) => {
   const { userEmail } = user;
+  const isUSer = await User.findOne({ email: userEmail });
+  const userID = isUSer?._id;
   const myOrderQuery = new QueryBuilder(
-    Order.find({ userEmail, isDeleted: false }),
+    Order.find({ userID, isDeleted: false }),
     query,
   )
     .search(['userEmail'])
@@ -223,13 +256,52 @@ const getMyOwnOrders = async (
   return { result, meta };
 };
 
+// const mySingleOrder = async (id: string, user: JwtPayload) => {
+//   const { userEmail } = user;
+//   const isUSer = await User.findOne({ email: userEmail });
+//   const useriD = isUSer?._id;
+//   const myOrder = await Order.findById(id);
+//   if (myOrder?.isDeleted) {
+//     throw new AppError(
+//       StatusCodes.FORBIDDEN,
+//       'this order information is not available',
+//     );
+//   }
+//   if (myOrder?.userID !== useriD) {
+//     throw new AppError(
+//       StatusCodes.FORBIDDEN,
+//       'you have no permission to view this order',
+//     );
+//   }
+// };
+
 const getASingleOrder = async (id: string, user: JwtPayload) => {
-  const { userRole, userEmail } = user;
-  let result;
-  if (userRole === USER_ROLE.user) {
-    result = await Order.findOne({ _id: id, userEmail, isDeleted: false });
+  const { userEmail, userRole } = user;
+  const isUSer = await User.findOne({ email: userEmail });
+  const useriD = isUSer?._id;
+  const result = await Order.findById(id);
+  if (!result) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'this order information is not available',
+    );
   }
-  result = await Order.findById(id);
+
+  if (
+    userRole === USER_ROLE.user &&
+    useriD?.toString() !== result?.userID.toString()
+  ) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'you have no permission to view this order',
+    );
+  }
+  if (userRole === USER_ROLE.user && result?.isDeleted) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'this order information is not available',
+    );
+  }
   return result;
 };
 
@@ -270,4 +342,5 @@ export const orderService = {
   deleteMyOwnOrder,
   deleteAllOrders,
   verifyPayment,
+  // mySingleOrder,
 };
