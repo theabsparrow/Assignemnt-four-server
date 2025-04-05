@@ -18,10 +18,10 @@ export const deliveryMethod: string[] = [
 ];
 export const trackingStatus: string[] = [
   'Processing',
-  'Pending',
   'Shipped',
   'Out for Delivery',
   'Delivered',
+  'Order Placed',
 ];
 
 export const paymentMethod: string[] = ['Cash on Delivery', 'Online Payment'];

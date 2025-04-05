@@ -12,6 +12,13 @@ const orderValidationSchema = z.object({
   paymentOption: z.enum([...paymentOption] as [string, ...string[]]),
 });
 
+const orderTrackingValidationSchema = z.object({
+  isTracking: z.boolean({
+    required_error: 'tracking info must be boolean',
+  }),
+});
+
 export const orderValidation = {
   orderValidationSchema,
+  orderTrackingValidationSchema,
 };

@@ -4,13 +4,14 @@ type TOrderStatus = 'Pending' | 'Paid' | 'Completed' | 'Cancelled';
 export type TDeliveryMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
 export type TTrackingStatus =
   | 'Processing'
-  | 'Pending'
   | 'Shipped'
   | 'Out for Delivery'
-  | 'Delivered';
+  | 'Delivered'
+  | 'Order Placed';
 export type TTrackingInfo = {
-  trackingID: string;
+  trackingID?: string;
   trackingStatus?: TTrackingStatus;
+  isTracking?: boolean;
 };
 export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
 export type TPaymentOption = 'SSLCommerz' | 'Stripe' | 'SurjoPay';
@@ -35,6 +36,6 @@ export type Torder = {
   phoneNumber: string;
   deliveryCost: number;
   paymentMethod: TPaymentMethod;
-  paymentOption: TPaymentOption;
+  paymentOption?: TPaymentOption;
   isDeleted: boolean;
 };

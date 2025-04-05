@@ -49,12 +49,6 @@ const createOrder = async (
     orderData.userID = userID;
     orderData.quantity = 1;
     orderData.car = carData._id;
-    const trackingID = await createTrackingID();
-
-    const tracking: TTrackingInfo = {
-      trackingID: trackingID,
-    };
-    orderData.tracking = tracking;
     const order = await Order.create([orderData], { session });
     if (!order.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
@@ -118,14 +112,14 @@ const verifyPayment = async (order_id: string) => {
         ? 'Pending'
         : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
 
-  const trackingStatus =
-    status === 'Paid'
-      ? 'Processing'
-      : status === 'Pending'
-        ? 'Pending'
-        : status === 'Cancelled'
-          ? 'Cancelled'
-          : undefined;
+  const tracking: TTrackingInfo = {};
+
+  if (status === 'Paid') {
+    const trackingID = await createTrackingID();
+    tracking.trackingID = trackingID;
+    tracking.isTracking = false;
+    tracking.trackingStatus = 'Order Placed';
+  }
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -135,6 +129,7 @@ const verifyPayment = async (order_id: string) => {
         $set: {
           ...paymentInfo,
           status,
+          tracking,
         },
       },
       { new: true, session, runValidators: true },
@@ -152,6 +147,24 @@ const verifyPayment = async (order_id: string) => {
     const carInfo = await Car.findById(carID);
     if (!carInfo) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'no car data found found');
+    }
+
+    if (
+      verifiedPayment[0].bank_status === paymentStatus.success &&
+      carInfo?.inStock
+    ) {
+      const updatecarData = await Car.findByIdAndUpdate(
+        carID,
+        { inStock: false },
+        {
+          new: true,
+          session,
+          runValidators: true,
+        },
+      );
+      if (!updatecarData) {
+        throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
+      }
     }
 
     let pdfPath;
@@ -180,36 +193,6 @@ const verifyPayment = async (order_id: string) => {
       if (info.accepted.length > 0) {
         await fs.unlink(pdfPath);
         console.log('file deleted successfully');
-      }
-    }
-    if (updatedData?.tracking?.trackingStatus === 'Pending') {
-      const updateTracking = await Order.findOneAndUpdate(
-        { orderID: order_id },
-        {
-          'tracking.trackingStatus': trackingStatus,
-        },
-        { new: true, session, runValidators: true },
-      );
-      if (!updateTracking) {
-        throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
-      }
-    }
-
-    if (
-      verifiedPayment[0].bank_status === paymentStatus.success &&
-      carInfo?.inStock
-    ) {
-      const updatecarData = await Car.findByIdAndUpdate(
-        carID,
-        { inStock: false },
-        {
-          new: true,
-          session,
-          runValidators: true,
-        },
-      );
-      if (!updatecarData) {
-        throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
       }
     }
     await session.commitTransaction();
@@ -256,25 +239,6 @@ const getMyOwnOrders = async (
   return { result, meta };
 };
 
-// const mySingleOrder = async (id: string, user: JwtPayload) => {
-//   const { userEmail } = user;
-//   const isUSer = await User.findOne({ email: userEmail });
-//   const useriD = isUSer?._id;
-//   const myOrder = await Order.findById(id);
-//   if (myOrder?.isDeleted) {
-//     throw new AppError(
-//       StatusCodes.FORBIDDEN,
-//       'this order information is not available',
-//     );
-//   }
-//   if (myOrder?.userID !== useriD) {
-//     throw new AppError(
-//       StatusCodes.FORBIDDEN,
-//       'you have no permission to view this order',
-//     );
-//   }
-// };
-
 const getASingleOrder = async (id: string, user: JwtPayload) => {
   const { userEmail, userRole } = user;
   const isUSer = await User.findOne({ email: userEmail });
@@ -301,6 +265,18 @@ const getASingleOrder = async (id: string, user: JwtPayload) => {
       StatusCodes.FORBIDDEN,
       'this order information is not available',
     );
+  }
+  return result;
+};
+
+const switchTracking = async (id: string, payload: boolean) => {
+  const result = await Order.findByIdAndUpdate(
+    id,
+    { 'tracking.isTracking': payload },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to track order info');
   }
   return result;
 };
@@ -342,5 +318,5 @@ export const orderService = {
   deleteMyOwnOrder,
   deleteAllOrders,
   verifyPayment,
-  // mySingleOrder,
+  switchTracking,
 };

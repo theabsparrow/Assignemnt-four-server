@@ -82,6 +82,24 @@ const getASingleOrder = catchAsync(
   },
 );
 
+const switchTracking = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const payload = req.body.isTracking;
+    const result = await orderService.switchTracking(id, payload);
+    const message =
+      payload === true
+        ? 'tracking on successfully'
+        : 'tracking of successfully';
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: message,
+      data: result,
+    });
+  },
+);
+
 const deleteOrder = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -132,4 +150,5 @@ export const orderController = {
   deleteMyOwnOrder,
   deleteAllOrders,
   verifyPayment,
+  switchTracking,
 };

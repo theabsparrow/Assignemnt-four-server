@@ -17,7 +17,10 @@ const trackingSchema = new Schema<TTrackingInfo>({
   trackingStatus: {
     type: String,
     enum: trackingStatus,
-    default: 'Pending',
+  },
+  isTracking: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -60,7 +63,9 @@ const orderSchema = new Schema<Torder>(
       enum: deliveryMethod,
       required: [true, 'delivery method is required'],
     },
-    tracking: trackingSchema,
+    tracking: {
+      type: trackingSchema,
+    },
     location: String,
     nearestDealer: String,
     phoneNumber: {
@@ -83,7 +88,6 @@ const orderSchema = new Schema<Torder>(
     paymentOption: {
       type: String,
       enum: paymentOption,
-      required: [true, 'payment option is required'],
     },
     isDeleted: {
       type: Boolean,

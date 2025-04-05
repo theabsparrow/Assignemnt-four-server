@@ -31,6 +31,12 @@ router.get(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   orderController.getASingleOrder,
 );
+router.patch(
+  '/tracking/:id',
+  validateRequest(orderValidation.orderTrackingValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  orderController.switchTracking,
+);
 router.delete(
   '/delete-order/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
