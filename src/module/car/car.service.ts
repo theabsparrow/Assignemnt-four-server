@@ -111,6 +111,16 @@ const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
 
 // delete a car
 const deleteCar = async (id: string) => {
+  const isCarExist = await Car.findById(id);
+  if (!isCarExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'this car is not available');
+  }
+  if (!isCarExist?.inStock) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this car is already out of stock',
+    );
+  }
   const result = await Car.findByIdAndDelete(id);
   return result;
 };

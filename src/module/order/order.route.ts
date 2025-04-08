@@ -13,13 +13,11 @@ router.post(
   auth(USER_ROLE.user),
   orderController.createOrder,
 );
-
 router.get(
   '/verify-order',
   auth(USER_ROLE.user),
   orderController.verifyPayment,
 );
-
 router.get(
   '/all-orders',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
@@ -37,6 +35,18 @@ router.patch(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   orderController.switchTracking,
 );
+router.patch(
+  '/changeStatus/:id',
+  validateRequest(orderValidation.orderStatusChangeValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  orderController.changeOrderStatus,
+);
+router.patch(
+  '/change-trackingStatus/:id',
+  validateRequest(orderValidation.trackingStatusChangeValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  orderController.changeTrackingStatus,
+);
 router.delete(
   '/delete-order/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
@@ -46,10 +56,5 @@ router.patch(
   '/delete-myOrder/:id',
   auth(USER_ROLE.user),
   orderController.deleteMyOwnOrder,
-);
-router.delete(
-  '/delete-myOrders',
-  auth(USER_ROLE.user),
-  orderController.deleteAllOrders,
 );
 export const orderRoute = router;

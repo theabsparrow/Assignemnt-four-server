@@ -107,4 +107,4 @@ userSchema.post('save', function (data, next) {
   data.password = '';
   next();
 });
-export const User = model<TUser>('USer', userSchema);
+export const User = model<TUser>('User', userSchema);

@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { deliveryMethod, paymentMethod, paymentOption } from './order.const';
+import {
+  deliveryMethod,
+  orderStatus,
+  paymentMethod,
+  paymentOption,
+  trackingStatus,
+} from './order.const';
 
 const orderValidationSchema = z.object({
   deliveryMethod: z.enum([...deliveryMethod] as [string, ...string[]]),
@@ -17,8 +23,15 @@ const orderTrackingValidationSchema = z.object({
     required_error: 'tracking info must be boolean',
   }),
 });
-
+const orderStatusChangeValidationSchema = z.object({
+  status: z.enum([...orderStatus] as [string, ...string[]]),
+});
+const trackingStatusChangeValidationSchema = z.object({
+  trackingStatus: z.enum([...trackingStatus] as [string, ...string[]]),
+});
 export const orderValidation = {
   orderValidationSchema,
   orderTrackingValidationSchema,
+  orderStatusChangeValidationSchema,
+  trackingStatusChangeValidationSchema,
 };

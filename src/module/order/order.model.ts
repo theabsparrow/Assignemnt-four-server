@@ -29,10 +29,16 @@ const orderSchema = new Schema<Torder>(
     userID: {
       type: Schema.Types.ObjectId,
       required: [true, 'userID is required'],
+      ref: 'User',
+    },
+    userEmail: {
+      type: String,
+      required: [true, 'user email is required'],
     },
     car: {
       type: Schema.Types.ObjectId,
       required: [true, 'Car Id is required'],
+      ref: 'Car',
     },
     quantity: {
       type: Number,

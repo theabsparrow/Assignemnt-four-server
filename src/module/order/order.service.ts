@@ -8,7 +8,11 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import Order from './order.model';
 import { User } from '../users/user.model';
 import { createTrackingID, dateFormat, orderUtills } from './order.utills';
-import { paymentStatus } from './order.const';
+import {
+  orderStatusInfo,
+  paymentStatus,
+  trackingStatusinfo,
+} from './order.const';
 import mongoose from 'mongoose';
 import { generateOrderHTML } from '../../utills/orderPdfTemplate';
 import { generateOrderPdf } from '../../utills/generateOrderPdf';
@@ -47,6 +51,7 @@ const createOrder = async (
     const totalPrice = carData?.price + orderData.deliveryCost!;
     orderData.totalPrice = totalPrice;
     orderData.userID = userID;
+    orderData.userEmail = userEmail;
     orderData.quantity = 1;
     orderData.car = carData._id;
     const order = await Order.create([orderData], { session });
@@ -208,7 +213,7 @@ const verifyPayment = async (order_id: string) => {
 // get all orders by admin superadmin
 const getAllOrder = async (query: Record<string, unknown>) => {
   const orderQuery = new QueryBuilder(Order.find(), query)
-    .search(['userEmail'])
+    .search(['userEmail', 'orderID'])
     .filter()
     .sort()
     .paginateQuery()
@@ -229,7 +234,7 @@ const getMyOwnOrders = async (
     Order.find({ userID, isDeleted: false }),
     query,
   )
-    .search(['userEmail'])
+    .search(['orderID'])
     .filter()
     .sort()
     .paginateQuery()
@@ -243,21 +248,11 @@ const getASingleOrder = async (id: string, user: JwtPayload) => {
   const { userEmail, userRole } = user;
   const isUSer = await User.findOne({ email: userEmail });
   const useriD = isUSer?._id;
-  const result = await Order.findById(id);
+  const result = await Order.findById(id).populate('userID').populate('car');
   if (!result) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
       'this order information is not available',
-    );
-  }
-
-  if (
-    userRole === USER_ROLE.user &&
-    useriD?.toString() !== result?.userID.toString()
-  ) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      'you have no permission to view this order',
     );
   }
   if (userRole === USER_ROLE.user && result?.isDeleted) {
@@ -266,10 +261,167 @@ const getASingleOrder = async (id: string, user: JwtPayload) => {
       'this order information is not available',
     );
   }
+  if (
+    userRole === USER_ROLE.user &&
+    useriD?.toString() !== result?.userID?._id.toString()
+  ) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'this order information is not available',
+    );
+  }
+  return result;
+};
+
+const changeOrderStatus = async (id: string, payload: string) => {
+  if (payload === orderStatusInfo?.completed) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `order status can't be completed manually`,
+    );
+  }
+  const isOrderExists = await Order.findById(id);
+  if (!isOrderExists) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this order info is not available',
+    );
+  }
+  if (isOrderExists?.isDeleted) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this order info is not available',
+    );
+  }
+  if (isOrderExists?.status === payload) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `the order status is already ${isOrderExists?.status}`,
+    );
+  }
+  if (
+    isOrderExists?.status === orderStatusInfo?.completed ||
+    isOrderExists?.status === orderStatusInfo?.cancelled
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `the order status is already ${isOrderExists?.status}. you can't change it`,
+    );
+  }
+  if (
+    isOrderExists?.tracking?.trackingStatus === trackingStatusinfo?.delivered
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `faild to change the order status`,
+    );
+  }
+  let result;
+  if (payload === orderStatusInfo?.cancelled) {
+    result = await Order.findByIdAndUpdate(
+      id,
+      {
+        status: payload,
+        'tracking.trackingStatus': orderStatusInfo.cancelled,
+      },
+      { new: true },
+    );
+  }
+  result = await Order.findByIdAndUpdate(
+    id,
+    { status: payload },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `faild to change the order status`,
+    );
+  }
+  return result;
+};
+
+const changeTrackingStatus = async (id: string, payload: string) => {
+  if (payload === trackingStatusinfo?.cancelled) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `tracking can't be cancelled manually`,
+    );
+  }
+  const isOrderExists = await Order.findById(id);
+  if (!isOrderExists) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this order info is not available',
+    );
+  }
+  if (isOrderExists?.isDeleted) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this order info is not available',
+    );
+  }
+  if (isOrderExists?.tracking?.trackingStatus === payload) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `the order status is already ${isOrderExists?.status}`,
+    );
+  }
+  if (
+    isOrderExists?.status === orderStatusInfo?.completed ||
+    isOrderExists?.status === orderStatusInfo?.cancelled
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `the order status is already ${isOrderExists?.status}. you can't track it`,
+    );
+  }
+  let result;
+  if (payload === trackingStatusinfo?.delivered) {
+    result = await Order.findByIdAndUpdate(
+      id,
+      { 'tracking.trackingStatus': payload, status: 'Completed' },
+      { new: true },
+    );
+  }
+  result = await Order.findByIdAndUpdate(
+    id,
+    { 'tracking.trackingStatus': payload },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `faild to update tracking status`,
+    );
+  }
   return result;
 };
 
 const switchTracking = async (id: string, payload: boolean) => {
+  const isOrderInfo = await Order.findById(id);
+  if (!isOrderInfo) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'the order info you are trying to track is not available',
+    );
+  }
+  if (isOrderInfo?.isDeleted) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'the order info you are trying to track is not available',
+    );
+  }
+  if (
+    !['Paid', 'Cash on Delivery', 'Completed'].includes(isOrderInfo?.status)
+  ) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'This order can`t be tracked');
+  }
+
+  if (isOrderInfo?.tracking?.trackingStatus === 'Cancelled') {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Faild to track this order');
+  }
+
   const result = await Order.findByIdAndUpdate(
     id,
     { 'tracking.isTracking': payload },
@@ -288,21 +440,15 @@ const deleteOrder = async (id: string) => {
 
 const deleteMyOwnOrder = async (id: string, user: JwtPayload) => {
   const { userEmail } = user;
+  const isOrderExist = await Order.findById(id);
+  if (!isOrderExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'the order does not found');
+  }
+  if (isOrderExist?.userEmail !== userEmail) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'the order does not found');
+  }
   const result = await Order.findOneAndUpdate(
     { _id: id, userEmail },
-    { isDeleted: false },
-    { new: true },
-  );
-  return result;
-};
-
-const deleteAllOrders = async (ids: string[], user: JwtPayload) => {
-  const { userEmail } = user;
-  if (!ids.length) {
-    throw new Error('No order IDs provided.');
-  }
-  const result = await Order.updateMany(
-    { _id: { $in: ids }, userEmail },
     { isDeleted: true },
     { new: true },
   );
@@ -316,7 +462,8 @@ export const orderService = {
   getASingleOrder,
   deleteOrder,
   deleteMyOwnOrder,
-  deleteAllOrders,
   verifyPayment,
   switchTracking,
+  changeOrderStatus,
+  changeTrackingStatus,
 };
