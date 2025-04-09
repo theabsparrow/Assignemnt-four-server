@@ -96,6 +96,19 @@ const changeOrderStatus = catchAsync(
   },
 );
 
+const cancellMyOrder = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await orderService.cancellMyOrder(id);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Order cancelled successfully',
+      data: result,
+    });
+  },
+);
+
 const changeTrackingStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -166,4 +179,5 @@ export const orderController = {
   switchTracking,
   changeOrderStatus,
   changeTrackingStatus,
+  cancellMyOrder,
 };

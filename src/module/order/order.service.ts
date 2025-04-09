@@ -45,15 +45,17 @@ const createOrder = async (
   orderData.estimatedDeliveryTime = dateFormat(
     orderData?.estimatedDeliveryTime as string,
   );
+
+  const totalPrice = carData?.price + orderData.deliveryCost!;
+  orderData.totalPrice = totalPrice;
+  orderData.userID = userID;
+  orderData.userEmail = userEmail;
+  orderData.quantity = 1;
+  orderData.car = carData._id;
+
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    const totalPrice = carData?.price + orderData.deliveryCost!;
-    orderData.totalPrice = totalPrice;
-    orderData.userID = userID;
-    orderData.userEmail = userEmail;
-    orderData.quantity = 1;
-    orderData.car = carData._id;
     const order = await Order.create([orderData], { session });
     if (!order.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
@@ -116,14 +118,17 @@ const verifyPayment = async (order_id: string) => {
       : verifiedPayment[0].bank_status == paymentStatus.failed
         ? 'Pending'
         : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
-
   const tracking: TTrackingInfo = {};
-
+  const updatePayload: any = {
+    ...paymentInfo,
+    status,
+  };
   if (status === 'Paid') {
     const trackingID = await createTrackingID();
     tracking.trackingID = trackingID;
     tracking.isTracking = false;
-    tracking.trackingStatus = 'Order Placed';
+    tracking.trackingStatus = trackingStatusinfo['Order Placed'];
+    updatePayload.tracking = tracking;
   }
   const session = await mongoose.startSession();
   try {
@@ -132,14 +137,11 @@ const verifyPayment = async (order_id: string) => {
       { orderID: order_id },
       {
         $set: {
-          ...paymentInfo,
-          status,
-          tracking,
+          ...updatePayload,
         },
       },
       { new: true, session, runValidators: true },
     );
-
     if (!updatedData) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'faild to verify order');
     }
@@ -147,13 +149,11 @@ const verifyPayment = async (order_id: string) => {
     if (!isUser) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'no user found');
     }
-
     const carID = updatedData?.car;
     const carInfo = await Car.findById(carID);
     if (!carInfo) {
       throw new AppError(StatusCodes.BAD_GATEWAY, 'no car data found found');
     }
-
     if (
       verifiedPayment[0].bank_status === paymentStatus.success &&
       carInfo?.inStock
@@ -316,29 +316,107 @@ const changeOrderStatus = async (id: string, payload: string) => {
       `faild to change the order status`,
     );
   }
-  let result;
-  if (payload === orderStatusInfo?.cancelled) {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    let result;
+    if (payload === orderStatusInfo?.cancelled) {
+      result = await Order.findByIdAndUpdate(
+        id,
+        {
+          status: payload,
+          'tracking.trackingStatus': orderStatusInfo.cancelled,
+        },
+        { new: true, session, runValidators: true },
+      );
+      const carID = result?.car;
+      const carData = await Car.findByIdAndUpdate(
+        carID,
+        { inStock: true },
+        { new: true, session, runValidators: true },
+      );
+      if (!carData) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          `faild to change the order status`,
+        );
+      }
+    }
     result = await Order.findByIdAndUpdate(
       id,
-      {
-        status: payload,
-        'tracking.trackingStatus': orderStatusInfo.cancelled,
-      },
+      { status: payload },
       { new: true },
     );
+    if (!result) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        `faild to change the order status`,
+      );
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-  result = await Order.findByIdAndUpdate(
-    id,
-    { status: payload },
-    { new: true },
-  );
-  if (!result) {
+};
+
+const cancellMyOrder = async (id: string) => {
+  const isOrderExists = await Order.findById(id);
+  if (!isOrderExists) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
-      `faild to change the order status`,
+      'this order info is not available',
     );
   }
-  return result;
+  if (isOrderExists?.isDeleted) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      'this order info is not available',
+    );
+  }
+  if (
+    isOrderExists?.status === orderStatusInfo?.completed ||
+    isOrderExists?.status === orderStatusInfo?.cancelled
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `the order status is already ${isOrderExists?.status}. you can't change it`,
+    );
+  }
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const result = await Order.findByIdAndUpdate(
+      id,
+      {
+        status: orderStatusInfo?.cancelled,
+        'tracking.trackingStatus': orderStatusInfo.cancelled,
+      },
+      { new: true, session, runValidators: true },
+    );
+    if (!result) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to cancell the order');
+    }
+    const carId = result?.car;
+    const carData = await Car.findByIdAndUpdate(
+      carId,
+      { inStock: true },
+      { new: true, session, runValidators: true },
+    );
+    if (!carData) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to cancell the order');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
+  }
 };
 
 const changeTrackingStatus = async (id: string, payload: string) => {
@@ -466,4 +544,5 @@ export const orderService = {
   switchTracking,
   changeOrderStatus,
   changeTrackingStatus,
+  cancellMyOrder,
 };

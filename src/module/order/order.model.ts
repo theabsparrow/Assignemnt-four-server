@@ -69,9 +69,7 @@ const orderSchema = new Schema<Torder>(
       enum: deliveryMethod,
       required: [true, 'delivery method is required'],
     },
-    tracking: {
-      type: trackingSchema,
-    },
+    tracking: trackingSchema,
     location: String,
     nearestDealer: String,
     phoneNumber: {

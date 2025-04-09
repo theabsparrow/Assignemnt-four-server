@@ -47,6 +47,7 @@ export const trackingStatus: string[] = [
   'Delivered',
   'Order Placed',
   'Cancelled',
+  'Pending',
 ];
 
 export const paymentMethod: string[] = ['Cash on Delivery', 'Online Payment'];

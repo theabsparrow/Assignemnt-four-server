@@ -64,11 +64,13 @@ export const orderUtills = {
 //   }
 // };
 
-const findLastTrackingID = async () => {
-  const lastTracking = await Order.find({})
+export const findLastTrackingID = async () => {
+  const lastTracking = await Order.find({
+    'tracking.trackingID': { $exists: true, $ne: null },
+  })
+    .select('tracking.trackingID')
     .sort({ createdAt: -1 })
-    .limit(1)
-    .select('tracking.trackingID');
+    .limit(1);
   const lastTrackingID = lastTracking[0];
   return lastTrackingID?.tracking?.trackingID
     ? lastTrackingID?.tracking?.trackingID
@@ -78,6 +80,7 @@ const findLastTrackingID = async () => {
 export const createTrackingID = async () => {
   let currentID = (0).toString();
   const lastTrackingID = await findLastTrackingID();
+
   if (lastTrackingID) {
     currentID = lastTrackingID;
   }

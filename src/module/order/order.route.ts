@@ -42,6 +42,11 @@ router.patch(
   orderController.changeOrderStatus,
 );
 router.patch(
+  '/cancell-order/:id',
+  auth(USER_ROLE.user),
+  orderController.cancellMyOrder,
+);
+router.patch(
   '/change-trackingStatus/:id',
   validateRequest(orderValidation.trackingStatusChangeValidationSchema),
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
