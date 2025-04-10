@@ -53,6 +53,10 @@ const createOrder = async (
   orderData.quantity = 1;
   orderData.car = carData._id;
 
+  const tracking: TTrackingInfo = {};
+  const trackingID = await createTrackingID();
+  tracking.trackingID = trackingID;
+  orderData.tracking = tracking;
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -118,17 +122,13 @@ const verifyPayment = async (order_id: string) => {
       : verifiedPayment[0].bank_status == paymentStatus.failed
         ? 'Pending'
         : verifiedPayment[0].bank_status == paymentStatus.cancel && 'Cancelled';
-  const tracking: TTrackingInfo = {};
   const updatePayload: any = {
     ...paymentInfo,
     status,
   };
   if (status === 'Paid') {
-    const trackingID = await createTrackingID();
-    tracking.trackingID = trackingID;
-    tracking.isTracking = false;
-    tracking.trackingStatus = trackingStatusinfo['Order Placed'];
-    updatePayload.tracking = tracking;
+    updatePayload['tracking.trackingStatus'] =
+      trackingStatusinfo['Order Placed'];
   }
   const session = await mongoose.startSession();
   try {
@@ -195,7 +195,7 @@ const verifyPayment = async (order_id: string) => {
           },
         ],
       });
-      if (info.accepted.length > 0) {
+      if (info?.accepted?.length > 0) {
         await fs.unlink(pdfPath);
         console.log('file deleted successfully');
       }

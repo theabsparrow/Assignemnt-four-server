@@ -95,6 +95,7 @@ const accountDelationValidationSchema = z.object({
     .min(6, { message: 'password can`t be less than 6 character' })
     .max(20, { message: 'password can`t be more than 20 character' }),
 });
+
 export const userValidation = {
   userValidationSchema,
   userStatusValidationSchema,

@@ -1,0 +1,639 @@
+{
+	"info": {
+		"_postman_id": "467eda9d-351f-46be-b41b-e660b19fdc1f",
+		"name": "assignemnt four",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40778936"
+	},
+	"item": [
+		{
+			"name": "cars collection",
+			"item": [
+				{
+					"name": "create car",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"basicInfo\": {\r\n        \"brand\": \"Toyota\",\r\n        \"model\": \"Corrola\",\r\n        \"year\": 2023,\r\n        \"price\": \"30000\",\r\n        \"category\": \"SUV\",\r\n        \"color\": [\"Silver\"],\r\n        \"description\": \"A reliable and fuel-efficient midsize sedan with advanced safety features and a comfortable interior.\",\r\n        \r\n        \"inStock\": true,\r\n        \"condition\": \"New\",\r\n        \"madeIn\": \"Japan\",\r\n        \"country\": \"USA\",\r\n        \"image\": \"https://i.ibb.co.com/bj2Wqsyf/toyota-camery.png\",\r\n        \"seatingCapacity\": \"5\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/cars/create-car",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"cars",
+								"create-car"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all cars",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{localURL}}/cars/get-allCars?minPrice=1&maxPrice=82500001",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"cars",
+								"get-allCars"
+							],
+							"query": [
+								{
+									"key": "minPrice",
+									"value": "1"
+								},
+								{
+									"key": "maxPrice",
+									"value": "82500001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get a single car",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localURL}}/cars/67aae81606f74cce09412dbe",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"cars",
+								"67aae81606f74cce09412dbe"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "useres collection",
+			"item": []
+		},
+		{
+			"name": "user collection",
+			"item": [
+				{
+					"name": "create user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": {\r\n    \"firstName\": \"liver\",\r\n    \"middleName\": \"pestana\",\r\n    \"lastName\": \"koibob\"\r\n  },\r\n  \"email\": \"liverpestana@gmail.com\",\r\n  \"password\": \"Bashar15@\",\r\n  \"phoneNumber\": \"+8801852230095\",\r\n  \"gender\": \"female\",\r\n  \"dateOfBirth\": \"1998-05-21\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/register",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhYnNiYXNoYXJAZ21haWwuY29tIiwidXNlclJvbGUiOiJzdXBlckFkbWluIiwiaWF0IjoxNzQwOTkwOTE4LCJleHAiOjE3NDEwNzczMTh9.VbokBk_TioEahilvi6K7RXh8OB2Y11jMh6HfYgy7hf0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localURL}}/user/?fields=name,email,phoneNumber,role,status&sort=-firstName",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								""
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "name,email,phoneNumber,role,status"
+								},
+								{
+									"key": "sort",
+									"value": "-firstName"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get a single user",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/67a4e555823ba3f99e9b92aa",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"67a4e555823ba3f99e9b92aa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create admin",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/update-role/67a73b28971ee6abe572cc8c",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"update-role",
+								"67a73b28971ee6abe572cc8c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change user status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/change-status/67a49e6f4767161d24051e31",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"change-status",
+								"67a49e6f4767161d24051e31"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get me route",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localURL}}/user/my-profile",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"my-profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update user info",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{superAdminToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": {\r\n    \"firstName\": \"abul\",\r\n    \"middleName\": \"bashar\",\r\n    \"lastName\": \"babu\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/update-info",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"update-info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{adminToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localURL}}/user/:id",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"Bashar15@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/user/delete-account",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"user",
+								"delete-account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "authentication",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"jamessecurea@gmail.com\",\r\n    \"password\": \"Bashar15@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/auth/login",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "generate accesstoken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{localURL}}/auth/access-token",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"access-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJiYXNoYXIwNEBleGFtcGxlLmNvbSIsInVzZXJSb2xlIjoidXNlciIsImlhdCI6MTczODkyNjMyMSwiZXhwIjoxNzM5NzkwMzIxfQ.AQPabtVD3XzoRbx7RKelzjhPkdsWMsfATRVI7pwHqK8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"Abul@1234\",\r\n    \"newPassword\": \"Bashar1905@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/auth/change-password",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forget password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"absbashar04@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/auth/forget-password",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"forget-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reset password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhYnNiYXNoYXIwNEBnbWFpbC5jb20iLCJ1c2VyUm9sZSI6ImFkbWluIiwib3RwIjoiNzkxMzc4IiwiaWF0IjoxNzM5MDc4NzcyLCJleHAiOjE3MzkwNzkwNzJ9.EQVU2_YYGpww7GQlb5cJZbr69ehS-TrHeUITdWrtrFg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\": \"791378\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/auth/reset-password",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "set new pasword",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyRW1haWwiOiJhYnNiYXNoYXIwNEBnbWFpbC5jb20iLCJ1c2VyUm9sZSI6ImFkbWluIiwiaWF0IjoxNzM5MDc4Nzk5LCJleHAiOjE3MzkwODA1OTl9.n3HZmABPEnImU0COYc5YKshvACkVhVd6Yu4T9ST1ouc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newPassword\": \"Bashar15@\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/auth/set-newPassword",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"auth",
+								"set-newPassword"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order car",
+			"item": [
+				{
+					"name": "create an order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"deliveryMethod\": \"Home Delivery\",\r\n  \"estimatedDeliveryTime\": \"7 days\",\r\n  \"location\": \"Dhaka, Bangladesh\",\r\n  \"nearestDealer\": \"Dealer A\",\r\n  \"phoneNumber\": \"+880123456789\",\r\n  \"deliveryCost\": 50,\r\n  \"paymentMethod\": \"Online Payment\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{localURL}}/order/create-order/67bd7546fdcd08f5a354dd86",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"order",
+								"create-order",
+								"67bd7546fdcd08f5a354dd86"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify payment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{localURL}}/order/verify-order?order_id=SP67cab3657850c",
+							"host": [
+								"{{localURL}}"
+							],
+							"path": [
+								"order",
+								"verify-order"
+							],
+							"query": [
+								{
+									"key": "order_id",
+									"value": "SP67cab3657850c"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

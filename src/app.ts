@@ -13,7 +13,9 @@ app.use(cookieParser());
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://kxc6ddnh-3000.asse.devtunnels.ms/',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://lambo-car-frontend.vercel.app',
   ],
   credentials: true,
 };

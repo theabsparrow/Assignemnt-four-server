@@ -277,6 +277,7 @@ const deleteAccount = async (password: string, user: JwtPayload) => {
   }
   return null;
 };
+
 export const userSrevice = {
   createUser,
   getAllUser,

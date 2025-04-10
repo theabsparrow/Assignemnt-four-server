@@ -4,9 +4,13 @@ This is an advance backend application with rest apis built with the powerfull t
 
 ---
 
-## **Live Demo** : https://car-store-psi-wheat.vercel.app
+## **Live Demo server site** : https://lambo-car.vercel.app/
 
-- **API Base URL:** : /api/cars
+## **api common inception** : https://lambo-car.vercel.app/api
+
+## **client site live link** : https://lambo-car-frontend.vercel.app/
+
+## **client site github repo** : https://github.com/theabsparrow/Assignment-four-client.git
 
 ---
 
@@ -42,63 +46,19 @@ This is an advance backend application with rest apis built with the powerfull t
 - **Backend technology:** Node.js,
 - **Framework:** Express.js
 - **Database:** MongoDB with the library Mongoose
-- **Validation:** Mongoose Schema Validation
+- **Validation:** Zod Validation
 - **API Testing:** Postman
 - **Deployment:** vercel
-
-## **Project Structure**
-
-```
-📦 Car-store
-├── 📂 src
-│   ├── 📂 config                 # Configuration files
-│   │   ├── index.ts                # env file connection setup
-│   │
-│   │
-│   ├── 📂 module                # All modules
-│   │   ├── 📂 car               # cars-related functionalities
-│   │   │   ├── car.controller.ts
-│   │   │   ├── car.interface.ts
-│   │   │   ├── car.route.ts
-│   │   │   ├── car.service.ts
-│   │   │   ├── car.model.ts
-│   │   │
-│   │   ├── 📂 order          # Order-related functionalities
-│   │       ├── order.controller.ts
-│   │       ├── order.interface.ts
-│   │       ├── order.route.ts
-│   │       ├── order.service.ts
-│   │       ├── order.model.ts
-│   │
-│   ├── app.ts     # Application setup (middleware, routes, etc.)
-│   ├── server.ts    # Server startup file
-│
-├── 📂 dist                       # Compiled output (TypeScript -> JavaScript)
-│
-├── 📂 node_modules               # Installed dependencies
-│
-├── .env                          # Environment variables file
-├── .gitignore                    # Ignored files for Git
-├── .prettierignore                    # Ignored files for Git
-├── .prettierrc.json                  # Ignored files for Git
-├── eslint.config.mjs                 # Ignored files for Git
-├── package-lock.json                # Ignored files for Git
-├── package.json                  # Project dependencies and scripts
-├── README.md                      # Locked dependency versions
-├── tsconfig.json                 # TypeScript configuration
-
-```
-
----
 
 ### **Installation**
 
 1. **Clone the Repository:**
 
-   ```bash
-   git clone https://github.com/theabsparrow/Assignment-two
-   cd Assignment-two
-   ```
+**go to your terminal , access your demanded directory and command**
+
+```bash
+git clone https://github.com/theabsparrow/Assignemnt-four-server.git
+```
 
 2. **Install Dependencies:**
 
@@ -107,118 +67,48 @@ This is an advance backend application with rest apis built with the powerfull t
    ```
 
 3. **Set Up Environment Variables:**  
-   Create a `.env` file in the root directory and add the following:
+    Create a `.env` file in the root directory and add the following:
 
    ```env
-   NODE_ENV=development
-   PORT=5000
-   DATABASE_URL=your_mongodb_connection_string
+   PORT
+   DATABASE_URL
+   NODE_ENV
+   BCRYPT_SALT_ROUND
+   <!-- jwt token -->
+   JWT_ACCESS_SECRET
+   JWT_REFRESH_SECRET
+   JWT_ACCESS_EXPIRES_IN
+   JWT_REFRESH_EXPIRES_IN
+   <!-- super admin -->
+   SUPER_ADMIN_EMAIL
+   SUPER_ADMIN_PASS
+   SUPER_ADMIN_PHONE
+   SUPER_ADMIN_BIRTH(it will be year/month/date formated)
+   SUPER_ADMIN_FIRST_NAME
+   SUPER_ADMIN_MIDDLE_NAME
+   SUPER_ADMIN_LAST_NAME
+   <!-- # nodemailer -->
+   EMAIL_APP_PASSWORD
+   EMAIL_SENT_FROM
+   SMTP_HOST
+   SMTP_PORT
+   <!-- # surjopay -->
+   SP_ENDPOINT
+   SP_USERNAME
+   SP_PASSWORD
+   SP_PREFIX
+   SP_RETURN_URL=http://localhost:3000/order/verify (this is custom component)
+   <!-- # SP_RETURN_URL=https://sandbox.shurjopayment.com/response -->
+   DB_FILE
    ```
 
 4. **Run the Server:**
+
    ```bash
    npm run dev
    ```
-   The server will start at `http://localhost:5000`.
 
-to compile the files in java script in dist folder
-
-```bash
-npm run build
-```
-
-### got to package.json file to know more command located in the script object
-
----
-
-### **Product Endpoints**
-
-1. **Create a Car document:**
-
-   - **POST** `/api/Cars`
-   - **Request Body:**
-     ```json
-     {
-       "brand": "Toyota",
-       "model": "Camry",
-       "year": 2024,
-       "price": 25000,
-       "category": "Sedan",
-       "description": "A reliable family sedan with modern features.",
-       "quantity": 50,
-       "inStock": true
-     }
-     ```
-   - **Response:** Details of the car post operation.
-
-2. **Get All Cars:**
-
-   - **GET** `/api/cars`
-   - **Query Parameters:**
-     - `searchTerm` (optional): Search by `brand`, `model`, or `category`.
-   - **Response:** List of cars.
-
-3. **Get a Specific Car:**
-
-   - **GET** `/api/cars/:carId`
-   - **Response:** Details of a specific car.
-
-4. **Update a Car Data:**
-
-   - **PUT** `/api/cars/:carId`
-   - **Request Body:** Partial updates (e.g., `price`, `quantity`, `description`).
-   - **Response:** Updated a car`s details.
-
-5. **Delete a Car data:**
-
-   - **DELETE** `/api/cars/:carId`
-   - **Response:** Confirmation message for a deletion.
-
-   ### **Order Endpoints**
-
-6. **create an Order:**
-
-   - **POST** `/api/orders`
-   - **Request Body:**
-     ```json
-     {
-       "email": "customer@example.com",
-       "car": "648a45e5f0123c45678d9012",
-       "quantity": 1,
-       "totalPrice": 27000
-     }
-     ```
-   - **Response:** Details of the created order.
-
-7. **Calculate the Revenue:**
-   - **GET** `/api/orders/revenue`
-   - **Response:**
-     ```json
-     {
-       "totalRevenue": 600
-     }
-     ```
-
----
-
-## **Error Handling**
-
-- **Validation Errors:**  
-  Returns a clear and meaningfull error message when input validation fails.  
-  Example:
-
-  ```json
-  {
-    "message": "Validation failed",
-    "success": false,
-    "error": "Price must be a positive number"
-  }
-  ```
-
-- **Not Found:**  
-  Returns `404` if a product or order is not found.
-
-- **Insufficient Stock:**  
-  Returns an error if the requested quantity exceeds available stock.
-
----
+5. **build the Server after completing:**
+   ```bash
+   npm run build
+   ```
