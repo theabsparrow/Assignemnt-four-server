@@ -3,6 +3,7 @@ import { orderRoute } from '../module/order/order.route';
 import { carRoute } from '../module/car/car.router';
 import { userRoute } from '../module/users/user.route';
 import { authRoute } from '../module/auth/auth.route';
+import { blogRoute } from '../module/blog/blog.router';
 
 const router = Router();
 const moduleRoutes = [
@@ -21,6 +22,10 @@ const moduleRoutes = [
   {
     path: '/auth',
     route: authRoute,
+  },
+  {
+    path: '/blog',
+    route: blogRoute,
   },
 ];
 

@@ -94,6 +94,7 @@ const carSchema = new Schema<TCar>(
       type: String,
       required: [true, 'Car model name is required'],
       trim: true,
+      max: [25, 'model can`t be more than 25 character'],
     },
     year: {
       type: String,

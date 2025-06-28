@@ -47,7 +47,7 @@ export type TCarBrand =
   | 'Tata'
   | 'Opel';
 
-type TCategory =
+export type TCategory =
   | 'Sedan'
   | 'SUV'
   | 'Coupe'

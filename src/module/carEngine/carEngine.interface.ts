@@ -5,6 +5,7 @@ export type TFuelType =
   | 'Hybrid'
   | 'CNG'
   | 'LPG'
+  | 'Petrol+CNG'
   | 'Hydrogen';
 
 export type TEngine =
