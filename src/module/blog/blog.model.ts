@@ -39,7 +39,6 @@ const blogSchema = new Schema<TBlog>(
       required: [true, 'content is required'],
       trim: true,
       min: [1, ' content can`t be blank'],
-      max: [5000, 'content can`t be more that 5000 character'],
     },
     image: {
       type: String,
@@ -73,7 +72,14 @@ const blogSchema = new Schema<TBlog>(
       required: [true, 'status is required'],
       enum: ['draft', 'published'],
     },
-    reaction: blogReactionSchema,
+    view: {
+      type: Number,
+      default: 0,
+    },
+    reaction: {
+      type: blogReactionSchema,
+      default: () => ({}),
+    },
     isDeleted: {
       type: Boolean,
       default: false,

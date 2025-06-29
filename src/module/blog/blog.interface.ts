@@ -18,6 +18,7 @@ export type TBlog = {
   model?: string;
   category: TCategory;
   status: TBlogStatus;
+  view: number;
   reaction: TBlogReaction;
   isDeleted: boolean;
 };

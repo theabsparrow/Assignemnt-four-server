@@ -118,6 +118,25 @@ const deleteBlog = catchAsync(
   },
 );
 
+const countReaction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const blogId = req.params.id;
+    const { userEmail } = req.user as JwtPayload;
+    const payload = req.body;
+    const result = await blogService.countReaction({
+      userEmail,
+      blogId,
+      payload,
+    });
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'you have reacted successfully',
+      data: result,
+    });
+  },
+);
+
 export const blogController = {
   createBlog,
   getAllBlogs,
@@ -127,4 +146,5 @@ export const blogController = {
   updateMyBlog,
   deleteMyBlog,
   deleteBlog,
+  countReaction,
 };

@@ -6,6 +6,10 @@ import AppError from '../../error/AppError';
 import { StatusCodes } from 'http-status-codes';
 import { Blog } from './blog.model';
 import mongoose from 'mongoose';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { blogSearchAbleFields } from './blog.const';
+import { TReaction } from '../reaction/reaction.interface';
+import { Reaction } from '../reaction/reaction.model';
 
 const createBlog = async (user: JwtPayload, payload: TBlog) => {
   const { userEmail } = user;
@@ -23,11 +27,22 @@ const createBlog = async (user: JwtPayload, payload: TBlog) => {
 };
 
 const getallBlogs = async (query: Record<string, unknown>) => {
-  const result = await Blog.find({ status: 'published' });
+  const filter: Record<string, unknown> = {};
+  filter.isDeleted = false;
+  filter.status = 'published';
+  query = { ...query, ...filter };
+  const blogQuery = new QueryBuilder(Blog.find(), query)
+    .search(blogSearchAbleFields)
+    .sort()
+    .filter()
+    .paginateQuery()
+    .fields();
+  const result = await blogQuery.modelQuery;
+  const meta = await blogQuery.countTotal();
   if (result.length < 1) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blogs found');
   }
-  return result;
+  return { meta, result };
 };
 
 const getASingleBlog = async (id: string) => {
@@ -50,7 +65,18 @@ const getMyBlogs = async (
     throw new AppError(StatusCodes.NOT_FOUND, 'no user found to create a blog');
   }
   const userId = userInfo?._id;
-  const result = await Blog.find({ authorId: userId });
+  const filter: Record<string, unknown> = {};
+  filter.isDeleted = false;
+  filter.authorId = userId;
+  query = { ...query, ...filter };
+  const blogQuery = new QueryBuilder(Blog.find(), query)
+    .search(blogSearchAbleFields)
+    .sort()
+    .filter();
+  const result = await blogQuery.modelQuery;
+  if (result.length < 1) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no blogs found');
+  }
   if (result.length < 1) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blogs found');
   }
@@ -188,6 +214,101 @@ const deleteBlog = async (id: string) => {
   return result;
 };
 
+const countReaction = async ({
+  userEmail,
+  blogId,
+  payload,
+}: {
+  userEmail: string;
+  blogId: string;
+  payload: TReaction;
+}) => {
+  const userInfo = await User.findOne({ email: userEmail }).select('name');
+  if (!userInfo) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no user found to create a blog');
+  }
+  payload.userId = userInfo?._id;
+  const isBlogExists = await Blog.findById(blogId).select('title');
+  if (!isBlogExists) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'data not found');
+  }
+  const blog_id = isBlogExists?._id;
+  payload.blogId = blog_id;
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const reactionForThisUserOfThisBlogExists = await Reaction.findOne({
+      blogId: isBlogExists?._id,
+      userId: userInfo?._id,
+    });
+    const updateField = `reaction.${payload.reaction}`;
+    if (!reactionForThisUserOfThisBlogExists) {
+      const reactResult = await Blog.findByIdAndUpdate(
+        blog_id,
+        { $inc: { [updateField]: 1 } },
+        { session, new: true, runValidators: true },
+      );
+      if (!reactResult) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+      const reactionInfo = await Reaction.create([payload], { session });
+      if (!reactionInfo.length) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+    }
+    if (
+      reactionForThisUserOfThisBlogExists &&
+      reactionForThisUserOfThisBlogExists?.reaction === payload.reaction
+    ) {
+      const reactResult = await Blog.findByIdAndUpdate(
+        blog_id,
+        { $inc: { [updateField]: -1 } },
+        { session, new: true, runValidators: true },
+      );
+      if (!reactResult) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+      const reactionInfo = await Reaction.deleteOne(
+        { blogId: isBlogExists?._id, userId: userInfo?._id },
+        { session },
+      );
+      if (reactionInfo.deletedCount === 0) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+    }
+    if (
+      reactionForThisUserOfThisBlogExists &&
+      reactionForThisUserOfThisBlogExists?.reaction !== payload.reaction
+    ) {
+      const decreaseReaction = `reaction.${reactionForThisUserOfThisBlogExists?.reaction}`;
+      const reactResult = await Blog.findByIdAndUpdate(
+        blog_id,
+        { $inc: { [updateField]: 1, [decreaseReaction]: -1 } },
+        { session, new: true, runValidators: true },
+      );
+      if (!reactResult) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+      const updateFromReaction = await Reaction.findOneAndUpdate(
+        { blogId: isBlogExists?._id, userId: userInfo?._id },
+        { reaction: payload.reaction },
+        { session, new: true, runValidators: true },
+      );
+      if (!updateFromReaction) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      }
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    const result = await Blog.findById(blog_id);
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
+  }
+};
+
 export const blogService = {
   createBlog,
   getallBlogs,
@@ -197,4 +318,5 @@ export const blogService = {
   deleteMyBlog,
   updateMyBlog,
   deleteBlog,
+  countReaction,
 };

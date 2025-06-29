@@ -13,8 +13,7 @@ const blogValidationSchema = z.object({
     .string({
       required_error: 'content is required',
     })
-    .min(1, { message: 'content can`t be blank' })
-    .max(5000, { message: 'content can`t be more than 5000 character' }),
+    .min(1, { message: 'content can`t be blank' }),
   image: z.string().url({ message: 'Invalid image URL' }).optional(),
   tags: z
     .array(z.string())
@@ -48,7 +47,6 @@ const updateBlogValidationSchema = z.object({
       required_error: 'content is required',
     })
     .min(1, { message: 'content can`t be blank' })
-    .max(5000, { message: 'content can`t be more than 5000 character' })
     .optional(),
   image: z.string().url({ message: 'Invalid image URL' }).optional(),
   addTags: z.array(z.string()).optional(),

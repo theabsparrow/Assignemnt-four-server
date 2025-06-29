@@ -4,6 +4,7 @@ import { blogValidation } from './blog.validation';
 import { auth } from '../../middlewire/auth';
 import { USER_ROLE } from '../users/user.constant';
 import { blogController } from './blog.controller';
+import { reactionValidation } from '../reaction/reaction.validation';
 
 const router = Router();
 
@@ -37,8 +38,14 @@ router.delete(
   blogController.deleteMyBlog,
 );
 router.delete(
-  'delete-blog/:id',
+  '/delete-blog/:id',
   auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   blogController.deleteBlog,
+);
+router.patch(
+  '/count-reaction/:id',
+  validateRequest(reactionValidation.reactionValidationSchema),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  blogController.countReaction,
 );
 export const blogRoute = router;
