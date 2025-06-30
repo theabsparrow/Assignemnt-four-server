@@ -46,13 +46,15 @@ const getallBlogs = async (query: Record<string, unknown>) => {
 };
 
 const getASingleBlog = async (id: string) => {
+  const isBlogExists = await Blog.findById(id);
+  if (!isBlogExists) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
+  }
+  if (isBlogExists?.status === 'draft') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
+  }
+  await Blog.findByIdAndUpdate(id, { $inc: { view: 1 } }, { new: true });
   const result = await Blog.findById(id);
-  if (!result) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
-  }
-  if (result?.status === 'draft') {
-    throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
-  }
   return result;
 };
 
