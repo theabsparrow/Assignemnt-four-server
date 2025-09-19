@@ -5,18 +5,21 @@ export type TUSerName = {
   middleName?: string;
   lastName: string;
 };
+export type TGender = 'male' | 'female' | 'others';
+export type TStatus = 'active' | 'deactive';
+export type TUSerRole = keyof typeof USER_ROLE;
 
 export type TUser = {
   name: TUSerName;
   email: string;
   password: string;
   phoneNumber: string;
-  gender: 'male' | 'female' | 'others';
+  gender: TGender;
   dateOfBirth: string;
   profileImage?: string;
   coverImage?: string;
-  status: 'active' | 'deactive';
-  role: 'user' | 'admin' | 'superAdmin';
+  status: TStatus;
+  role: TUSerRole;
   homeTown?: string;
   currentAddress?: string;
   verifyWithEmail: boolean;
@@ -24,10 +27,6 @@ export type TUser = {
   passwordChangedAt?: Date;
 };
 
-export type TUserStatus = {
-  status: string;
-  userRole: string;
-};
 type TUpdatedResult = {
   updateResult: TUser;
 };
@@ -38,4 +37,3 @@ type TUpdateResult2 = {
 };
 
 export type TUpdatedResultInterface = TUpdatedResult | TUpdateResult2;
-export type TUSerRole = keyof typeof USER_ROLE;

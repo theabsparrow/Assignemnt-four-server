@@ -73,14 +73,14 @@ const getASingleUSer = catchAsync(
 const updateUserStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const { status } = req.body;
-    const user = req.user;
+    const payload = req.body;
+    const user = req.user as JwtPayload;
     const { userRole } = user;
-    const payload = {
-      status,
-      userRole,
-    };
-    const result = await userSrevice.updateUSerStatus(id, payload);
+    const result = await userSrevice.updateUSerStatus({
+      id,
+      role: userRole,
+      payload,
+    });
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -109,25 +109,12 @@ const updateUserInfo = catchAsync(
     const payload = req.body;
     const user = req.user;
     const result = await userSrevice.updateUserInfo(user, payload);
-    if ('access' in result && 'refresh' in result) {
-      const access = result?.access;
-      const refresh = result?.refresh;
-      const data = result?.updateResult;
-      res.cookie('refreshToken', refresh, cookieOptions);
-      sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: 'User info updated successfully',
-        data: { data, access },
-      });
-    } else {
-      sendResponse(res, {
-        success: true,
-        statusCode: StatusCodes.OK,
-        message: 'User info updated successfully',
-        data: { result },
-      });
-    }
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'User info updated successfully',
+      data: result,
+    });
   },
 );
 

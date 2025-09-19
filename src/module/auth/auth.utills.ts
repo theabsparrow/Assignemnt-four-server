@@ -1,9 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-type TJwtPayload = {
-  userEmail: string;
-  userRole: string;
-};
+import { TJwtPayload } from './auth.interface';
 
 export const createToken = (
   jwtPayload: TJwtPayload,

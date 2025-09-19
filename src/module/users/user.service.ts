@@ -1,8 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../error/AppError';
-import { TUser, TUserStatus } from './user.interface';
+import { TUser, TUSerRole } from './user.interface';
 import { User } from './user.model';
-import { calculateAge, isUserExistByEmail, isUserExists } from './user.utills';
+import { calculateAge, capitalizeFirst, isUserExists } from './user.utills';
 import { JwtPayload } from 'jsonwebtoken';
 import { searchableFields, USER_ROLE } from './user.constant';
 import { createToken, passwordMatching } from '../auth/auth.utills';
@@ -10,36 +10,24 @@ import config from '../../config';
 import QueryBuilder from '../../builder/QueryBuilder';
 
 const createUser = async (payload: TUser) => {
-  payload.name.firstName =
-    payload.name.firstName.charAt(0).toUpperCase() +
-    payload.name.firstName.slice(1);
-  if (payload.name.middleName) {
-    payload.name.middleName =
-      payload.name.middleName.charAt(0).toUpperCase() +
-      payload.name.middleName.slice(1);
-  }
-  payload.name.lastName =
-    payload.name.lastName.charAt(0).toUpperCase() +
-    payload.name.lastName.slice(1);
-
-  const isEmailExists = await User.findOne({
-    email: payload.email,
+  // check existing user
+  const existingUser = await User.findOne({
     isDeleted: false,
-  });
-  if (isEmailExists) {
-    throw new AppError(StatusCodes.CONFLICT, 'this email is already in used');
-  }
+    $or: [{ email: payload.email }, { phoneNumber: payload.phoneNumber }],
+  }).select('email phoneNumber');
 
-  const isPhoneExists = await User.findOne({
-    phoneNumber: payload.phoneNumber,
-    isDeleted: false,
-  });
-  if (isPhoneExists) {
-    throw new AppError(
-      StatusCodes.CONFLICT,
-      'this phone number is already in used',
-    );
+  if (existingUser) {
+    if (existingUser.email === payload.email) {
+      throw new AppError(StatusCodes.CONFLICT, 'this email is already in use');
+    }
+    if (existingUser.phoneNumber === payload.phoneNumber) {
+      throw new AppError(
+        StatusCodes.CONFLICT,
+        'this phone number is already in use',
+      );
+    }
   }
+  // check if age is less than 18 years
   const age = calculateAge(payload.dateOfBirth);
   if (age < 18) {
     throw new AppError(
@@ -47,10 +35,20 @@ const createUser = async (payload: TUser) => {
       'You must be at least 18 years old.',
     );
   }
+
+  // capitalize name
+  payload.name.firstName = capitalizeFirst(payload?.name?.firstName);
+  if (payload?.name?.middleName) {
+    payload.name.middleName = capitalizeFirst(payload.name.middleName);
+  }
+  payload.name.lastName = capitalizeFirst(payload?.name?.lastName);
+
+  // create user
   const result = await User.create(payload);
 
+  // jwt section
   const jwtPayload = {
-    userEmail: result?.email,
+    userId: result?._id.toString(),
     userRole: result?.role,
   };
   const accessToken = createToken(
@@ -104,16 +102,29 @@ const getASingleUSer = async (id: string, user: JwtPayload) => {
   return result;
 };
 
-const updateUSerStatus = async (id: string, payload: TUserStatus) => {
-  const { status, userRole } = payload;
-  const userExistence = await isUserExists(id);
-  if (userExistence?.status === status) {
-    throw new AppError(StatusCodes.CONFLICT, `this user is already ${status}`);
+const updateUSerStatus = async ({
+  id,
+  role,
+  payload,
+}: {
+  id: string;
+  role: TUSerRole;
+  payload: TUser;
+}) => {
+  const { status } = payload;
+  //  check if the user is exists
+  const isUserExists = await User.findById(id).select('status role isDeleted');
+  if (!isUserExists || isUserExists?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
   }
-  const role = userExistence?.role;
+  if (isUserExists?.status === status) {
+    throw new AppError(StatusCodes.CONFLICT, `this user is already ${payload}`);
+  }
+  // check if the user role didn`t conflict
+  const userRole = isUserExists?.role;
   if (
-    userRole === USER_ROLE.admin &&
-    (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
+    role === USER_ROLE.admin &&
+    (userRole === USER_ROLE.admin || userRole === USER_ROLE.superAdmin)
   ) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
@@ -130,13 +141,21 @@ const updateUSerStatus = async (id: string, payload: TUserStatus) => {
 
 const deleteUser = async (id: string, user: JwtPayload) => {
   const { userRole } = user;
-  const userInfo = await isUserExists(id);
-  const role = userInfo?.role;
-  if (role === USER_ROLE.superAdmin) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'Super Admin can`t be delete');
+  // check if the user is exists
+  const isUserExists = await User.findById(id).select(' role isDeleted');
+  if (!isUserExists || isUserExists?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
   }
-  if (userRole === USER_ROLE.admin && role === USER_ROLE.admin) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'you can`t delete an admin ');
+  // check if the user role didn`t conflict
+  const role = isUserExists?.role;
+  if (
+    userRole === USER_ROLE.admin &&
+    (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
+  ) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'you can`t change the status of an admin as well as super admin',
+    );
   }
   const result = await User.findByIdAndUpdate(
     id,
@@ -146,15 +165,20 @@ const deleteUser = async (id: string, user: JwtPayload) => {
   return result;
 };
 
-const makeAdmin = async (id: string, payload: string) => {
-  const userExistence = await isUserExists(id);
-  if (userExistence?.role === USER_ROLE.superAdmin) {
+const makeAdmin = async (id: string, payload: TUser) => {
+  const isUserExists = await User.findById(id).select('role isDeleted');
+  if (!isUserExists || isUserExists?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
+  }
+  // check if the user role didn`t conflict
+  const role = isUserExists?.role;
+  if (role === USER_ROLE.superAdmin) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       'role super admin can`t be change ',
     );
   }
-  if (userExistence?.role === payload) {
+  if (role === payload?.role) {
     throw new AppError(
       StatusCodes.CONFLICT,
       `this user is already an ${payload}`,
@@ -162,36 +186,42 @@ const makeAdmin = async (id: string, payload: string) => {
   }
   const result = await User.findByIdAndUpdate(
     id,
-    { role: payload },
+    { role: payload?.role },
     { new: true },
   );
   return result;
 };
 
 const getMe = async (user: JwtPayload) => {
-  const { userEmail } = user;
-  const result = await isUserExistByEmail(userEmail);
+  const { userId } = user;
+  const result = await User.findById(userId);
   return result;
 };
 
 const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
+  const { userId } = user;
+
   const { name, email, phoneNumber, dateOfBirth, ...remainingInfo } = payload;
-  const { userEmail, userRole } = user;
   const modifiedData: Record<string, unknown> = { ...remainingInfo };
-  const isEmailExists = await User.findOne({ email: email, isDeleted: false });
-  if (isEmailExists) {
-    throw new AppError(StatusCodes.CONFLICT, 'this email is already exists');
-  }
-  const isPhoneNumberExists = await User.findOne({
-    phoneNumber: phoneNumber,
+
+  // check existing user
+  const existingUser = await User.findOne({
     isDeleted: false,
-  });
-  if (isPhoneNumberExists) {
-    throw new AppError(
-      StatusCodes.CONFLICT,
-      'this phone number is already exists',
-    );
+    $or: [{ email: email }, { phoneNumber: phoneNumber }],
+  }).select('email phoneNumber');
+
+  if (existingUser) {
+    if (existingUser.email === email) {
+      throw new AppError(StatusCodes.CONFLICT, 'this email is already in use');
+    }
+    if (existingUser.phoneNumber === phoneNumber) {
+      throw new AppError(
+        StatusCodes.CONFLICT,
+        'this phone number is already in use',
+      );
+    }
   }
+  // check if the user age is under 18
   if (dateOfBirth) {
     const age = calculateAge(dateOfBirth);
     if (age < 18) {
@@ -203,19 +233,19 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       modifiedData.dateOfBirth = dateOfBirth;
     }
   }
+
+  // capitalize name
   if (name && name?.firstName) {
-    name.firstName =
-      name.firstName.charAt(0).toUpperCase() + name.firstName.slice(1);
+    name.firstName = capitalizeFirst(name.firstName);
   }
   if (name && name?.middleName) {
-    name.middleName =
-      name.middleName.charAt(0).toUpperCase() + name.middleName.slice(1);
+    name.middleName = capitalizeFirst(name.middleName);
   }
   if (name && name?.lastName) {
-    name.lastName =
-      name.lastName.charAt(0).toUpperCase() + name.lastName.slice(1);
+    name.lastName = capitalizeFirst(name.lastName);
   }
 
+  // update operation
   if (name && Object.keys(name).length) {
     for (const [key, value] of Object.entries(name)) {
       modifiedData[`name.${key}`] = value;
@@ -223,42 +253,20 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
   }
   if (email) modifiedData.email = email;
   if (phoneNumber) modifiedData.phoneNumber = phoneNumber;
-  const updateResult = await User.findOneAndUpdate(
-    { email: userEmail, isDeleted: false },
-    modifiedData,
-    { new: true, runValidators: true },
-  );
+  const result = await User.findByIdAndUpdate(userId, modifiedData, {
+    new: true,
+  });
 
-  if (!updateResult) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'User not found.');
+  if (!result) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update.');
   }
 
-  if (email && email !== userEmail) {
-    const jwtPayload = {
-      userEmail: email,
-      userRole,
-    };
-    const accessToken = createToken(
-      jwtPayload,
-      config.jwt_access_secret as string,
-      config.jwt_access_expires_in as string,
-    );
-    const refreshToken = createToken(
-      jwtPayload,
-      config.jwt_refresh_secret as string,
-      config.jwt_refresh_expires_in as string,
-    );
-    const access = `Bearer ${accessToken}`;
-    const refresh = `Bearer ${refreshToken}`;
-    return { updateResult, access, refresh };
-  } else {
-    return updateResult;
-  }
+  return result;
 };
 
 const deleteAccount = async (password: string, user: JwtPayload) => {
-  const { userEmail } = user;
-  const userInfo = await User.findOne({ email: userEmail }).select('password');
+  const { userId } = user;
+  const userInfo = await User.findById(userId).select('password');
   const userPass = userInfo?.password as string;
   const isPasswordMatched = await passwordMatching(password, userPass);
   if (!isPasswordMatched) {
@@ -267,8 +275,8 @@ const deleteAccount = async (password: string, user: JwtPayload) => {
       'the password you have provided is wrong',
     );
   }
-  const result = await User.findOneAndUpdate(
-    { email: userEmail },
+  const result = await User.findByIdAndUpdate(
+    userId,
     { isDeleted: true },
     { new: true },
   );

@@ -7,6 +7,7 @@ import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import config from '../../config';
 import { cookieOptions } from './auth.const';
+import { JwtPayload } from 'jsonwebtoken';
 
 const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -35,8 +36,9 @@ const logout = catchAsync(
 const changePassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const user = req.user;
-    const result = await authService.changePassword(payload, user);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await authService.changePassword(payload, userId);
     const { access, refresh } = result;
     res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {
@@ -77,8 +79,9 @@ const forgetPassword = catchAsync(
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { otp } = req.body;
-    const user = req.user;
-    const result = await authService.resetPassword(user, otp);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await authService.resetPassword(userId, otp);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -91,8 +94,9 @@ const resetPassword = catchAsync(
 const setNewPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { newPassword } = req.body;
-    const user = req.user;
-    const result = await authService.setNewPassword(user, newPassword);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await authService.setNewPassword(userId, newPassword);
     const { access, refresh } = result;
     res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { gender } from './user.constant';
 
 const userNameValidationSchema = z.object({
   firstName: z
@@ -49,7 +50,7 @@ const userValidationSchema = z.object({
     .refine((value) => /^\d{10,14}$/.test(value), {
       message: 'Phone number must contain only digits (10-14 characters)',
     }),
-  gender: z.enum(['male', 'female', 'others'] as [string, ...string[]]),
+  gender: z.enum(gender as [string, ...string[]]),
   dateOfBirth: z.string({
     invalid_type_error: 'date must be string',
   }),
@@ -72,9 +73,7 @@ const updateUserInfoValidationSchema = z.object({
       invalid_type_error: 'date must be string',
     })
     .optional(),
-  gender: z
-    .enum(['male', 'female', 'others'] as [string, ...string[]])
-    .optional(),
+  gender: z.enum(gender as [string, ...string[]]).optional(),
   profileImage: z.string().optional(),
   coverImage: z.string().optional(),
   homeTown: z.string().optional(),

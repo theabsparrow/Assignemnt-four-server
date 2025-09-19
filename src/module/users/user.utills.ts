@@ -40,3 +40,8 @@ export const calculateAge = (dob: string) => {
   }
   return age;
 };
+
+export const capitalizeFirst = (name: string) => {
+  if (!name) return name;
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};

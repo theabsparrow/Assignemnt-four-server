@@ -3,6 +3,7 @@ import { model, Schema } from 'mongoose';
 import { TUser, TUSerName } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
+import { gender } from './user.constant';
 
 const userNameSchema = new Schema<TUSerName>({
   firstName: {
@@ -31,7 +32,6 @@ const userSchema = new Schema<TUser>(
       type: String,
       required: [true, 'email is required'],
       trim: true,
-      // unique: true,
     },
     password: {
       type: String,
@@ -40,13 +40,12 @@ const userSchema = new Schema<TUser>(
     },
     phoneNumber: {
       type: String,
-      // unique: true,
       required: [true, 'phone number is required'],
       trim: true,
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'others'],
+      enum: gender,
       required: [true, 'gender is required'],
     },
     dateOfBirth: {
