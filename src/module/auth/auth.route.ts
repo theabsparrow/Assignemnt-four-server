@@ -4,7 +4,7 @@ import { authValidation } from './auth.validation';
 import { authController } from './auth.controller';
 import { auth } from '../../middlewire/auth';
 import { USER_ROLE } from '../users/user.constant';
-import { authReset } from '../../middlewire/authreset';
+import { resetAuth } from '../../middlewire/resetAuth';
 
 const router = Router();
 router.post(
@@ -36,13 +36,13 @@ router.post(
 router.post(
   '/reset-password',
   validateRequest(authValidation.resetPasswordValidationSchema),
-  authReset(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  resetAuth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   authController.resetPassword,
 );
 router.post(
   '/set-newPassword',
   validateRequest(authValidation.setNewPasswordValidationSchema),
-  authReset(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  resetAuth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   authController.setNewPassword,
 );
 export const authRoute = router;

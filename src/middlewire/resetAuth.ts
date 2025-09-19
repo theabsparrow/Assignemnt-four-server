@@ -10,7 +10,7 @@ import { User } from '../module/users/user.model';
 import { TUSerRole } from '../module/users/user.interface';
 import { verifyToken } from '../module/auth/auth.utills';
 
-export const authReset = (...requiredRoles: TUSerRole[]) => {
+export const resetAuth = (...requiredRoles: TUSerRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const resetToken = req.headers.authorization;
 
