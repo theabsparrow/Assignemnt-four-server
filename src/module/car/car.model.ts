@@ -72,10 +72,12 @@ const carSchema = new Schema<TCar>(
     carEngine: {
       type: Schema.Types.ObjectId,
       ref: 'CarEngine',
+      required: [true, 'engine information is required'],
     },
     registrationData: {
       type: Schema.Types.ObjectId,
       ref: 'RegistrationData',
+      required: [true, 'registration information is required'],
     },
     serviceHistory: {
       type: Schema.Types.ObjectId,

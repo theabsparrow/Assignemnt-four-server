@@ -1,4 +1,8 @@
 import { Types } from 'mongoose';
+import { TEngine } from '../carEngine/carEngine.interface';
+import { TRegistrationdata } from '../registrationData/registrationData.interface';
+import { TSafetyFeature } from '../safetyFeatures/safetyFeature.interface';
+import { TserviceHistory } from '../serviceHistory/serviceHistory.interface';
 
 export type TCarBrand =
   | 'Toyota'
@@ -112,8 +116,8 @@ export type TDeliveryMethod = {
 
 export type TCar = {
   // basic car info
-  carEngine?: Types.ObjectId;
-  registrationData?: Types.ObjectId;
+  carEngine: Types.ObjectId;
+  registrationData: Types.ObjectId;
   serviceHistory?: Types.ObjectId;
   safetyFeature?: Types.ObjectId;
   brand: TCarBrand;
@@ -128,6 +132,7 @@ export type TCar = {
   seatingCapacity: TSeatingCapacity;
   madeIn: string;
   country: string;
+  negotiable: boolean;
   // car image
   image: string;
   galleryImage?: TGalleryImage[];
@@ -136,4 +141,12 @@ export type TCar = {
   paymentOption: TPaymentOptions[];
   deliveryMethod: TDeliveryMethod[];
   carBrandLogo: string;
+};
+
+export type TcarInfoPayload = {
+  basicInfo: TCar;
+  engineInfo: TEngine;
+  registrationData: TRegistrationdata;
+  safetyFeature?: TSafetyFeature;
+  serviceHistory?: TserviceHistory;
 };

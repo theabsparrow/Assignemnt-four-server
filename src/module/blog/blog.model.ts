@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { TBlog, TBlogReaction } from './blog.interface';
-import { carBrand, carCategory } from '../car/car.const';
+import { blogStatus } from './blog.const';
 
 const blogReactionSchema = new Schema<TBlogReaction>({
   like: {
@@ -32,13 +32,14 @@ const blogSchema = new Schema<TBlog>(
       type: String,
       required: [true, 'title is required'],
       min: [1, 'title can`t be blank'],
-      max: [50, 'title can`t be more that 50 character'],
+      max: [100, 'title can`t be more that 100 character'],
     },
     content: {
       type: String,
       required: [true, 'content is required'],
       trim: true,
       min: [1, ' content can`t be blank'],
+      max: [5000, 'content can`t be more than 5000 character'],
     },
     image: {
       type: String,
@@ -47,30 +48,15 @@ const blogSchema = new Schema<TBlog>(
       type: [String],
       validate: {
         validator: function (value: string[]) {
-          return value.length <= 5;
+          return value.length <= 10;
         },
-        message: 'you can store not more that 5 tags',
+        message: 'you can store not more that 10 tags',
       },
-    },
-    brand: {
-      type: String,
-      required: [true, 'Car Brand name is required'],
-      enum: carBrand,
-    },
-    model: {
-      type: String,
-      max: [25, 'model can`t be more than 25 character'],
-      trim: true,
-    },
-    category: {
-      type: String,
-      required: [true, 'Car category is required'],
-      enum: carCategory,
     },
     status: {
       type: String,
       required: [true, 'status is required'],
-      enum: ['draft', 'published'],
+      enum: blogStatus,
     },
     view: {
       type: Number,

@@ -1,28 +1,89 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCodes } from 'http-status-codes';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../error/AppError';
-import { TEngine } from '../carEngine/carEngine.interface';
-import { TRegistrationdata } from '../registrationData/registrationData.interface';
-import { TSafetyFeature } from '../safetyFeatures/safetyFeature.interface';
-import { TserviceHistory } from '../serviceHistory/serviceHistory.interface';
 import { carBrandLogo, carSearchAbleFields } from './car.const';
-import { TCar, TCarBrand } from './car.interface';
+import { TCar, TCarBrand, TcarInfoPayload } from './car.interface';
 import Car from './car.model';
+import mongoose from 'mongoose';
+import { CarEngine } from '../carEngine/carEngine.model';
+import { RegistrationData } from '../registrationData/registrationData.model';
+import { SafetyFeature } from '../safetyFeatures/safetyFeature.model';
+import { ServiceHistory } from '../serviceHistory/serviceHistory.moodel';
 
-type TcarInfoPayload = {
-  basicInfo: TCar;
-  engineInfo?: TEngine;
-  registrationData?: TRegistrationdata;
-  safetyFeature?: TSafetyFeature;
-  serviceHistory?: TserviceHistory;
-};
 // create a car service
 const createCar = async (payload: TcarInfoPayload) => {
-  const { basicInfo } = payload;
+  const {
+    basicInfo,
+    engineInfo,
+    registrationData,
+    safetyFeature,
+    serviceHistory,
+  } = payload;
   const logo = carBrandLogo[basicInfo.brand as TCarBrand];
   basicInfo.carBrandLogo = logo as string;
   basicInfo.model =
     basicInfo.model.charAt(0).toUpperCase() + basicInfo.model.slice(1);
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // save engine information
+    const engineResult = await CarEngine.create([engineInfo], { session });
+    if (!engineResult) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the car info');
+    }
+    basicInfo.carEngine = engineResult[0]?._id;
+    // registration  info
+    const registrationResult = await RegistrationData.create(
+      [registrationData],
+      { session },
+    );
+    if (!registrationResult) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the car info');
+    }
+    basicInfo.registrationData = registrationResult[0]?._id;
+    // safety feature info
+    if (safetyFeature) {
+      const safetyFeatureResult = await SafetyFeature.create([safetyFeature], {
+        session,
+      });
+      if (!safetyFeatureResult) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to post the car info',
+        );
+      }
+      basicInfo.safetyFeature = safetyFeatureResult[0]?._id;
+    }
+    // service history
+    if (serviceHistory) {
+      const serviceHistoryResult = await ServiceHistory.create(
+        [serviceHistory],
+        { session },
+      );
+      if (!serviceHistoryResult) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to post the car info',
+        );
+      }
+      basicInfo.serviceHistory = serviceHistoryResult[0]?._id;
+    }
+    // basic info
+    const result = await Car.create([basicInfo], { session });
+    if (!result) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the car info');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return result[0];
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
+  }
+
   const result = await Car.create(basicInfo);
   return result;
 };
@@ -42,7 +103,9 @@ const getAllCars = async (query: Record<string, unknown>) => {
 
 // get a single car service
 const getSingleCar = async (id: string) => {
-  const result = await Car.findById(id);
+  const result = await Car.findById(id).populate(
+    'carEngine registrationData serviceHistory safetyFeature',
+  );
   return result;
 };
 

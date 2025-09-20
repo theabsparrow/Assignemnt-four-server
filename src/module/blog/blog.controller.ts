@@ -11,8 +11,9 @@ import { JwtPayload } from 'jsonwebtoken';
 const createBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payloade = req.body;
-    const user = req.user;
-    const result = await blogService.createBlog(user, payloade);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await blogService.createBlog(userId, payloade);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
@@ -79,9 +80,9 @@ const getMySingleBlog = catchAsync(
 const updateMyBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const { userEmail } = req.user as JwtPayload;
+    const { userId } = req.user as JwtPayload;
     const payload = req.body;
-    const result = await blogService.updateMyBlog({ userEmail, id, payload });
+    const result = await blogService.updateMyBlog({ userId, id, payload });
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -94,8 +95,8 @@ const updateMyBlog = catchAsync(
 const deleteMyBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const { userEmail } = req.user as JwtPayload;
-    const result = await blogService.deleteMyBlog(id, userEmail);
+    const { userId } = req.user as JwtPayload;
+    const result = await blogService.deleteMyBlog(id, userId);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -121,10 +122,10 @@ const deleteBlog = catchAsync(
 const countReaction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const blogId = req.params.id;
-    const { userEmail } = req.user as JwtPayload;
+    const { userId } = req.user as JwtPayload;
     const payload = req.body;
     const result = await blogService.countReaction({
-      userEmail,
+      userId,
       blogId,
       payload,
     });

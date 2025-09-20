@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { TCarBrand, TCategory } from '../car/car.interface';
 
 export type TBlogReaction = {
   like: number;
@@ -14,9 +13,6 @@ export type TBlog = {
   content: string;
   image?: string;
   tags?: string[];
-  brand: TCarBrand;
-  model?: string;
-  category: TCategory;
   status: TBlogStatus;
   view: number;
   reaction: TBlogReaction;
