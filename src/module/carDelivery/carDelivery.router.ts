@@ -9,7 +9,7 @@ const router = Router();
 router.patch(
   '/updateDelivery/:id',
   validateRequest(
-    deliveryAndPaymentValidation.deliveryAndPaymentValidationSchema,
+    deliveryAndPaymentValidation.updateDeliveryAndPaymentValidatonSchema,
   ),
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   carDeliveryController.updateCarDeliveryInfo,
