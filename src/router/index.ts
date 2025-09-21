@@ -5,6 +5,7 @@ import { userRoute } from '../module/users/user.route';
 import { authRoute } from '../module/auth/auth.route';
 import { blogRoute } from '../module/blog/blog.router';
 import { reactionRoute } from '../module/reaction/reaction.route';
+import { carDeliveryRouter } from '../module/carDelivery/carDelivery.router';
 
 const router = Router();
 const moduleRoutes = [
@@ -31,6 +32,10 @@ const moduleRoutes = [
   {
     path: '/reaction',
     route: reactionRoute,
+  },
+  {
+    path: '/delivery',
+    route: carDeliveryRouter,
   },
 ];
 

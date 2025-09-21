@@ -26,7 +26,12 @@ const createCar = async (payload: TcarInfoPayload) => {
   basicInfo.carBrandLogo = logo as string;
   basicInfo.model =
     basicInfo.model.charAt(0).toUpperCase() + basicInfo.model.slice(1);
-
+  if (
+    payload?.basicInfo?.condition === 'Used' ||
+    payload?.basicInfo?.condition === 'Certified Pre-Owned'
+  ) {
+    payload.basicInfo.negotiable = true;
+  }
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -102,13 +107,18 @@ const createCar = async (payload: TcarInfoPayload) => {
     await session.endSession();
     throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-
-  const result = await Car.create(basicInfo);
-  return result;
 };
 
 // get all cars service with query
 const getAllCars = async (query: Record<string, unknown>) => {
+  const filter: Record<string, unknown> = {};
+  filter.isDeleted = false;
+  if (query.inStock) {
+    query.inStock = query.inStock === 'yes' ? true : false;
+  } else {
+    filter.inStock = true;
+  }
+  query = { ...filter, ...query };
   const carQuery = new QueryBuilder(Car.find(), query)
     .search(carSearchAbleFields)
     .filter()
@@ -125,6 +135,9 @@ const getSingleCar = async (id: string) => {
   const result = await Car.findById(id).populate(
     'carEngine registrationData serviceHistory safetyFeature',
   );
+  if (!result || result?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
+  }
   return result;
 };
 
@@ -140,6 +153,7 @@ const updateCarInfo = async (id: string, payload: Partial<TCar>) => {
   return result;
 };
 
+// car image section
 const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   const isCarExists = await Car.findById(id);
   if (!isCarExists) {
@@ -169,7 +183,6 @@ const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   const updatedImage = await Car.findById(id).select('galleryImage');
   return updatedImage;
 };
-
 const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
   const isCarExists = await Car.findById(id);
   if (!isCarExists) {
@@ -193,18 +206,87 @@ const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
 
 // delete a car
 const deleteCar = async (id: string) => {
-  const isCarExist = await Car.findById(id);
-  if (!isCarExist) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'this car is not available');
+  const isCarExist = await Car.findById(id).select('isDeleted');
+  if (!isCarExist || isCarExist?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this car is not available');
   }
-  if (!isCarExist?.inStock) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'this car is already out of stock',
+  const carEngine = isCarExist?.carEngine;
+  const deliveryAndPayment = isCarExist?.deliveryAndPayment;
+  const registartionData = isCarExist?.registrationData;
+  const safetyFeature = isCarExist?.safetyFeature;
+  const serviceHistory = isCarExist?.serviceHistory;
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // basic info deletion
+    const deletebasicInfo = await Car.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { session, new: true, runValidators: true },
     );
+    if (!deletebasicInfo) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+    }
+    // engine info deletion
+    const deleteEngineInfo = await CarEngine.findByIdAndUpdate(
+      carEngine,
+      { isDeleted: true },
+      { session, new: true, runValidators: true },
+    );
+    if (!deleteEngineInfo) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+    }
+    // delivery and payment deletion
+    const deleteDeliveryAndPayment = await DeliveryAndPayment.findByIdAndUpdate(
+      deliveryAndPayment,
+      { isDeleted: true },
+      { session, new: true, runValidators: true },
+    );
+    if (!deleteDeliveryAndPayment) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+    }
+    // registration data Deletion
+    if (registartionData) {
+      const deleteRegistrationData = await RegistrationData.findByIdAndUpdate(
+        registartionData,
+        { isDeleted: true },
+        { session, new: true, runValidators: true },
+      );
+      if (!deleteRegistrationData) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+      }
+    }
+    // safety feature deletion
+    if (safetyFeature) {
+      const deleteSafetyFeature = await SafetyFeature.findByIdAndUpdate(
+        registartionData,
+        { isDeleted: true },
+        { session, new: true, runValidators: true },
+      );
+      if (!deleteSafetyFeature) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+      }
+    }
+    // service history deletion
+    if (serviceHistory) {
+      const deleteServiceHistory = await ServiceHistory.findByIdAndUpdate(
+        serviceHistory,
+        { isDeleted: true },
+        { session, new: true, runValidators: true },
+      );
+      if (!deleteServiceHistory) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete the car');
+      }
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return deletebasicInfo;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-  const result = await Car.findByIdAndDelete(id);
-  return result;
 };
 
 export const carService = {

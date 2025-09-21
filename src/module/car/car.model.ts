@@ -84,7 +84,6 @@ const carSchema = new Schema<TCar>(
       type: String,
       required: [true, 'country is required'],
     },
-    // car image schema
     image: {
       type: String,
       required: [true, 'car image is required'],
@@ -101,6 +100,10 @@ const carSchema = new Schema<TCar>(
     carBrandLogo: {
       type: String,
       required: [true, 'car brand logo is required'],
+    },
+    negotiable: {
+      type: Boolean,
+      default: false,
     },
     seatingCapacity: {
       type: String,
