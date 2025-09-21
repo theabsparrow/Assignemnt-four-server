@@ -8,6 +8,8 @@ import { reactionRoute } from '../module/reaction/reaction.route';
 import { carDeliveryRouter } from '../module/carDelivery/carDelivery.router';
 import { carEngineRouter } from '../module/carEngine/carEngine.router';
 import { registrationdataRouter } from '../module/registrationData/registrationdata.router';
+import { safetyFeatureRouter } from '../module/safetyFeatures/safetyfeature.router';
+import { serviceHistoryRouter } from '../module/serviceHistory/serviceHistory.router';
 
 const router = Router();
 const moduleRoutes = [
@@ -46,6 +48,14 @@ const moduleRoutes = [
   {
     path: '/registration',
     route: registrationdataRouter,
+  },
+  {
+    path: '/safety-feature',
+    route: safetyFeatureRouter,
+  },
+  {
+    path: '/service-history',
+    route: serviceHistoryRouter,
   },
 ];
 
