@@ -4,4 +4,5 @@ export type TserviceHistory = {
   serviceDetails: string;
   cost: number;
   mileageAtService: number;
+  isDeleted: boolean;
 };

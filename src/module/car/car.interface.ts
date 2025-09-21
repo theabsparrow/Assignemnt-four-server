@@ -3,6 +3,7 @@ import { TEngine } from '../carEngine/carEngine.interface';
 import { TRegistrationdata } from '../registrationData/registrationData.interface';
 import { TSafetyFeature } from '../safetyFeatures/safetyFeature.interface';
 import { TserviceHistory } from '../serviceHistory/serviceHistory.interface';
+import { TDeliveryAndPayment } from '../carDelivery/carDelivery.interface';
 
 export type TCarBrand =
   | 'Toyota'
@@ -87,37 +88,10 @@ export type TGalleryImage = {
 };
 export type TSeatingCapacity = '2' | '4' | '5' | '6' | '7' | '8' | '9' | '10+';
 export type TCondition = 'New' | 'Used' | 'Certified Pre-Owned';
-export type TPaymentMethod = {
-  method: 'Cash on Delivery' | 'Online Payment';
-  isDeleted: boolean;
-};
-export type TPaymentOptions = {
-  option: 'SSLCommerz' | 'Stripe' | 'SurjoPay';
-  isDeleted: boolean;
-};
-
-export type TMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
-
-export type TEstimatedTime =
-  | '24 hours'
-  | '2 days'
-  | '5 days'
-  | '6 days'
-  | '8 days'
-  | '9 days'
-  | '10 days';
-
-export type TDeliveryMethod = {
-  method: TMethod;
-  estimatedTime: TEstimatedTime;
-  deliveryCost: number;
-  isDeleted: boolean;
-};
-
 export type TCar = {
-  // basic car info
   carEngine: Types.ObjectId;
-  registrationData: Types.ObjectId;
+  deliveryAndPayment: Types.ObjectId;
+  registrationData?: Types.ObjectId;
   serviceHistory?: Types.ObjectId;
   safetyFeature?: Types.ObjectId;
   brand: TCarBrand;
@@ -133,19 +107,16 @@ export type TCar = {
   madeIn: string;
   country: string;
   negotiable: boolean;
-  // car image
   image: string;
   galleryImage?: TGalleryImage[];
-  // delivery and payment
-  paymentMethod: TPaymentMethod[];
-  paymentOption: TPaymentOptions[];
-  deliveryMethod: TDeliveryMethod[];
   carBrandLogo: string;
+  isDeleted: boolean;
 };
 
 export type TcarInfoPayload = {
   basicInfo: TCar;
   engineInfo: TEngine;
+  deliveryAndPayment: TDeliveryAndPayment;
   registrationData: TRegistrationdata;
   safetyFeature?: TSafetyFeature;
   serviceHistory?: TserviceHistory;

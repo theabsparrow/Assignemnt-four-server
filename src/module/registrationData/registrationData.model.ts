@@ -43,6 +43,10 @@ const registrationDataSchema = new Schema<TRegistrationdata>(
       type: Boolean,
       default: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

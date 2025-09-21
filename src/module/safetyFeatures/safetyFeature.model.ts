@@ -29,6 +29,10 @@ const safetyFeatureSchema = new Schema<TSafetyFeature>(
       enum: warranty,
       required: [true, 'warrenty is required'],
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

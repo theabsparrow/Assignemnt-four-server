@@ -33,4 +33,5 @@ export type TSafetyFeature = {
   airbags: TAirbags;
   features: TFeature[];
   warranty: TWarranty;
+  isDeleted: boolean;
 };

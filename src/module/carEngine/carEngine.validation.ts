@@ -10,7 +10,7 @@ import {
   transmission,
 } from './carEngine.const';
 
-export const engineInfoValidationSchema = z.object({
+const engineInfoValidationSchema = z.object({
   engine: z.enum([...engine] as [string, ...string[]], {
     required_error: 'Engine is required',
   }),
@@ -38,7 +38,7 @@ export const engineInfoValidationSchema = z.object({
   }),
 });
 
-export const updateEngineInfoValidationSchema = z.object({
+const updateEngineInfoValidationSchema = z.object({
   engine: z
     .enum([...engine] as [string, ...string[]], {
       required_error: 'Engine is required',
@@ -81,3 +81,8 @@ export const updateEngineInfoValidationSchema = z.object({
     })
     .optional(),
 });
+
+export const engineInfoValidation = {
+  engineInfoValidationSchema,
+  updateEngineInfoValidationSchema,
+};

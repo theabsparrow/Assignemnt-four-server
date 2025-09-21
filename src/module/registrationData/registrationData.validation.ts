@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const registrationDataValidationSchema = z.object({
+const registrationDataValidationSchema = z.object({
   licensePlate: z
     .string()
     .trim()
@@ -39,7 +39,7 @@ export const registrationDataValidationSchema = z.object({
     .min(1, { message: 'Registration country is required' }),
 });
 
-export const updateRegistrationDataValidationSchema = z.object({
+const updateRegistrationDataValidationSchema = z.object({
   licensePlate: z
     .string()
     .trim()
@@ -82,3 +82,8 @@ export const updateRegistrationDataValidationSchema = z.object({
     .min(1, { message: 'Registration country is required' })
     .optional(),
 });
+
+export const registrationDataValidation = {
+  registrationDataValidationSchema,
+  updateRegistrationDataValidationSchema,
+};

@@ -1,69 +1,10 @@
 import { Schema, model } from 'mongoose';
-import {
-  TCar,
-  TDeliveryMethod,
-  TGalleryImage,
-  TPaymentMethod,
-  TPaymentOptions,
-} from './car.interface';
-import {
-  carBrand,
-  carCategory,
-  condition,
-  estimatedTimes,
-  methods,
-  paymentMethod,
-  paymentOptions,
-  seatingCapacity,
-} from './car.const';
+import { TCar, TGalleryImage } from './car.interface';
+import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
 
 const carImageGallerySchema = new Schema<TGalleryImage>({
   url: {
     type: String,
-  },
-});
-const deliveryMethodSchema = new Schema<TDeliveryMethod>({
-  method: {
-    type: String,
-    enum: methods,
-    required: [true, 'delivery method is required'],
-  },
-  estimatedTime: {
-    type: String,
-    enum: estimatedTimes,
-    required: [true, 'estimated time is required'],
-  },
-  deliveryCost: {
-    type: Number,
-    required: [true, 'delivery cost is required'],
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const paymentMethodSchema = new Schema<TPaymentMethod>({
-  method: {
-    type: String,
-    required: [true, 'minimum one payment method is required'],
-    enum: paymentMethod,
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const paymentOptionSchema = new Schema<TPaymentOptions>({
-  option: {
-    type: String,
-    required: [true, 'minimum one payment option is required'],
-    enum: paymentOptions,
-  },
-  isDeleted: {
-    type: Boolean,
-    default: false,
   },
 });
 
@@ -74,10 +15,14 @@ const carSchema = new Schema<TCar>(
       ref: 'CarEngine',
       required: [true, 'engine information is required'],
     },
+    deliveryAndPayment: {
+      type: Schema.Types.ObjectId,
+      ref: 'DeliveryAndPayment',
+      required: [true, 'delivery and payment information is required'],
+    },
     registrationData: {
       type: Schema.Types.ObjectId,
       ref: 'RegistrationData',
-      required: [true, 'registration information is required'],
     },
     serviceHistory: {
       type: Schema.Types.ObjectId,
@@ -87,6 +32,7 @@ const carSchema = new Schema<TCar>(
       type: Schema.Types.ObjectId,
       ref: 'ServiceHistory',
     },
+
     brand: {
       type: String,
       required: [true, 'Car Brand name is required'],
@@ -161,16 +107,9 @@ const carSchema = new Schema<TCar>(
       enum: seatingCapacity,
       required: [true, 'seating capacity is required'],
     },
-    paymentMethod: {
-      type: [paymentMethodSchema],
-      required: [true, 'payment methods are required'],
-    },
-    paymentOption: {
-      type: [paymentOptionSchema],
-    },
-    deliveryMethod: {
-      type: [deliveryMethodSchema],
-      required: [true, 'deliveryMethods are required'],
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

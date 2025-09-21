@@ -27,6 +27,10 @@ const serviceHistorySchema = new Schema<TserviceHistory>(
       required: [true, 'Mileage at service is required'],
       min: [0, 'Mileage cannot be negative'],
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

@@ -85,4 +85,5 @@ export type TCarEngine = {
   torque: TTorque;
   topSpeed: TTopSpeed;
   acceleration: TAccelaration;
+  isDeleted: boolean;
 };

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { features, warranty } from './safetyFeature.const';
 
-export const safetyFeatureValidationSchema = z.object({
+const safetyFeatureValidationSchema = z.object({
   safetyRating: z
     .number()
     .min(1, { message: 'Safety rating must be at least 1' })
@@ -30,7 +30,7 @@ export const safetyFeatureValidationSchema = z.object({
   }),
 });
 
-export const updateSafetyFeatureValidationSchema = z.object({
+const updateSafetyFeatureValidationSchema = z.object({
   safetyRating: z
     .number()
     .min(1, { message: 'Safety rating must be at least 1' })
@@ -61,3 +61,8 @@ export const updateSafetyFeatureValidationSchema = z.object({
     })
     .optional(),
 });
+
+export const safetyFeatureValidation = {
+  safetyFeatureValidationSchema,
+  updateSafetyFeatureValidationSchema,
+};

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const serviceHistoryValidationSchema = z.object({
+const serviceHistoryValidationSchema = z.object({
   serviceDate: z.string().min(1, { message: 'Service date is required' }),
   serviceCenter: z
     .string()
@@ -16,7 +16,7 @@ export const serviceHistoryValidationSchema = z.object({
     .min(0, { message: 'Mileage cannot be negative' }),
 });
 
-export const updateServiceHistoryValidationSchema = z.object({
+const updateServiceHistoryValidationSchema = z.object({
   serviceDate: z
     .string()
     .min(1, { message: 'Service date is required' })
@@ -37,3 +37,8 @@ export const updateServiceHistoryValidationSchema = z.object({
     .min(0, { message: 'Mileage cannot be negative' })
     .optional(),
 });
+
+export const serviceHistoryValidation = {
+  serviceHistoryValidationSchema,
+  updateServiceHistoryValidationSchema,
+};

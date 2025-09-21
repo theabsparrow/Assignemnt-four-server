@@ -1,38 +1,16 @@
 import { z } from 'zod';
-import {
-  carBrand,
-  carCategory,
-  condition,
-  estimatedTimes,
-  methods,
-  paymentMethod,
-  paymentOptions,
-  seatingCapacity,
-} from './car.const';
-import { engineInfoValidationSchema } from '../carEngine/carEngine.validation';
-import { registrationDataValidationSchema } from '../registrationData/registrationData.validation';
-import { safetyFeatureValidationSchema } from '../safetyFeatures/safetyFeature.validation';
-import { serviceHistoryValidationSchema } from '../serviceHistory/serviceHistory.validation';
+import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
+import { engineInfoValidation } from '../carEngine/carEngine.validation';
+import { registrationDataValidation } from '../registrationData/registrationData.validation';
+import { safetyFeatureValidation } from '../safetyFeatures/safetyFeature.validation';
+import { serviceHistoryValidation } from '../serviceHistory/serviceHistory.validation';
+import { deliveryAndPaymentValidation } from '../carDelivery/carDelivery.validation';
+
 // car image validation schema
 const carImageGallerySchema = z.object({
   url: z.string().url({ message: 'Invalid URL format' }),
 });
-// delivery method validation schema
-const deliveryMethodValidationSchema = z.object({
-  method: z.enum([...methods] as [string, ...string[]]),
-  estimatedTime: z.enum([...estimatedTimes] as [string, ...string[]]),
-  deliveryCost: z.number().max(50000, {
-    message: 'delivery cost can`t be more than fifty thousands',
-  }),
-});
-// payment method validation schema
-const paymentMethodValidationSchema = z.object({
-  method: z.enum([...paymentMethod] as [string, ...string[]]),
-});
-// payment options validation schema
-const paymentOptionValidationSchema = z.object({
-  option: z.enum([...paymentOptions] as [string, ...string[]]),
-});
+
 // car validation schema
 export const carValidationSchema = z.object({
   basicInfo: z.object({
@@ -72,14 +50,16 @@ export const carValidationSchema = z.object({
     seatingCapacity: z.enum([...seatingCapacity] as [string, ...string[]], {
       required_error: 'Seating capacity is required',
     }),
-    paymentMethod: z.array(paymentMethodValidationSchema),
-    paymentOption: z.array(paymentOptionValidationSchema).optional(),
-    deliveryMethod: z.array(deliveryMethodValidationSchema),
   }),
-  engineInfo: engineInfoValidationSchema,
-  registrationData: registrationDataValidationSchema,
-  safetyFeature: safetyFeatureValidationSchema.optional(),
-  serviceHistory: serviceHistoryValidationSchema.optional(),
+  engineInfo: engineInfoValidation.engineInfoValidationSchema,
+  deliveryAndPayment:
+    deliveryAndPaymentValidation.deliveryAndPaymentValidationSchema,
+  registrationData:
+    registrationDataValidation.registrationDataValidationSchema.optional(),
+  safetyFeature:
+    safetyFeatureValidation.safetyFeatureValidationSchema.optional(),
+  serviceHistory:
+    serviceHistoryValidation.serviceHistoryValidationSchema.optional(),
 });
 
 // update car validation schema
@@ -120,6 +100,7 @@ const updateCArInfoValidationSchema = z.object({
   image: z.string().url({ message: 'Invalid image URL' }).optional(),
 });
 
+// update car image validation schema
 const updateCarImageValidationSchema = z.object({
   galleryImage: z
     .array(carImageGallerySchema)

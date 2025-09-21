@@ -57,6 +57,10 @@ const carEngineSchema = new Schema<TCarEngine>(
       enum: accelaration,
       required: [true, 'accelaration is required'],
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

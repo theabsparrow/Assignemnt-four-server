@@ -10,12 +10,14 @@ import { CarEngine } from '../carEngine/carEngine.model';
 import { RegistrationData } from '../registrationData/registrationData.model';
 import { SafetyFeature } from '../safetyFeatures/safetyFeature.model';
 import { ServiceHistory } from '../serviceHistory/serviceHistory.moodel';
+import { DeliveryAndPayment } from '../carDelivery/carDelivery.model';
 
 // create a car service
 const createCar = async (payload: TcarInfoPayload) => {
   const {
     basicInfo,
     engineInfo,
+    deliveryAndPayment,
     registrationData,
     safetyFeature,
     serviceHistory,
@@ -28,21 +30,36 @@ const createCar = async (payload: TcarInfoPayload) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    // save engine information
+    // engine information
     const engineResult = await CarEngine.create([engineInfo], { session });
     if (!engineResult) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the car info');
     }
     basicInfo.carEngine = engineResult[0]?._id;
-    // registration  info
-    const registrationResult = await RegistrationData.create(
-      [registrationData],
+    // delivery and payment information
+    const deliveryAndPaymentResult = await DeliveryAndPayment.create(
+      [deliveryAndPayment],
       { session },
     );
-    if (!registrationResult) {
+    if (!deliveryAndPaymentResult) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the car info');
     }
-    basicInfo.registrationData = registrationResult[0]?._id;
+    basicInfo.deliveryAndPayment = deliveryAndPaymentResult[0]?._id;
+    // registration  info
+    if (registrationData) {
+      const registrationResult = await RegistrationData.create(
+        [registrationData],
+        { session },
+      );
+      if (!registrationResult) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to post the car info',
+        );
+      }
+      basicInfo.registrationData = registrationResult[0]?._id;
+    }
+
     // safety feature info
     if (safetyFeature) {
       const safetyFeatureResult = await SafetyFeature.create([safetyFeature], {
@@ -56,6 +73,7 @@ const createCar = async (payload: TcarInfoPayload) => {
       }
       basicInfo.safetyFeature = safetyFeatureResult[0]?._id;
     }
+
     // service history
     if (serviceHistory) {
       const serviceHistoryResult = await ServiceHistory.create(
@@ -70,6 +88,7 @@ const createCar = async (payload: TcarInfoPayload) => {
       }
       basicInfo.serviceHistory = serviceHistoryResult[0]?._id;
     }
+
     // basic info
     const result = await Car.create([basicInfo], { session });
     if (!result) {

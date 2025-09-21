@@ -7,4 +7,5 @@ export type TRegistrationdata = {
   previousOwnerAddress?: string;
   registrationCountry: string;
   roadTaxPaid: boolean;
+  isDeleted: boolean;
 };
