@@ -1,12 +1,16 @@
 import { Types } from 'mongoose';
+import {
+  TDeliveryMethod,
+  TPaymentMethod,
+  TPaymentOptions,
+} from '../carDelivery/carDelivery.interface';
 
-type TOrderStatus =
+export type TOrderStatus =
   | 'Pending'
   | 'Paid'
   | 'Completed'
   | 'Cancelled'
   | 'Cash on Delivery';
-export type TDeliveryMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
 export type TTrackingStatus =
   | 'Processing'
   | 'Shipped'
@@ -19,12 +23,10 @@ export type TTrackingInfo = {
   trackingStatus?: TTrackingStatus;
   isTracking?: boolean;
 };
-export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
-export type TPaymentOption = 'SSLCommerz' | 'Stripe' | 'SurjoPay';
 export type Torder = {
   userID: Types.ObjectId;
-  userEmail: string;
   car: Types.ObjectId;
+  userEmail: string;
   quantity: number;
   totalPrice: number;
   status: TOrderStatus;
@@ -43,7 +45,7 @@ export type Torder = {
   phoneNumber: string;
   deliveryCost: number;
   paymentMethod: TPaymentMethod;
-  paymentOption?: TPaymentOption;
+  paymentOption?: TPaymentOptions;
   isDeleted: boolean;
 };
 

@@ -1,24 +1,26 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import { orderService } from './order.service';
 import { catchAsync } from '../../utills/catchAsync';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 
+export type TOrderUserdata = { id: string; ip: string; userId: string };
 const createOrder = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const orderData = req.body;
-    const user = req.user;
+    const payload = req.body;
+    const user = req.user as JwtPayload;
+    const { userId } = user;
     const ip = req.ip as string;
-    const payload: { id: string; ip: string; user: JwtPayload } = {
+    const userData: TOrderUserdata = {
       id,
       ip,
-      user,
+      userId,
     };
-    const result = await orderService.createOrder(orderData, payload);
+    const result = await orderService.createOrder(userData, payload);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
@@ -57,8 +59,9 @@ const getAllOrder = catchAsync(
 const getMyOwnOrders = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
-    const user = req.user;
-    const result = await orderService.getMyOwnOrders(query, user);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await orderService.getMyOwnOrders(query, userId);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -157,8 +160,9 @@ const deleteOrder = catchAsync(
 const deleteMyOwnOrder = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const user = req.user;
-    const result = await orderService.deleteMyOwnOrder(id, user);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await orderService.deleteMyOwnOrder(id, userId);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

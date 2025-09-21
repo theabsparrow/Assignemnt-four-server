@@ -1,12 +1,11 @@
 import { Schema, model } from 'mongoose';
 import { Torder, TTrackingInfo } from './order.interface';
+import { orderStatus, trackingStatus } from './order.const';
 import {
-  deliveryMethod,
-  orderStatus,
+  deliveryMethods,
   paymentMethod,
-  paymentOption,
-  trackingStatus,
-} from './order.const';
+  paymentOptions,
+} from '../carDelivery/carDelivery.const';
 
 const trackingSchema = new Schema<TTrackingInfo>({
   trackingID: {
@@ -66,7 +65,7 @@ const orderSchema = new Schema<Torder>(
     date_time: String,
     deliveryMethod: {
       type: String,
-      enum: deliveryMethod,
+      enum: deliveryMethods,
       required: [true, 'delivery method is required'],
     },
     tracking: trackingSchema,
@@ -91,7 +90,7 @@ const orderSchema = new Schema<Torder>(
     },
     paymentOption: {
       type: String,
-      enum: paymentOption,
+      enum: paymentOptions,
     },
     isDeleted: {
       type: Boolean,

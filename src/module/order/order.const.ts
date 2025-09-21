@@ -35,11 +35,6 @@ export const trackingStatusinfo: TTrackingStatusInfo = {
   cancelled: 'Cancelled',
 } as const;
 
-export const deliveryMethod: string[] = [
-  'Home Delivery',
-  'Pickup',
-  'Express Delivery',
-];
 export const trackingStatus: string[] = [
   'Processing',
   'Shipped',
@@ -49,6 +44,3 @@ export const trackingStatus: string[] = [
   'Cancelled',
   'Pending',
 ];
-
-export const paymentMethod: string[] = ['Cash on Delivery', 'Online Payment'];
-export const paymentOption: string[] = ['SSLCommerz', 'Stripe', 'SurjoPay'];

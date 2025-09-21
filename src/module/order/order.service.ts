@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { JwtPayload } from 'jsonwebtoken';
-import { Torder, TTrackingInfo } from './order.interface';
+import { Torder, TOrderStatus, TTrackingInfo } from './order.interface';
 import Car from '../car/car.model';
 import AppError from '../../error/AppError';
 import { StatusCodes } from 'http-status-codes';
@@ -13,69 +13,69 @@ import {
   paymentStatus,
   trackingStatusinfo,
 } from './order.const';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { generateOrderHTML } from '../../utills/orderPdfTemplate';
 import { generateOrderPdf } from '../../utills/generateOrderPdf';
 import { sendEmail } from '../../utills/sendEmail';
 import fs from 'fs/promises';
 import { USER_ROLE } from '../users/user.constant';
+import { TOrderUserdata } from './order.controller';
 
 // create an order service
 const createOrder = async (
-  orderData: Partial<Torder>,
-  payload: { id: string; ip: string; user: JwtPayload },
+  userData: TOrderUserdata,
+  payload: Partial<Torder>,
 ) => {
-  const { ip, id, user } = payload;
-  const { userEmail } = user;
-  const isUser = await User.findOne({ email: userEmail, isDeleted: false });
-  const userID = isUser?._id;
-  const carData = await Car.findById(id);
-  if (!carData) {
+  const { ip, id, userId } = userData;
+  // check if the car is exists
+  const carData = await Car.findById(id).select('isDeleted inStock price');
+  if (!carData || carData?.isDeleted || !carData?.inStock) {
     throw new AppError(
       StatusCodes.NOT_FOUND,
       'This car is not available right now',
     );
   }
-  if (!carData?.inStock) {
-    throw new AppError(
-      StatusCodes.EXPECTATION_FAILED,
-      'this car isn`t in stock right now',
-    );
-  }
-  orderData.estimatedDeliveryTime = dateFormat(
-    orderData?.estimatedDeliveryTime as string,
+  // extraxt the user info
+  const isUserExists = await User.findById(userId).select(
+    'email phoneNumber name currentAddress',
   );
 
-  const totalPrice = carData?.price + orderData.deliveryCost!;
-  orderData.totalPrice = totalPrice;
-  orderData.userID = userID;
-  orderData.userEmail = userEmail;
-  orderData.quantity = 1;
-  orderData.car = carData._id;
-
+  // push data in payload object
   const tracking: TTrackingInfo = {};
   const trackingID = await createTrackingID();
   tracking.trackingID = trackingID;
-  orderData.tracking = tracking;
+  payload.estimatedDeliveryTime = dateFormat(
+    payload?.estimatedDeliveryTime as string,
+  );
+  payload.totalPrice = carData?.price + payload.deliveryCost!;
+  payload.userID = new Types.ObjectId(userId);
+  payload.userEmail = isUserExists?.email;
+  payload.quantity = 1;
+  payload.car = carData._id;
+  payload.tracking = tracking;
+
+  // start transaction rollback
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
-    const order = await Order.create([orderData], { session });
+    const order = await Order.create([payload], { session });
     if (!order.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'failed to create order');
     }
     const id = order[0]._id;
     const shurjopayPayload = {
-      amount: totalPrice,
+      amount: carData?.price + payload.deliveryCost!,
       order_id: id,
       currency: 'BDT',
-      customer_name: `${isUser?.name?.firstName} ${isUser?.name?.lastName}`,
-      customer_address: orderData?.location
-        ? orderData?.location
-        : orderData?.nearestDealer,
-      customer_email: isUser?.email,
-      customer_phone: isUser?.phoneNumber,
-      customer_city: isUser?.currentAddress ? isUser?.currentAddress : 'N/A',
+      customer_name: `${isUserExists?.name?.firstName} ${isUserExists?.name?.lastName}`,
+      customer_address: payload?.location
+        ? payload?.location
+        : payload?.nearestDealer,
+      customer_email: isUserExists?.email,
+      customer_phone: isUserExists?.phoneNumber,
+      customer_city: isUserExists?.currentAddress
+        ? isUserExists?.currentAddress
+        : 'N/A',
       client_ip: ip,
     };
     const paymentResult = await orderUtills.makePayment(shurjopayPayload);
@@ -222,18 +222,15 @@ const getAllOrder = async (query: Record<string, unknown>) => {
   const meta = await orderQuery.countTotal();
   return { result, meta };
 };
-
+// get all orders by user
 const getMyOwnOrders = async (
   query: Record<string, unknown>,
-  user: JwtPayload,
+  userId: string,
 ) => {
-  const { userEmail } = user;
-  const isUSer = await User.findOne({ email: userEmail });
-  const userID = isUSer?._id;
-  const myOrderQuery = new QueryBuilder(
-    Order.find({ userID, isDeleted: false }),
-    query,
-  )
+  const filter: Record<string, unknown> = {};
+  filter.userID = userId;
+  filter.isDeleted = false;
+  const myOrderQuery = new QueryBuilder(Order.find(), query)
     .search(['orderID'])
     .filter()
     .sort()
@@ -243,11 +240,9 @@ const getMyOwnOrders = async (
   const meta = await myOrderQuery.countTotal();
   return { result, meta };
 };
-
+// get a single order
 const getASingleOrder = async (id: string, user: JwtPayload) => {
-  const { userEmail, userRole } = user;
-  const isUSer = await User.findOne({ email: userEmail });
-  const useriD = isUSer?._id;
+  const { userId, userRole } = user;
   const result = await Order.findById(id).populate('userID').populate('car');
   if (!result) {
     throw new AppError(
@@ -263,7 +258,7 @@ const getASingleOrder = async (id: string, user: JwtPayload) => {
   }
   if (
     userRole === USER_ROLE.user &&
-    useriD?.toString() !== result?.userID?._id.toString()
+    userId !== result?.userID?._id.toString()
   ) {
     throw new AppError(
       StatusCodes.FORBIDDEN,
@@ -272,27 +267,24 @@ const getASingleOrder = async (id: string, user: JwtPayload) => {
   }
   return result;
 };
-
-const changeOrderStatus = async (id: string, payload: string) => {
+// change the order status
+const changeOrderStatus = async (id: string, payload: TOrderStatus) => {
   if (payload === orderStatusInfo?.completed) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       `order status can't be completed manually`,
     );
   }
-  const isOrderExists = await Order.findById(id);
-  if (!isOrderExists) {
+  const isOrderExists = await Order.findById(id).select(
+    'isDeleted status tracking',
+  );
+  if (!isOrderExists || isOrderExists?.isDeleted) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       'this order info is not available',
     );
   }
-  if (isOrderExists?.isDeleted) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'this order info is not available',
-    );
-  }
+
   if (isOrderExists?.status === payload) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
@@ -362,16 +354,10 @@ const changeOrderStatus = async (id: string, payload: string) => {
     throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
 };
-
+// user cancell the order
 const cancellMyOrder = async (id: string) => {
-  const isOrderExists = await Order.findById(id);
-  if (!isOrderExists) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'this order info is not available',
-    );
-  }
-  if (isOrderExists?.isDeleted) {
+  const isOrderExists = await Order.findById(id).select('isDeleted status');
+  if (!isOrderExists || isOrderExists?.isDeleted) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       'this order info is not available',
@@ -418,7 +404,7 @@ const cancellMyOrder = async (id: string) => {
     throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
 };
-
+// change the tracking status
 const changeTrackingStatus = async (id: string, payload: string) => {
   if (payload === trackingStatusinfo?.cancelled) {
     throw new AppError(
@@ -426,14 +412,10 @@ const changeTrackingStatus = async (id: string, payload: string) => {
       `tracking can't be cancelled manually`,
     );
   }
-  const isOrderExists = await Order.findById(id);
-  if (!isOrderExists) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'this order info is not available',
-    );
-  }
-  if (isOrderExists?.isDeleted) {
+  const isOrderExists = await Order.findById(id).select(
+    'isDeleted status tracking',
+  );
+  if (!isOrderExists || isOrderExists?.isDeleted) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       'this order info is not available',
@@ -475,31 +457,28 @@ const changeTrackingStatus = async (id: string, payload: string) => {
   }
   return result;
 };
-
+// switch the tracking status
 const switchTracking = async (id: string, payload: boolean) => {
-  const isOrderInfo = await Order.findById(id);
-  if (!isOrderInfo) {
+  // check the order is valid
+  const isOrderInfo = await Order.findById(id).select(
+    'isDeleted tracking status',
+  );
+  if (!isOrderInfo || isOrderInfo?.isDeleted) {
     throw new AppError(
       StatusCodes.BAD_REQUEST,
       'the order info you are trying to track is not available',
     );
   }
-  if (isOrderInfo?.isDeleted) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'the order info you are trying to track is not available',
-    );
-  }
+  // check the order status and tracking
   if (
     !['Paid', 'Cash on Delivery', 'Completed'].includes(isOrderInfo?.status)
   ) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'This order can`t be tracked');
   }
-
   if (isOrderInfo?.tracking?.trackingStatus === 'Cancelled') {
     throw new AppError(StatusCodes.BAD_REQUEST, 'Faild to track this order');
   }
-
+  // change tracking status operation
   const result = await Order.findByIdAndUpdate(
     id,
     { 'tracking.isTracking': payload },
@@ -510,23 +489,26 @@ const switchTracking = async (id: string, payload: boolean) => {
   }
   return result;
 };
-
+// permanently delete
 const deleteOrder = async (id: string) => {
-  const result = await Order.findByIdAndDelete(id);
-  return result;
-};
-
-const deleteMyOwnOrder = async (id: string, user: JwtPayload) => {
-  const { userEmail } = user;
-  const isOrderExist = await Order.findById(id);
+  const isOrderExist = await Order.findById(id).select('isDeleted');
   if (!isOrderExist) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'the order does not found');
   }
-  if (isOrderExist?.userEmail !== userEmail) {
+  const result = await Order.findByIdAndDelete(id);
+  return result;
+};
+// delete a order by a user
+const deleteMyOwnOrder = async (id: string, userId: string) => {
+  const isOrderExist = await Order.findById(id).select('isDeleted userID');
+  if (!isOrderExist || isOrderExist?.isDeleted) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'the order does not found');
   }
-  const result = await Order.findOneAndUpdate(
-    { _id: id, userEmail },
+  if (isOrderExist?.userID.toString() !== userId) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'the order does not found');
+  }
+  const result = await Order.findByIdAndUpdate(
+    id,
     { isDeleted: true },
     { new: true },
   );

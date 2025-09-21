@@ -1,21 +1,20 @@
 import { z } from 'zod';
+import { orderStatus, trackingStatus } from './order.const';
 import {
-  deliveryMethod,
-  orderStatus,
+  deliveryMethods,
   paymentMethod,
-  paymentOption,
-  trackingStatus,
-} from './order.const';
+  paymentOptions,
+} from '../carDelivery/carDelivery.const';
 
 const orderValidationSchema = z.object({
-  deliveryMethod: z.enum([...deliveryMethod] as [string, ...string[]]),
+  deliveryMethod: z.enum([...deliveryMethods] as [string, ...string[]]),
   estimatedDeliveryTime: z.string(),
   location: z.string().optional(),
   nearestDealer: z.string().optional(),
   phoneNumber: z.string(),
   deliveryCost: z.number(),
   paymentMethod: z.enum([...paymentMethod] as [string, ...string[]]),
-  paymentOption: z.enum([...paymentOption] as [string, ...string[]]),
+  paymentOption: z.enum([...paymentOptions] as [string, ...string[]]),
 });
 
 const orderTrackingValidationSchema = z.object({
