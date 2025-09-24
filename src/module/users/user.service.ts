@@ -192,9 +192,24 @@ const makeAdmin = async (id: string, payload: TUser) => {
   return result;
 };
 
-const getMe = async (user: JwtPayload) => {
+const getMe = async (user: JwtPayload, query: Record<string, unknown>) => {
   const { userId } = user;
-  const result = await User.findById(userId);
+  let result = null;
+
+  if (query.for === 'navbar') {
+    result = await User.findById(userId).select('name profileImage');
+    if (!result) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'information not found');
+    }
+  } else {
+    result = await User.findById(userId).select(
+      '-role -isDeleted -passwordChangedAt -updatedAt -status',
+    );
+    if (!result) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'information not found');
+    }
+  }
+
   return result;
 };
 

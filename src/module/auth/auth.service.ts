@@ -21,7 +21,7 @@ const login = async (payload: TLogin) => {
   const password = payload.password;
   // user existance section
   const isUserExistence = await User.findOne({ email: email }).select(
-    'password isDeleted status',
+    'password isDeleted status role',
   );
   if (
     !isUserExistence ||
@@ -66,7 +66,7 @@ const changePassword = async (payload: TChangePassword, userId: string) => {
   const { oldPassword, newPassword } = payload;
   const saltNumber = Number(config.bcrypt_salt_round);
   // match password
-  const userInfo = await User.findById(userId).select('password');
+  const userInfo = await User.findById(userId).select('password role');
   const userPass = userInfo?.password as string;
   const isPasswordMatched = await passwordMatching(oldPassword, userPass);
   if (!isPasswordMatched) {

@@ -34,8 +34,8 @@ class QueryBuilder<T> {
     excludeFields.forEach((element) => delete queryObject[element]);
 
     if (this.query.minPrice && this.query.maxPrice) {
-      const minPrice = Number(this.query.minPrice);
-      const maxPrice = Number(this.query.maxPrice);
+      const minPrice = this.query.minPrice;
+      const maxPrice = this.query.maxPrice;
       queryObject.price = { $gte: minPrice, $lte: maxPrice };
     }
     this.modelQuery = this.modelQuery.find(queryObject);

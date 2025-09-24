@@ -46,7 +46,8 @@ const getAllUsers = catchAsync(
 const getMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const result = await userSrevice.getMe(user);
+    const query = req.query;
+    const result = await userSrevice.getMe(user, query);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

@@ -112,13 +112,24 @@ const createCar = async (payload: TcarInfoPayload) => {
 // get all cars service with query
 const getAllCars = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
-  filter.isDeleted = false;
-  if (query.inStock) {
-    query.inStock = query.inStock === 'yes' ? true : false;
+  // filter.isDeleted = false;
+  if (query?.minPrice) {
+    query.minPrice = Number(query.minPrice);
+  }
+  if (query?.maxPrice) {
+    query.maxPrice = Number(query.maxPrice);
+  }
+  if (query?.inStock) {
+    query.inStock = query?.inStock === 'yes' ? true : false;
   } else {
     filter.inStock = true;
   }
-  query = { ...filter, ...query };
+
+  query = {
+    ...filter,
+    fields: 'brand, model, price, year, image, category, condition',
+    ...query,
+  };
   const carQuery = new QueryBuilder(Car.find(), query)
     .search(carSearchAbleFields)
     .filter()
@@ -126,8 +137,19 @@ const getAllCars = async (query: Record<string, unknown>) => {
     .paginateQuery()
     .fields();
   const result = await carQuery.modelQuery;
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No data found');
+  }
   const meta = await carQuery.countTotal();
-  return { meta, result };
+  if (query?.limit === '20') {
+    let models: string[] = [];
+    if (query?.brand) {
+      models = await Car.distinct('model', { brand: query.brand });
+    }
+    const totalCar = await Car.countDocuments({ inStock: true });
+    return { meta, result, models, totalCar };
+  }
+  return result;
 };
 
 // get a single car service
