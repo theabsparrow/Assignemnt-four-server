@@ -33,7 +33,18 @@ const getAllCars = catchAsync(
     });
   },
 );
-
+const getModelsByBrand = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await carService.getModelsByBrand(query);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars models are retrived successfully',
+      data: result,
+    });
+  },
+);
 // get a specefic car controller
 const getSingleCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -114,4 +125,5 @@ export const carController = {
   deleteCar,
   updatedCarImage,
   deleteImageFromGallery,
+  getModelsByBrand,
 };

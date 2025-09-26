@@ -15,6 +15,7 @@ router.post(
 );
 
 router.get('/get-allCars', carController.getAllCars);
+router.get('/get-models', carController.getModelsByBrand);
 router.get('/:id', carController.getSingleCar);
 
 router.patch(

@@ -113,18 +113,11 @@ const createCar = async (payload: TcarInfoPayload) => {
 const getAllCars = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   // filter.isDeleted = false;
-  if (query?.minPrice) {
-    query.minPrice = Number(query.minPrice);
-  }
-  if (query?.maxPrice) {
-    query.maxPrice = Number(query.maxPrice);
-  }
   if (query?.inStock) {
     query.inStock = query?.inStock === 'yes' ? true : false;
   } else {
     filter.inStock = true;
   }
-
   query = {
     ...filter,
     fields: 'brand, model, price, year, image, category, condition',
@@ -141,17 +134,41 @@ const getAllCars = async (query: Record<string, unknown>) => {
     throw new AppError(StatusCodes.NOT_FOUND, 'No data found');
   }
   const meta = await carQuery.countTotal();
-  if (query?.limit === '20') {
+  if (query?.limit === '21') {
     let models: string[] = [];
     if (query?.brand) {
       models = await Car.distinct('model', { brand: query.brand });
     }
     const totalCar = await Car.countDocuments({ inStock: true });
-    return { meta, result, models, totalCar };
+    const highestCarPrice = await Car.findOne({}, { price: 1 })
+      .sort({ price: -1 })
+      .lean();
+    const lowestPrice = await Car.findOne({}, { price: 1 })
+      .sort({ price: 1 })
+      .lean();
+    const maxPrice = highestCarPrice?.price ?? 0;
+    const minPrice = lowestPrice?.price ?? 0;
+    return { meta, result, models, totalCar, maxPrice, minPrice };
+  } else {
+    return result;
   }
-  return result;
 };
-
+// get car model according to the brand
+const getModelsByBrand = async (query: Record<string, unknown>) => {
+  const highestCarPrice = await Car.findOne({}, { price: 1 })
+    .sort({ price: -1 })
+    .lean();
+  const lowestPrice = await Car.findOne({}, { price: 1 })
+    .sort({ price: 1 })
+    .lean();
+  const maxPrice = highestCarPrice?.price ?? 0;
+  const minPrice = lowestPrice?.price ?? 0;
+  if (query?.brand) {
+    const models = await Car.distinct('model', { brand: query.brand });
+    return { models, maxPrice, minPrice };
+  }
+  return { maxPrice, minPrice };
+};
 // get a single car service
 const getSingleCar = async (id: string) => {
   const result = await Car.findById(id).populate(
@@ -314,6 +331,7 @@ const deleteCar = async (id: string) => {
 export const carService = {
   createCar,
   getAllCars,
+  getModelsByBrand,
   getSingleCar,
   updateCarInfo,
   deleteImageFromGallery,
