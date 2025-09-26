@@ -6,7 +6,6 @@ import { catchAsync } from '../../utills/catchAsync';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 
-// create a car data controller
 const createCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payloade = req.body;
@@ -20,7 +19,6 @@ const createCar = catchAsync(
   },
 );
 
-// get all cars controller
 const getAllCars = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
@@ -33,6 +31,7 @@ const getAllCars = catchAsync(
     });
   },
 );
+
 const getModelsByBrand = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
@@ -45,7 +44,7 @@ const getModelsByBrand = catchAsync(
     });
   },
 );
-// get a specefic car controller
+
 const getSingleCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -59,7 +58,32 @@ const getSingleCar = catchAsync(
   },
 );
 
-// update a car info
+const getCarCategories = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await carService.getCarCategories(query);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars categories are retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const getCarBrands = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await carService.getCarBrands(query);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars brands are retrived successfully',
+      data: result,
+    });
+  },
+);
+
 const updatCarInfo = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -74,7 +98,6 @@ const updatCarInfo = catchAsync(
   },
 );
 
-// update car image info
 const updatedCarImage = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
@@ -103,7 +126,6 @@ const deleteImageFromGallery = catchAsync(
   },
 );
 
-// delete a car data
 const deleteCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -126,4 +148,6 @@ export const carController = {
   updatedCarImage,
   deleteImageFromGallery,
   getModelsByBrand,
+  getCarCategories,
+  getCarBrands,
 };

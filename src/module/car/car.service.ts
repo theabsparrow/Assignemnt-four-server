@@ -12,7 +12,6 @@ import { SafetyFeature } from '../safetyFeatures/safetyFeature.model';
 import { ServiceHistory } from '../serviceHistory/serviceHistory.moodel';
 import { DeliveryAndPayment } from '../carDelivery/carDelivery.model';
 
-// create a car service
 const createCar = async (payload: TcarInfoPayload) => {
   const {
     basicInfo,
@@ -109,7 +108,6 @@ const createCar = async (payload: TcarInfoPayload) => {
   }
 };
 
-// get all cars service with query
 const getAllCars = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   // filter.isDeleted = false;
@@ -153,7 +151,7 @@ const getAllCars = async (query: Record<string, unknown>) => {
     return result;
   }
 };
-// get car model according to the brand
+
 const getModelsByBrand = async (query: Record<string, unknown>) => {
   const highestCarPrice = await Car.findOne({}, { price: 1 })
     .sort({ price: -1 })
@@ -169,7 +167,7 @@ const getModelsByBrand = async (query: Record<string, unknown>) => {
   }
   return { maxPrice, minPrice };
 };
-// get a single car service
+
 const getSingleCar = async (id: string) => {
   const result = await Car.findById(id).populate(
     'carEngine registrationData serviceHistory safetyFeature',
@@ -180,7 +178,91 @@ const getSingleCar = async (id: string) => {
   return result;
 };
 
-// update a car data
+const getCarCategories = async (query: Record<string, unknown>) => {
+  if (!query?.limit) {
+    const carCategories = await Car.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          image: { $first: '$image' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: '$_id',
+          image: 1,
+        },
+      },
+    ]);
+    return carCategories;
+  } else {
+    const cars = await Car.aggregate([
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: '$category',
+          image: { $first: '$image' },
+        },
+      },
+      {
+        $limit: Number(query?.limit),
+      },
+      {
+        $project: {
+          _id: 0,
+          category: '$_id',
+          image: 1,
+        },
+      },
+    ]);
+    return cars;
+  }
+};
+
+const getCarBrands = async (query: Record<string, unknown>) => {
+  if (!query.limit) {
+    const result = await Car.aggregate([
+      {
+        $group: {
+          _id: '$brand',
+          carBrandLogo: { $first: '$carBrandLogo' },
+          carCount: { $sum: 1 },
+        },
+      },
+      { $sort: { carCount: -1 } },
+      {
+        $project: {
+          _id: 0,
+          brand: '$_id',
+          carBrandLogo: 1,
+        },
+      },
+    ]);
+    return result;
+  } else {
+    const result = await Car.aggregate([
+      {
+        $group: {
+          _id: '$brand',
+          carBrandLogo: { $first: '$carBrandLogo' },
+          carCount: { $sum: 1 },
+        },
+      },
+      { $sort: { carCount: -1 } },
+      { $limit: Number(query?.limit) },
+      {
+        $project: {
+          _id: 0,
+          brand: '$_id',
+          carBrandLogo: 1,
+        },
+      },
+    ]);
+    return result;
+  }
+};
+
 const updateCarInfo = async (id: string, payload: Partial<TCar>) => {
   if (payload.brand) {
     const logo = carBrandLogo[payload.brand as TCarBrand];
@@ -192,7 +274,6 @@ const updateCarInfo = async (id: string, payload: Partial<TCar>) => {
   return result;
 };
 
-// car image section
 const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   const isCarExists = await Car.findById(id);
   if (!isCarExists) {
@@ -222,6 +303,7 @@ const updateCarImage = async (id: string, payload: Partial<TCar>) => {
   const updatedImage = await Car.findById(id).select('galleryImage');
   return updatedImage;
 };
+
 const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
   const isCarExists = await Car.findById(id);
   if (!isCarExists) {
@@ -243,7 +325,6 @@ const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
   return deleteImageFromGallery;
 };
 
-// delete a car
 const deleteCar = async (id: string) => {
   const isCarExist = await Car.findById(id).select('isDeleted');
   if (!isCarExist || isCarExist?.isDeleted) {
@@ -337,4 +418,6 @@ export const carService = {
   deleteImageFromGallery,
   deleteCar,
   updateCarImage,
+  getCarCategories,
+  getCarBrands,
 };

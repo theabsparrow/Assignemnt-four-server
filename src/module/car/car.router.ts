@@ -16,8 +16,9 @@ router.post(
 
 router.get('/get-allCars', carController.getAllCars);
 router.get('/get-models', carController.getModelsByBrand);
+router.get('/get-categories', carController.getCarCategories);
+router.get('/get-brands', carController.getCarBrands);
 router.get('/:id', carController.getSingleCar);
-
 router.patch(
   '/update-info/:id',
   validateRequest(carValidation.updateCArInfoValidationSchema),
