@@ -70,7 +70,20 @@ const forgetPassword = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: 'generate otp successfully',
+      message: 'user info retrive successfully',
+      data: result,
+    });
+  },
+);
+
+const sendOTP = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.body;
+    const result = await authService.sendOTP(id);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'sent OTP successfully',
       data: result,
     });
   },
@@ -116,4 +129,5 @@ export const authController = {
   resetPassword,
   setNewPassword,
   logout,
+  sendOTP,
 };

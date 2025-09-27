@@ -36,6 +36,10 @@ const forgetPasswordValidationSchema = z.object({
   email: z.string().email(),
 });
 
+const sendOtpValidationSchema = z.object({
+  id: z.string({ required_error: 'id is required' }),
+});
+
 const resetPasswordValidationSchema = z.object({
   otp: z
     .string()
@@ -64,4 +68,5 @@ export const authValidation = {
   forgetPasswordValidationSchema,
   resetPasswordValidationSchema,
   setNewPasswordValidationSchema,
+  sendOtpValidationSchema,
 };

@@ -34,6 +34,12 @@ router.post(
   authController.forgetPassword,
 );
 router.post(
+  '/send-otp',
+  validateRequest(authValidation.sendOtpValidationSchema),
+  authController.sendOTP,
+);
+
+router.post(
   '/reset-password',
   validateRequest(authValidation.resetPasswordValidationSchema),
   resetAuth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),

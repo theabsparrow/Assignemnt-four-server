@@ -130,15 +130,25 @@ const generateAccessToken = async (refreshToken: string) => {
 };
 
 const forgetPassword = async (email: string) => {
-  const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
   const result = await User.findOne({ email: email }).select(
-    'isDeleted status role email',
+    'isDeleted status profileImage name',
   );
   if (!result || result?.isDeleted || result?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
   }
-  // otp generate and create token
+  return result;
+};
+
+const sendOTP = async (id: string) => {
+  const saltNumber = Number(config.bcrypt_salt_round);
+  // check user existance
+  const result = await User.findById(id).select(
+    'isDeleted status profileImage name email',
+  );
+  if (!result || result?.isDeleted || result?.status === 'deactive') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
+  }
   const otp = generateOTP().toString();
   const hashedOTP = await bcrypt.hash(otp, saltNumber);
   const jwtPayload = {
@@ -150,18 +160,16 @@ const forgetPassword = async (email: string) => {
     config.jwt_reset_secret as string,
     config.jwt_reset_expires_in as string,
   );
-  // send otp through email
-  const userEmail = result?.email;
-  if (resetAccessToken) {
+  if (resetAccessToken && result?.email) {
     const resetToken = `Bearer ${resetAccessToken}`;
     const html = otpEmailTemplate(otp);
     await sendEmail({
-      to: userEmail,
+      to: result?.email,
       html,
       subject: 'Your one time password(OTP)',
       text: 'This one time password is valid for only 5 minutes',
     });
-    return resetToken;
+    return { resetToken };
   } else {
     throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
   }
@@ -237,4 +245,5 @@ export const authService = {
   forgetPassword,
   resetPassword,
   setNewPassword,
+  sendOTP,
 };
