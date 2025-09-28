@@ -38,6 +38,11 @@ router.post(
   validateRequest(authValidation.sendOtpValidationSchema),
   authController.sendOTP,
 );
+router.get(
+  '/get-user',
+  resetAuth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.getUser,
+);
 
 router.post(
   '/reset-password',

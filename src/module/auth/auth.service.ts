@@ -144,7 +144,7 @@ const sendOTP = async (id: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
   const result = await User.findById(id).select(
-    'isDeleted status profileImage name email',
+    'isDeleted status profileImage name email role',
   );
   if (!result || result?.isDeleted || result?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
@@ -173,6 +173,17 @@ const sendOTP = async (id: string) => {
   } else {
     throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
   }
+};
+
+const getUser = async (id: string) => {
+  const userId = id.split(' ')[0];
+  const result = await User.findById(userId).select(
+    'isDeleted status profileImage name',
+  );
+  if (!result || result?.isDeleted || result?.status === 'deactive') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
+  }
+  return result;
 };
 
 const resetPassword = async (userId: string, otp: string) => {
@@ -205,7 +216,9 @@ const resetPassword = async (userId: string, otp: string) => {
 const setNewPassword = async (userId: string, newPassword: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
-  const userInfo = await User.findById(userId).select('isDeleted status role');
+  const userInfo = await User.findById(userId).select(
+    'isDeleted status email password',
+  );
   if (!userInfo || userInfo?.isDeleted || userInfo?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
   }
@@ -218,24 +231,7 @@ const setNewPassword = async (userId: string, newPassword: string) => {
   if (!result) {
     throw new AppError(StatusCodes.GATEWAY_TIMEOUT, 'time out');
   }
-  // jwt token creation
-  const jwtPayload = {
-    userId: userInfo?._id.toString(),
-    userRole: userInfo?.role,
-  };
-  const accessToken = createToken(
-    jwtPayload,
-    config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string,
-  );
-  const refreshToken = createToken(
-    jwtPayload,
-    config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string,
-  );
-  const access = `Bearer ${accessToken}`;
-  const refresh = `Bearer ${refreshToken}`;
-  return { access, refresh };
+  return { userInfo };
 };
 
 export const authService = {
@@ -246,4 +242,5 @@ export const authService = {
   resetPassword,
   setNewPassword,
   sendOTP,
+  getUser,
 };

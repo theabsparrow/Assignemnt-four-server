@@ -13,7 +13,6 @@ import { verifyToken } from '../module/auth/auth.utills';
 export const resetAuth = (...requiredRoles: TUSerRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const resetToken = req.headers.authorization;
-
     const token = resetToken?.split(' ')[1];
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
@@ -27,7 +26,6 @@ export const resetAuth = (...requiredRoles: TUSerRole[]) => {
         `you are not authorized ${err}`,
       );
     }
-
     const { userId, userRole } = decoded as JwtPayload;
     const id = userId.split(' ')[0];
     const isUserExists = await User.findById(id).select(

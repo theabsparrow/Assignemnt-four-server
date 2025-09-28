@@ -89,6 +89,20 @@ const sendOTP = catchAsync(
   },
 );
 
+const getUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const { userId } = user;
+    const result = await authService.getUser(userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'user info retrive successfully',
+      data: result,
+    });
+  },
+);
+
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { otp } = req.body;
@@ -110,13 +124,11 @@ const setNewPassword = catchAsync(
     const user = req.user as JwtPayload;
     const { userId } = user;
     const result = await authService.setNewPassword(userId, newPassword);
-    const { access, refresh } = result;
-    res.cookie('refreshToken', refresh, cookieOptions);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'new password set successfully',
-      data: access,
+      data: result,
     });
   },
 );
@@ -130,4 +142,5 @@ export const authController = {
   setNewPassword,
   logout,
   sendOTP,
+  getUser,
 };
