@@ -1,8 +1,15 @@
-export const safetyRating: number[] = [1, 2, 3, 4, 5] as const;
+import {
+  TAirbags,
+  TFeature,
+  TSafetyRating,
+  TWarranty,
+} from './safetyFeature.interface';
 
-export const airBags: number[] = [2, 4, 6, 8, 10, 12] as const;
+export const safetyRating: TSafetyRating[] = ['1', '2', '3', '4', '5'] as const;
 
-export const features: string[] = [
+export const airBags: TAirbags[] = ['2', '4', '6', '8', '10', '12'] as const;
+
+export const features: TFeature[] = [
   'ABS',
   'Cruise Control',
   'Rear Camera',
@@ -20,7 +27,7 @@ export const features: string[] = [
   'Android Auto',
 ] as const;
 
-export const warranty: string[] = [
+export const warranty: TWarranty[] = [
   '1 Year',
   '2 Years',
   '3 Years',

@@ -1,63 +1,50 @@
 import { z } from 'zod';
-import { features, warranty } from './safetyFeature.const';
+import {
+  airBags,
+  features,
+  safetyRating,
+  warranty,
+} from './safetyFeature.const';
 
 const safetyFeatureValidationSchema = z.object({
-  safetyRating: z
-    .number()
-    .min(1, { message: 'Safety rating must be at least 1' })
-    .max(5, { message: 'Safety rating cannot exceed 5' })
-    .refine((val) => [1, 2, 3, 4, 5].includes(val), {
-      message: 'Invalid safety rating',
+  features: z.array(
+    z.enum([...features] as [string, ...string[]], {
+      required_error: 'features are required',
     }),
-
-  airbags: z
-    .number()
-    .min(1, { message: 'Airbags must be at least 1' })
-    .max(10, { message: 'Airbags cannot exceed 10' })
-    .refine((val) => [1, 2, 4, 6, 8, 10].includes(val), {
-      message: 'Invalid number of airbags',
-    }),
-
-  features: z
-    .array(z.string())
-    .min(1, { message: 'At least one feature is required' })
-    .refine((val) => val.every((feature) => features.includes(feature)), {
-      message: 'Invalid feature found',
-    }),
-
-  warranty: z.string().refine((val) => warranty.includes(val), {
-    message: 'Invalid warranty type',
+  ),
+  airbags: z.enum([...airBags] as [string, ...string[]]).optional(),
+  warranty: z.enum([...warranty] as [string, ...string[]], {
+    required_error: 'warenty is required',
+  }),
+  safetyRating: z.enum([...safetyRating] as [string, ...string[]], {
+    required_error: 'safety rating is required',
   }),
 });
 
 const updateSafetyFeatureValidationSchema = z.object({
-  safetyRating: z
-    .number()
-    .min(1, { message: 'Safety rating must be at least 1' })
-    .max(5, { message: 'Safety rating cannot exceed 5' })
-    .refine((val) => [1, 2, 3, 4, 5].includes(val), {
-      message: 'Invalid safety rating',
-    })
+  addFeatures: z
+    .array(
+      z.enum([...features] as [string, ...string[]], {
+        required_error: 'features are required',
+      }),
+    )
     .optional(),
-  airbags: z
-    .number()
-    .min(1, { message: 'Airbags must be at least 1' })
-    .max(10, { message: 'Airbags cannot exceed 10' })
-    .refine((val) => [1, 2, 4, 6, 8, 10].includes(val), {
-      message: 'Invalid number of airbags',
-    })
+  removeFeatures: z
+    .array(
+      z.enum([...features] as [string, ...string[]], {
+        required_error: 'features are required',
+      }),
+    )
     .optional(),
-  features: z
-    .array(z.string())
-    .min(1, { message: 'At least one feature is required' })
-    .refine((val) => val.every((feature) => features.includes(feature)), {
-      message: 'Invalid feature found',
-    })
-    .optional(),
+  airbags: z.enum([...airBags] as [string, ...string[]]).optional(),
   warranty: z
-    .string()
-    .refine((val) => warranty.includes(val), {
-      message: 'Invalid warranty type',
+    .enum([...warranty] as [string, ...string[]], {
+      required_error: 'warenty is required',
+    })
+    .optional(),
+  safetyRating: z
+    .enum([...safetyRating] as [string, ...string[]], {
+      required_error: 'safety rating is required',
     })
     .optional(),
 });

@@ -5,14 +5,14 @@ import AppError from '../../error/AppError';
 import { carBrandLogo, carSearchAbleFields } from './car.const';
 import { TCar, TCarBrand, TcarInfoPayload } from './car.interface';
 import Car from './car.model';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { CarEngine } from '../carEngine/carEngine.model';
 import { RegistrationData } from '../registrationData/registrationData.model';
 import { SafetyFeature } from '../safetyFeatures/safetyFeature.model';
 import { ServiceHistory } from '../serviceHistory/serviceHistory.moodel';
 import { DeliveryAndPayment } from '../carDelivery/carDelivery.model';
 
-const createCar = async (payload: TcarInfoPayload) => {
+const createCar = async (payload: TcarInfoPayload, userId: string) => {
   const {
     basicInfo,
     engineInfo,
@@ -31,6 +31,7 @@ const createCar = async (payload: TcarInfoPayload) => {
   ) {
     payload.basicInfo.negotiable = true;
   }
+  payload.basicInfo.user = new Types.ObjectId(userId);
   const session = await mongoose.startSession();
   try {
     session.startTransaction();

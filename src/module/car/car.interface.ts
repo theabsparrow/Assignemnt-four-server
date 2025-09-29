@@ -94,13 +94,14 @@ export type TCar = {
   registrationData?: Types.ObjectId;
   serviceHistory?: Types.ObjectId;
   safetyFeature?: Types.ObjectId;
+  user: Types.ObjectId;
   brand: TCarBrand;
   model: string;
   year: string;
   price: number;
   category: TCategory;
   color: string;
-  description: string;
+  description?: string;
   inStock: boolean;
   condition: TCondition;
   seatingCapacity: TSeatingCapacity;
@@ -117,7 +118,7 @@ export type TcarInfoPayload = {
   basicInfo: TCar;
   engineInfo: TEngine;
   deliveryAndPayment: TDeliveryAndPayment;
-  registrationData: TRegistrationdata;
+  registrationData?: TRegistrationdata;
   safetyFeature?: TSafetyFeature;
   serviceHistory?: TserviceHistory;
 };

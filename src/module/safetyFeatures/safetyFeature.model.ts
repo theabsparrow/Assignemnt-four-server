@@ -10,14 +10,13 @@ import {
 const safetyFeatureSchema = new Schema<TSafetyFeature>(
   {
     safetyRating: {
-      type: Number,
+      type: String,
       enum: safetyRating,
       required: [true, 'safety rating is required'],
     },
     airbags: {
-      type: Number,
+      type: String,
       enum: airBags,
-      required: [true, 'safety rating is required'],
     },
     features: {
       type: [String],

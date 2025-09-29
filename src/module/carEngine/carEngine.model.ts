@@ -24,7 +24,7 @@ const carEngineSchema = new Schema<TCarEngine>(
       required: [true, 'transmission is required'],
     },
     mileage: {
-      type: String,
+      type: Number,
       required: [true, 'mileage is required'],
     },
     fuelType: {

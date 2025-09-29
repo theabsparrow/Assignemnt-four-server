@@ -1,5 +1,5 @@
-export type TSafetyRating = 1 | 2 | 3 | 4 | 5;
-export type TAirbags = 2 | 4 | 6 | 8 | 10 | 12;
+export type TSafetyRating = '1' | '2' | '3' | '4' | '5';
+export type TAirbags = '2' | '4' | '6' | '8' | '10' | '12';
 export type TFeature =
   | 'ABS'
   | 'Cruise Control'
@@ -30,8 +30,13 @@ export type TWarranty =
 
 export type TSafetyFeature = {
   safetyRating: TSafetyRating;
-  airbags: TAirbags;
+  airbags?: TAirbags;
   features: TFeature[];
   warranty: TWarranty;
   isDeleted: boolean;
 };
+
+export interface updateSafetyFeature extends TSafetyFeature {
+  addFeatures: TFeature[];
+  removeFeatures: TFeature[];
+}

@@ -1,3 +1,5 @@
+import { getYears } from '../../utills/getYears';
+
 export const carBrand: string[] = [
   'Toyota',
   'Hyundai',
@@ -145,3 +147,5 @@ export const carBrandLogo: TCarBrandLogo = {
 } as const;
 
 export const carSearchAbleFields = ['brand', 'model', 'country', 'category'];
+
+export const years = getYears();

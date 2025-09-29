@@ -5,11 +5,14 @@ import { carService } from './car.service';
 import { catchAsync } from '../../utills/catchAsync';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payloade = req.body;
-    const result = await carService.createCar(payloade);
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const result = await carService.createCar(payloade, userId);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,

@@ -1,6 +1,12 @@
 import { Schema, model } from 'mongoose';
 import { TCar, TGalleryImage } from './car.interface';
-import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
+import {
+  carBrand,
+  carCategory,
+  condition,
+  seatingCapacity,
+  years,
+} from './car.const';
 
 const carImageGallerySchema = new Schema<TGalleryImage>({
   url: {
@@ -32,7 +38,11 @@ const carSchema = new Schema<TCar>(
       type: Schema.Types.ObjectId,
       ref: 'ServiceHistory',
     },
-
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'userId is required'],
+      ref: 'User',
+    },
     brand: {
       type: String,
       required: [true, 'Car Brand name is required'],
@@ -46,6 +56,7 @@ const carSchema = new Schema<TCar>(
     },
     year: {
       type: String,
+      enum: years,
       required: [true, 'Car manufacturing year is required'],
     },
     price: {
@@ -63,8 +74,6 @@ const carSchema = new Schema<TCar>(
     },
     description: {
       type: String,
-      required: true,
-      trim: true,
     },
     inStock: {
       type: Boolean,

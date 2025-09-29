@@ -17,7 +17,10 @@ const engineInfoValidationSchema = z.object({
   transmission: z.enum([...transmission] as [string, ...string[]], {
     required_error: 'Transmission is required',
   }),
-  mileage: z.string().nonempty({ message: 'Mileage is required' }),
+  mileage: z
+    .number()
+    .min(1, { message: 'milage is required' })
+    .max(100, { message: 'milage can`t be more than 100' }),
   fuelType: z.enum([...fuelType] as [string, ...string[]], {
     required_error: 'Fuel type is required',
   }),
@@ -49,7 +52,11 @@ const updateEngineInfoValidationSchema = z.object({
       required_error: 'Transmission is required',
     })
     .optional(),
-  mileage: z.string().nonempty({ message: 'Mileage is required' }).optional(),
+  mileage: z
+    .number()
+    .min(1, { message: 'milage is required' })
+    .max(100, { message: 'milage can`t be more than 100' })
+    .optional(),
   fuelType: z
     .enum([...fuelType] as [string, ...string[]], {
       required_error: 'Fuel type is required',

@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { carBrand, carCategory, condition, seatingCapacity } from './car.const';
+import {
+  carBrand,
+  carCategory,
+  condition,
+  seatingCapacity,
+  years,
+} from './car.const';
 import { engineInfoValidation } from '../carEngine/carEngine.validation';
 import { registrationDataValidation } from '../registrationData/registrationData.validation';
 import { safetyFeatureValidation } from '../safetyFeatures/safetyFeature.validation';
@@ -20,10 +26,10 @@ export const carValidationSchema = z.object({
     model: z
       .string()
       .min(1, { message: 'Car model must be at least 1 character' })
-      .max(25, { message: 'Car model must be less than 25 characters' })
-      .nonempty({ message: 'Car model is required' }),
-    year: z.string().max(new Date().getFullYear(), {
-      message: 'Year cannot be in the future',
+      .max(50, { message: 'Car model must be less than 50 characters' })
+      .trim(),
+    year: z.enum([...years] as [string, ...string[]], {
+      required_error: 'year is required',
     }),
     price: z.number().min(1, { message: 'Price is required' }),
     category: z.enum([...carCategory] as [string, ...string[]], {
@@ -39,7 +45,9 @@ export const carValidationSchema = z.object({
     description: z
       .string()
       .min(10, { message: 'Description must be at least 10 characters' })
-      .nonempty({ message: 'Description is required' }),
+      .max(500, { message: 'Description can`t be more that 500 character' })
+      .trim()
+      .optional(),
     madeIn: z.string().nonempty({ message: 'Made in is required' }),
     country: z.string().nonempty({ message: 'Country is required' }),
     image: z.string().url({ message: 'Invalid image URL' }),
@@ -71,9 +79,8 @@ const updateCArInfoValidationSchema = z.object({
     .max(25, { message: 'Car model must be less than 25 characters' })
     .optional(),
   year: z
-    .string()
-    .max(new Date().getFullYear(), {
-      message: 'Year cannot be in the future',
+    .enum([...years] as [string, ...string[]], {
+      required_error: 'year is required',
     })
     .optional(),
   price: z.string().optional(),
@@ -91,6 +98,8 @@ const updateCArInfoValidationSchema = z.object({
   description: z
     .string()
     .min(10, { message: 'Description must be at least 10 characters' })
+    .max(500, { message: 'Description can`t be more that 500 character' })
+    .trim()
     .optional(),
   madeIn: z.string().optional(),
   country: z.string().optional(),
