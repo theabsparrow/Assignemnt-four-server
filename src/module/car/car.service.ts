@@ -111,11 +111,8 @@ const createCar = async (payload: TcarInfoPayload) => {
 const getAllCars = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   // filter.isDeleted = false;
-  if (query?.inStock) {
-    query.inStock = query?.inStock === 'yes' ? true : false;
-  } else {
-    filter.inStock = true;
-  }
+  filter.inStock = query?.inStock ? query.inStock === 'yes' : true;
+  query.limit = query?.limit ? query.limit : '21';
   query = {
     ...filter,
     fields: 'brand, model, price, year, image, category, condition',

@@ -6,15 +6,16 @@ import { userSrevice } from './user.service';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
-import { cookieOptions } from '../auth/auth.const';
+import { cookieOptions, CookieOptions1 } from '../auth/auth.const';
 import { TUser } from './user.interface';
 
 const createUSer = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const dataInfo = await userSrevice.createUser(payload);
-    const { access, refresh, result } = dataInfo;
+    const { access, refresh, result, resetToken } = dataInfo;
     res.cookie('refreshToken', refresh, cookieOptions);
+    res.cookie('refreshToken1', resetToken, CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,

@@ -5,9 +5,16 @@ import { User } from './user.model';
 import { calculateAge, capitalizeFirst, isUserExists } from './user.utills';
 import { JwtPayload } from 'jsonwebtoken';
 import { searchableFields, USER_ROLE } from './user.constant';
-import { createToken, passwordMatching } from '../auth/auth.utills';
+import {
+  createToken,
+  generateOTP,
+  passwordMatching,
+} from '../auth/auth.utills';
 import config from '../../config';
 import QueryBuilder from '../../builder/QueryBuilder';
+import bcrypt from 'bcrypt';
+import { otpEmailTemplate } from '../../utills/otpEmailTemplate';
+import { sendEmail } from '../../utills/sendEmail';
 
 const createUser = async (payload: TUser) => {
   // check existing user
@@ -31,7 +38,7 @@ const createUser = async (payload: TUser) => {
   const age = calculateAge(payload.dateOfBirth);
   if (age < 18) {
     throw new AppError(
-      StatusCodes.CONFLICT,
+      StatusCodes.BAD_REQUEST,
       'You must be at least 18 years old.',
     );
   }
@@ -45,11 +52,20 @@ const createUser = async (payload: TUser) => {
 
   // create user
   const result = await User.create(payload);
-
+  if (!result) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to register.');
+  }
+  const saltNumber = Number(config.bcrypt_salt_round);
+  const otp = generateOTP().toString();
+  const hashedOTP = await bcrypt.hash(otp, saltNumber);
   // jwt section
   const jwtPayload = {
     userId: result?._id.toString(),
     userRole: result?.role,
+  };
+  const jwtOTPPayload = {
+    ...jwtPayload,
+    userId: `${result?._id.toString()} ${hashedOTP}`,
   };
   const accessToken = createToken(
     jwtPayload,
@@ -61,9 +77,29 @@ const createUser = async (payload: TUser) => {
     config.jwt_refresh_secret as string,
     config.jwt_refresh_expires_in as string,
   );
-  const access = `Bearer ${accessToken}`;
-  const refresh = `Bearer ${refreshToken}`;
-  return { result, access, refresh };
+  const resetAccessToken = createToken(
+    jwtOTPPayload,
+    config.jwt_reset_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+
+  if (resetAccessToken) {
+    const resetToken = `Bearer ${resetAccessToken}`;
+    const html = otpEmailTemplate(otp);
+    await sendEmail({
+      to: result?.email,
+      html,
+      subject: 'Your one time password(OTP)',
+      text: 'This one time password is valid for only 5 minutes',
+    });
+    const access = `Bearer ${accessToken}`;
+    const refresh = `Bearer ${refreshToken}`;
+    return { result, access, refresh, resetToken };
+  } else {
+    const access = `Bearer ${accessToken}`;
+    const refresh = `Bearer ${refreshToken}`;
+    return { result, access, refresh };
+  }
 };
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {
