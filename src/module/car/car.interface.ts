@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
-import { TEngine } from '../carEngine/carEngine.interface';
 import { TRegistrationdata } from '../registrationData/registrationData.interface';
 import { TSafetyFeature } from '../safetyFeatures/safetyFeature.interface';
 import { TserviceHistory } from '../serviceHistory/serviceHistory.interface';
 import { TDeliveryAndPayment } from '../carDelivery/carDelivery.interface';
+import { TCarEngine } from '../carEngine/carEngine.interface';
 
 export type TCarBrand =
   | 'Toyota'
@@ -116,7 +116,7 @@ export type TCar = {
 
 export type TcarInfoPayload = {
   basicInfo: TCar;
-  engineInfo: TEngine;
+  engineInfo: TCarEngine;
   deliveryAndPayment: TDeliveryAndPayment;
   registrationData?: TRegistrationdata;
   safetyFeature?: TSafetyFeature;

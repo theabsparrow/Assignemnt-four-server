@@ -1,6 +1,12 @@
 import { getYears } from '../../utills/getYears';
+import {
+  TCarBrand,
+  TCategory,
+  TCondition,
+  TSeatingCapacity,
+} from './car.interface';
 
-export const carBrand: string[] = [
+export const carBrand: TCarBrand[] = [
   'Toyota',
   'Hyundai',
   'Nissan',
@@ -48,7 +54,7 @@ export const carBrand: string[] = [
   'Opel',
 ] as const;
 
-export const carCategory: string[] = [
+export const carCategory: TCategory[] = [
   'Sedan',
   'SUV',
   'Coupe',
@@ -80,13 +86,13 @@ export const carCategory: string[] = [
   'Pony Car',
 ] as const;
 
-export const condition: string[] = [
+export const condition: TCondition[] = [
   'New',
   'Used',
   'Certified Pre-Owned',
 ] as const;
 
-export const seatingCapacity: string[] = [
+export const seatingCapacity: TSeatingCapacity[] = [
   '2',
   '4',
   '5',

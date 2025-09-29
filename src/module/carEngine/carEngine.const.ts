@@ -1,4 +1,15 @@
-export const fuelType: string[] = [
+import {
+  TAccelaration,
+  TDriveTrain,
+  TEngineType,
+  TFuelType,
+  THorsePower,
+  TTopSpeed,
+  TTorque,
+  TTransmission,
+} from './carEngine.interface';
+
+export const fuelType: TFuelType[] = [
   'Petrol',
   'Diesel',
   'Electric',
@@ -8,7 +19,7 @@ export const fuelType: string[] = [
   'Hydrogen',
 ] as const;
 
-export const engine: string[] = [
+export const engine: TEngineType[] = [
   '1.5L 3-cylinder',
   '2.0L 4-cylinder',
   '2.5L 4-cylinder',
@@ -20,7 +31,7 @@ export const engine: string[] = [
   'Turbocharged',
 ] as const;
 
-export const transmission: string[] = [
+export const transmission: TTransmission[] = [
   'Automatic',
   'Manual',
   'CVT',
@@ -29,7 +40,7 @@ export const transmission: string[] = [
   'Electric Drive',
 ] as const;
 
-export const driveTrain: string[] = [
+export const driveTrain: TDriveTrain[] = [
   'FWD',
   'RWD',
   'AWD',
@@ -37,7 +48,7 @@ export const driveTrain: string[] = [
   'All-Wheel Drive',
 ];
 
-export const horsePower: string[] = [
+export const horsePower: THorsePower[] = [
   '100',
   '150',
   '200',
@@ -50,7 +61,7 @@ export const horsePower: string[] = [
   '600+',
 ] as const;
 
-export const torque: string[] = [
+export const torque: TTorque[] = [
   '100',
   '150',
   '200',
@@ -65,7 +76,7 @@ export const torque: string[] = [
   '800+',
 ] as const;
 
-export const topSpeed: string[] = [
+export const topSpeed: TTopSpeed[] = [
   '120',
   '150',
   '180',
@@ -77,11 +88,11 @@ export const topSpeed: string[] = [
   '300+',
 ] as const;
 
-export const accelaration: string[] = [
+export const accelaration: TAccelaration[] = [
   '3.5',
   '4.0',
   '4.5',
-  ' 5.0',
+  '5.0',
   '5.5',
   '6.0',
   '6.5',

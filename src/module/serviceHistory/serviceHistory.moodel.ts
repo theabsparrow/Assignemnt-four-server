@@ -24,6 +24,7 @@ const serviceHistorySchema = new Schema<TserviceHistory>(
     },
     mileageAtService: {
       type: Number,
+      required: [true, 'milage is required'],
     },
     isDeleted: {
       type: Boolean,

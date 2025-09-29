@@ -8,7 +8,7 @@ export type TFuelType =
   | 'Petrol+CNG'
   | 'Hydrogen';
 
-export type TEngine =
+export type TEngineType =
   | '1.5L 3-cylinder'
   | '2.0L 4-cylinder'
   | '2.5L 4-cylinder'
@@ -76,7 +76,7 @@ export type TAccelaration =
   | '8.0+';
 
 export type TCarEngine = {
-  engine: TEngine;
+  engine: TEngineType;
   transmission: TTransmission;
   mileage: number;
   fuelType: TFuelType;
