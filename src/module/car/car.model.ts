@@ -89,10 +89,6 @@ const carSchema = new Schema<TCar>(
       type: String,
       required: [true, 'made in is required'],
     },
-    country: {
-      type: String,
-      required: [true, 'country is required'],
-    },
     image: {
       type: String,
       required: [true, 'car image is required'],

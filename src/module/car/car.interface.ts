@@ -106,7 +106,6 @@ export type TCar = {
   condition: TCondition;
   seatingCapacity: TSeatingCapacity;
   madeIn: string;
-  country: string;
   negotiable: boolean;
   image: string;
   galleryImage?: TGalleryImage[];

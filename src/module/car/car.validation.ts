@@ -49,7 +49,6 @@ export const carValidationSchema = z.object({
       .trim()
       .optional(),
     madeIn: z.string().nonempty({ message: 'Made in is required' }),
-    country: z.string().nonempty({ message: 'Country is required' }),
     image: z.string().url({ message: 'Invalid image URL' }),
     galleryImage: z
       .array(carImageGallerySchema)
@@ -102,7 +101,6 @@ const updateCArInfoValidationSchema = z.object({
     .trim()
     .optional(),
   madeIn: z.string().optional(),
-  country: z.string().optional(),
   seatingCapacity: z
     .enum([...seatingCapacity] as [string, ...string[]])
     .optional(),
