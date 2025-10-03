@@ -101,34 +101,6 @@ const updatCarInfo = catchAsync(
   },
 );
 
-const updatedCarImage = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
-    const id = req.params.id;
-    const result = await carService.updateCarImage(id, payload);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Cars image is updated successfully',
-      data: result,
-    });
-  },
-);
-
-const deleteImageFromGallery = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
-    const id = req.params.id;
-    const result = await carService.deleteImageFromGallery(id, payload);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'Cars image is deleted successfully',
-      data: result,
-    });
-  },
-);
-
 const deleteCar = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
@@ -148,8 +120,6 @@ export const carController = {
   getSingleCar,
   updatCarInfo,
   deleteCar,
-  updatedCarImage,
-  deleteImageFromGallery,
   getModelsByBrand,
   getCarCategories,
   getCarBrands,

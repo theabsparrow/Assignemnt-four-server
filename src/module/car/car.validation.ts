@@ -12,11 +12,6 @@ import { safetyFeatureValidation } from '../safetyFeatures/safetyFeature.validat
 import { serviceHistoryValidation } from '../serviceHistory/serviceHistory.validation';
 import { deliveryAndPaymentValidation } from '../carDelivery/carDelivery.validation';
 
-// car image validation schema
-const carImageGallerySchema = z.object({
-  url: z.string().url({ message: 'Invalid URL format' }),
-});
-
 // car validation schema
 export const carValidationSchema = z.object({
   basicInfo: z.object({
@@ -51,7 +46,9 @@ export const carValidationSchema = z.object({
     madeIn: z.string().nonempty({ message: 'Made in is required' }),
     image: z.string().url({ message: 'Invalid image URL' }),
     galleryImage: z
-      .array(carImageGallerySchema)
+      .array(
+        z.string({ invalid_type_error: 'images should be string url' }).url(),
+      )
       .max(5, { message: 'You can upload a maximum of 5 images' })
       .optional(),
     seatingCapacity: z.enum([...seatingCapacity] as [string, ...string[]], {
@@ -105,17 +102,21 @@ const updateCArInfoValidationSchema = z.object({
     .enum([...seatingCapacity] as [string, ...string[]])
     .optional(),
   image: z.string().url({ message: 'Invalid image URL' }).optional(),
-});
-
-// update car image validation schema
-const updateCarImageValidationSchema = z.object({
-  galleryImage: z
-    .array(carImageGallerySchema)
-    .max(5, { message: 'You can upload a maximum of 5 images' }),
+  addGalleryImage: z
+    .array(
+      z.string({ invalid_type_error: 'images should be string url' }).url(),
+    )
+    .max(5, { message: 'You can upload a maximum of 5 images' })
+    .optional(),
+  removeGalleryImage: z
+    .array(
+      z.string({ invalid_type_error: 'images should be string url' }).url(),
+    )
+    .max(5, { message: 'You can upload a maximum of 5 images' })
+    .optional(),
 });
 
 export const carValidation = {
   carValidationSchema,
   updateCArInfoValidationSchema,
-  updateCarImageValidationSchema,
 };

@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import QueryBuilder from '../../builder/QueryBuilder';
 import AppError from '../../error/AppError';
 import { carBrandLogo, carSearchAbleFields } from './car.const';
-import { TCar, TCarBrand, TcarInfoPayload } from './car.interface';
+import { TCarBrand, TcarInfoPayload, TUpdateCarInfo } from './car.interface';
 import Car from './car.model';
 import mongoose, { Types } from 'mongoose';
 import { CarEngine } from '../carEngine/carEngine.model';
@@ -261,66 +261,64 @@ const getCarBrands = async (query: Record<string, unknown>) => {
   }
 };
 
-const updateCarInfo = async (id: string, payload: Partial<TCar>) => {
-  if (payload.brand) {
-    const logo = carBrandLogo[payload.brand as TCarBrand];
-    payload.carBrandLogo = logo as string;
+const updateCarInfo = async (id: string, payload: Partial<TUpdateCarInfo>) => {
+  const isCarExists = await Car.findById(id).select('isDeleted');
+  if (!isCarExists || isCarExists?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'car data not found');
   }
-  const result = await Car.findByIdAndUpdate(id, payload, {
-    new: true,
-  });
-  return result;
-};
-
-const updateCarImage = async (id: string, payload: Partial<TCar>) => {
-  const isCarExists = await Car.findById(id);
-  if (!isCarExists) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
-  }
-  if (isCarExists?.galleryImage && isCarExists?.galleryImage.length === 5) {
-    throw new AppError(
-      StatusCodes.BAD_REQUEST,
-      'maximum 5 photos can be stored',
-    );
-  }
-  const addImageToGallery = await Car.findByIdAndUpdate(
-    id,
-    {
-      $addToSet: {
-        galleryImage: { $each: payload?.galleryImage },
-      },
-    },
-    {
+  const { addGalleryImage, removeGalleryImage, ...remaining } = payload;
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    let result;
+    // add gallery image
+    if (addGalleryImage && addGalleryImage.length > 0) {
+      result = await Car.findByIdAndUpdate(
+        id,
+        { $addToSet: { galleryImage: { $each: addGalleryImage } } },
+        { session, new: true, runValidators: true },
+      );
+      if (!result) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to update car gallery image',
+        );
+      }
+    }
+    // remove gallery image
+    if (removeGalleryImage && removeGalleryImage.length > 0) {
+      result = await Car.findByIdAndUpdate(
+        id,
+        { $pull: { galleryImage: { $in: removeGalleryImage } } },
+        { session, new: true, runValidators: true },
+      );
+      if (!result) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to remove car gallery image',
+        );
+      }
+    }
+    // update remaining data
+    if (remaining.brand) {
+      remaining.carBrandLogo = carBrandLogo[remaining.brand as TCarBrand];
+    }
+    result = await Car.findByIdAndUpdate(id, remaining, {
+      session,
       new: true,
       runValidators: true,
-    },
-  );
-  if (!addImageToGallery) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to add image');
+    });
+    if (!result) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update car Info');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, err);
   }
-  const updatedImage = await Car.findById(id).select('galleryImage');
-  return updatedImage;
-};
-
-const deleteImageFromGallery = async (id: string, payload: Partial<TCar>) => {
-  const isCarExists = await Car.findById(id);
-  if (!isCarExists) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'no car data found');
-  }
-
-  const deleteImageURL = payload?.galleryImage!.map((ele) => ele.url) || [];
-
-  const deleteImageFromGallery = await Car.findByIdAndUpdate(
-    id,
-    {
-      $pull: { galleryImage: { url: { $in: deleteImageURL } } },
-    },
-    { new: true, runValidators: true },
-  );
-  if (!deleteImageFromGallery) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to delete image');
-  }
-  return deleteImageFromGallery;
 };
 
 const deleteCar = async (id: string) => {
@@ -413,9 +411,7 @@ export const carService = {
   getModelsByBrand,
   getSingleCar,
   updateCarInfo,
-  deleteImageFromGallery,
   deleteCar,
-  updateCarImage,
   getCarCategories,
   getCarBrands,
 };

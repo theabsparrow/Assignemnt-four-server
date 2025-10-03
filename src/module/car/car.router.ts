@@ -26,20 +26,6 @@ router.patch(
   carController.updatCarInfo,
 );
 
-router.patch(
-  '/update-image/:id',
-  validateRequest(carValidation.updateCarImageValidationSchema),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
-  carController.updatedCarImage,
-);
-
-router.delete(
-  '/delete-image/:id',
-  validateRequest(carValidation.updateCarImageValidationSchema),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
-  carController.deleteImageFromGallery,
-);
-
 router.delete(
   '/delete/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),

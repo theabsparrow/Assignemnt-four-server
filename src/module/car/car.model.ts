@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { TCar, TGalleryImage } from './car.interface';
+import { TCar } from './car.interface';
 import {
   carBrand,
   carCategory,
@@ -7,12 +7,6 @@ import {
   seatingCapacity,
   years,
 } from './car.const';
-
-const carImageGallerySchema = new Schema<TGalleryImage>({
-  url: {
-    type: String,
-  },
-});
 
 const carSchema = new Schema<TCar>(
   {
@@ -94,7 +88,7 @@ const carSchema = new Schema<TCar>(
       required: [true, 'car image is required'],
     },
     galleryImage: {
-      type: [carImageGallerySchema],
+      type: [String],
       validate: {
         validator: function (value: string[]) {
           return value.length <= 5;
