@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../error/AppError';
 import { User } from '../users/user.model';
@@ -129,6 +130,17 @@ const generateAccessToken = async (refreshToken: string) => {
   return access;
 };
 
+const getUser = async (id: string) => {
+  const userId = id.split(' ')[0];
+  const result = await User.findById(userId).select(
+    'isDeleted status profileImage name',
+  );
+  if (!result || result?.isDeleted || result?.status === 'deactive') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
+  }
+  return result;
+};
+
 const forgetPassword = async (email: string) => {
   // check user existance
   const result = await User.findOne({ email: email }).select(
@@ -151,17 +163,19 @@ const sendOTP = async (id: string) => {
   }
   const otp = generateOTP().toString();
   const hashedOTP = await bcrypt.hash(otp, saltNumber);
+  // create refresh  token
   const jwtPayload = {
     userId: `${result?._id.toString()} ${hashedOTP}`,
     userRole: result?.role,
   };
-  const resetAccessToken = createToken(
+  const refreshToken1 = createToken(
     jwtPayload,
     config.jwt_reset_secret as string,
     config.jwt_reset_expires_in as string,
   );
-  if (resetAccessToken && result?.email) {
-    const resetToken = `Bearer ${resetAccessToken}`;
+  // send otp with email
+  if (refreshToken1 && result?.email) {
+    const refresh = `Bearer ${refreshToken1}`;
     const html = otpEmailTemplate(otp);
     await sendEmail({
       to: result?.email,
@@ -169,59 +183,48 @@ const sendOTP = async (id: string) => {
       subject: 'Your one time password(OTP)',
       text: 'This one time password is valid for only 5 minutes',
     });
-    return { resetToken };
+    return { refresh };
   } else {
     throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
   }
 };
 
-const getUser = async (id: string) => {
-  const userId = id.split(' ')[0];
-  const result = await User.findById(userId).select(
-    'isDeleted status profileImage name',
-  );
-  if (!result || result?.isDeleted || result?.status === 'deactive') {
-    throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
-  }
-  return result;
-};
-
 const resetPassword = async (userId: string, otp: string) => {
-  const hashedOtp = userId.split(' ')[1];
   const id = userId.split(' ')[0];
+  const hashedOtp = userId.split(' ')[1];
   // check user existence
   const userInfo = await User.findById(id).select('isDeleted status role');
   if (!userInfo || userInfo?.isDeleted || userInfo?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
   }
-  // chech the otp
+  // check the otp
   const isOtpMatched = await passwordMatching(otp, hashedOtp);
   if (!isOtpMatched) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'OTP didn`t match');
   }
-  // jwt token creation
   const jwtPayload = {
     userId: userInfo?._id.toString(),
     userRole: userInfo?.role,
   };
-  const tokenForSetNewPass = createToken(
+  // jwt refresh token creation
+  const refreshToken1 = createToken(
     jwtPayload,
     config.jwt_reset_secret as string,
     config.jwt_reset_expires_in as string,
   );
-  const setPassToken = `Bearer ${tokenForSetNewPass}`;
-  return setPassToken;
+  // jwt accesstoken creation
+  const accessToken1 = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+  const refresh = `Bearer ${refreshToken1}`;
+  const access = `Bearer ${accessToken1}`;
+  return { refresh, access };
 };
 
 const setNewPassword = async (userId: string, newPassword: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
-  // check user existance
-  const userInfo = await User.findById(userId).select(
-    'isDeleted status email password',
-  );
-  if (!userInfo || userInfo?.isDeleted || userInfo?.status === 'deactive') {
-    throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
-  }
   const hashedPassword = await bcrypt.hash(newPassword, saltNumber);
   const result = await User.findByIdAndUpdate(
     userId,
@@ -231,7 +234,8 @@ const setNewPassword = async (userId: string, newPassword: string) => {
   if (!result) {
     throw new AppError(StatusCodes.GATEWAY_TIMEOUT, 'time out');
   }
-  return { userInfo };
+  const userInfo = await User.findById(userId).select('email password');
+  return userInfo;
 };
 
 export const authService = {

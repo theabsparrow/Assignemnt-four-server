@@ -6,7 +6,7 @@ import { authService } from './auth.service';
 import { sendResponse } from '../../utills/sendResponse';
 import { StatusCodes } from 'http-status-codes';
 import config from '../../config';
-import { cookieOptions } from './auth.const';
+import { cookieOptions, CookieOptions1 } from './auth.const';
 import { JwtPayload } from 'jsonwebtoken';
 
 const login = catchAsync(
@@ -15,6 +15,7 @@ const login = catchAsync(
     const result = await authService.login(payload);
     const { access, refresh } = result;
     res.cookie('refreshToken', refresh, cookieOptions);
+    res.clearCookie('refreshToken1', CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -27,6 +28,15 @@ const login = catchAsync(
 const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('refreshToken', cookieOptions);
+    res.clearCookie('refreshToken1', CookieOptions1);
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, message: 'successfully logged out' });
+  },
+);
+const clearToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie('refreshToken1', CookieOptions1);
     res
       .status(StatusCodes.OK)
       .json({ success: true, message: 'successfully logged out' });
@@ -63,6 +73,20 @@ const generateAccessToken = catchAsync(
   },
 );
 
+const getUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const { userId } = user;
+    const result = await authService.getUser(userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'user info retrive successfully',
+      data: result,
+    });
+  },
+);
+
 const forgetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email } = req.body;
@@ -79,26 +103,13 @@ const forgetPassword = catchAsync(
 const sendOTP = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.body;
-    const result = await authService.sendOTP(id);
+    const { refresh } = await authService.sendOTP(id);
+    res.cookie('refreshToken1', refresh, CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'sent OTP successfully',
-      data: result,
-    });
-  },
-);
-
-const getUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-    const { userId } = user;
-    const result = await authService.getUser(userId);
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.OK,
-      message: 'user info retrive successfully',
-      data: result,
+      data: null,
     });
   },
 );
@@ -106,14 +117,14 @@ const getUser = catchAsync(
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { otp } = req.body;
-    const user = req.user as JwtPayload;
-    const { userId } = user;
-    const result = await authService.resetPassword(userId, otp);
+    const { userId } = req.user as JwtPayload;
+    const { refresh, access } = await authService.resetPassword(userId, otp);
+    res.cookie('refreshToken1', refresh, CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: 'password reset successfully',
-      data: result,
+      message: 'OTP matched successfully',
+      data: access,
     });
   },
 );
@@ -141,6 +152,7 @@ export const authController = {
   resetPassword,
   setNewPassword,
   logout,
+  clearToken,
   sendOTP,
   getUser,
 };

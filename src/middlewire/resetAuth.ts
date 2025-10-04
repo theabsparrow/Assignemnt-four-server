@@ -12,8 +12,9 @@ import { verifyToken } from '../module/auth/auth.utills';
 
 export const resetAuth = (...requiredRoles: TUSerRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const resetToken = req.headers.authorization;
-    const token = resetToken?.split(' ')[1];
+    // const resetToken = req.headers.authorization;
+    const { refreshToken1 } = req.cookies;
+    const token = refreshToken1?.split(' ')[1];
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
     }
