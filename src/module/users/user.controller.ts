@@ -15,13 +15,51 @@ const createUSer = catchAsync(
     const dataInfo = await userSrevice.createUser(payload);
     const { access, refresh, result, resetToken } = dataInfo;
     res.cookie('refreshToken', refresh, cookieOptions);
-    res.cookie('refreshToken1', resetToken, CookieOptions1);
+    res.cookie('refreshToken2', resetToken, CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,
       message: 'user created successfully',
       data: { access, result },
     });
+  },
+);
+
+const resendOTP = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const result = await userSrevice.resendOTP(id);
+    res.cookie('refreshToken2', result, CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'sent OTP successfully',
+      data: null,
+    });
+  },
+);
+
+const verifyEmail = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { otp } = req.body;
+    const user = req.user as JwtPayload;
+    const { userId } = user;
+    const { refreshToken2: token } = req.cookies;
+    await userSrevice.verifyEmail({ userId, otp, token });
+    res.clearCookie('refreshToken2', CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'sent OTP successfully',
+      data: null,
+    });
+  },
+);
+
+const clearCookie = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie('refreshToken2', CookieOptions1);
+    res.status(StatusCodes.OK).json({ success: true, message: 'clear cookie' });
   },
 );
 
@@ -151,6 +189,9 @@ const deleteAccount = catchAsync(
 
 export const userController = {
   createUSer,
+  resendOTP,
+  verifyEmail,
+  clearCookie,
   getAllUsers,
   getASingleUSer,
   updateUserStatus,

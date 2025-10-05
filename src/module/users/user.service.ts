@@ -7,6 +7,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { searchableFields, USER_ROLE } from './user.constant';
 import {
   createToken,
+  decodeToken,
   generateOTP,
   passwordMatching,
 } from '../auth/auth.utills';
@@ -100,6 +101,74 @@ const createUser = async (payload: TUser) => {
     const refresh = `Bearer ${refreshToken}`;
     return { result, access, refresh };
   }
+};
+
+const resendOTP = async (id: string) => {
+  const saltNumber = Number(config.bcrypt_salt_round);
+  // check user existance
+  const result = await User.findById(id).select('isDeleted status email role');
+  if (!result || result?.isDeleted || result?.status === 'deactive') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
+  }
+  const otp = generateOTP().toString();
+  const hashedOTP = await bcrypt.hash(otp, saltNumber);
+  // create refresh  token
+  const jwtPayload = {
+    userId: `${result?._id.toString()} ${hashedOTP}`,
+    userRole: result?.role,
+  };
+  const refreshToken1 = createToken(
+    jwtPayload,
+    config.jwt_reset_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+  // send otp with email
+  if (refreshToken1 && result?.email) {
+    const refresh = `Bearer ${refreshToken1}`;
+    const html = otpEmailTemplate(otp);
+    await sendEmail({
+      to: result?.email,
+      html,
+      subject: 'Your one time password(OTP)',
+      text: 'This one time password is valid for only 5 minutes',
+    });
+    return refresh;
+  } else {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
+  }
+};
+
+const verifyEmail = async ({
+  userId,
+  otp,
+  token,
+}: {
+  userId: string;
+  otp: string;
+  token: string;
+}) => {
+  const { id, hashedOtp } = decodeToken(token);
+  if (id !== userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
+  }
+  const userInfo = await User.findById(userId).select('isDeleted status');
+  if (!userInfo || userInfo?.isDeleted || userInfo?.status === 'deactive') {
+    throw new AppError(StatusCodes.NOT_FOUND, 'user not found');
+  }
+  // check the otp
+  const isOtpMatched = await passwordMatching(otp, hashedOtp);
+  if (!isOtpMatched) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'OTP didn`t match');
+  }
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { verifyWithEmail: true },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'faild to verify email');
+  }
+  return null;
 };
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {
@@ -302,7 +371,10 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       modifiedData[`name.${key}`] = value;
     }
   }
-  if (email) modifiedData.email = email;
+  if (email) {
+    modifiedData.email = email;
+    modifiedData.verifyWithEmail = false;
+  }
   if (phoneNumber) modifiedData.phoneNumber = phoneNumber;
   const result = await User.findByIdAndUpdate(userId, modifiedData, {
     new: true,
@@ -339,6 +411,8 @@ const deleteAccount = async (password: string, user: JwtPayload) => {
 
 export const userSrevice = {
   createUser,
+  resendOTP,
+  verifyEmail,
   getAllUser,
   getASingleUSer,
   updateUSerStatus,

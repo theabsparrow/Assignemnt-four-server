@@ -154,9 +154,7 @@ const forgetPassword = async (email: string) => {
 const sendOTP = async (id: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
-  const result = await User.findById(id).select(
-    'isDeleted status profileImage name email role',
-  );
+  const result = await User.findById(id).select('isDeleted status email role');
   if (!result || result?.isDeleted || result?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
   }
