@@ -168,7 +168,7 @@ const verifyEmail = async ({
   if (!result) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'faild to verify email');
   }
-  return null;
+  return result;
 };
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {

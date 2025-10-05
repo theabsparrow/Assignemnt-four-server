@@ -45,8 +45,10 @@ const verifyEmail = catchAsync(
     const user = req.user as JwtPayload;
     const { userId } = user;
     const { refreshToken2: token } = req.cookies;
-    await userSrevice.verifyEmail({ userId, otp, token });
-    res.clearCookie('refreshToken2', CookieOptions1);
+    const result = await userSrevice.verifyEmail({ userId, otp, token });
+    if (result) {
+      res.clearCookie('refreshToken2', CookieOptions1);
+    }
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
