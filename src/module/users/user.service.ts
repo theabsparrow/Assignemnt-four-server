@@ -306,6 +306,13 @@ const getMe = async (user: JwtPayload, query: Record<string, unknown>) => {
     if (!result) {
       throw new AppError(StatusCodes.NOT_FOUND, 'information not found');
     }
+  } else if (query.for === 'settings') {
+    result = await User.findById(userId).select(
+      'name email phoneNumber gender dateOfBirth',
+    );
+    if (!result) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'information not found');
+    }
   } else {
     result = await User.findById(userId).select(
       '-role -isDeleted -passwordChangedAt -updatedAt -status',
