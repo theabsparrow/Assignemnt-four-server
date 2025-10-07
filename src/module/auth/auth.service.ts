@@ -5,6 +5,7 @@ import { TChangePassword, TLogin } from './auth.interface';
 import bcrypt from 'bcrypt';
 import {
   createToken,
+  decodeToken,
   generateOTP,
   passwordMatching,
   timeComparison,
@@ -186,6 +187,93 @@ const retrivePassword = async (id: string, payload: { email: string }) => {
   }
 };
 
+const otpResend = async (id: string) => {
+  const saltNumber = Number(config.bcrypt_salt_round);
+  const result = await User.findById(id).select('email role');
+  const otp = generateOTP().toString();
+  const hashedOTP = await bcrypt.hash(otp, saltNumber);
+  const jwtPayload = {
+    userId: `${id} ${hashedOTP}`,
+    userRole: result?.role as TUSerRole,
+  };
+  const refreshToken3 = createToken(
+    jwtPayload,
+    config.jwt_reset_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+  if (refreshToken3) {
+    const refresh = `Bearer ${refreshToken3}`;
+    const html = otpEmailTemplate(otp);
+    await sendEmail({
+      to: result?.email as string,
+      html,
+      subject: 'Your one time password(OTP)',
+      text: 'This one time password is valid for only 5 minutes',
+    });
+    return { refresh };
+  } else {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
+  }
+};
+
+const matchOtp = async ({
+  userId,
+  token,
+  otp,
+}: {
+  userId: string;
+  token: string;
+  otp: string;
+}) => {
+  const { id, hashedOtp } = decodeToken(token);
+  if (id !== userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
+  }
+  // match the otp
+  const isOtpMatched = await passwordMatching(otp, hashedOtp);
+  if (!isOtpMatched) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'OTP didn`t match');
+  }
+  const userInfo = await User.findById(userId).select('role');
+  const jwtPayload = {
+    userId: userId,
+    userRole: userInfo?.role as TUSerRole,
+  };
+  // jwt refresh token creation
+  const refreshToken3 = createToken(
+    jwtPayload,
+    config.jwt_reset_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+  const refresh = `Bearer ${refreshToken3}`;
+  return refresh;
+};
+
+const updateNewPassword = async (id: string, newPassword: string) => {
+  const saltNumber = Number(config.bcrypt_salt_round);
+  const hashedPassword = await bcrypt.hash(newPassword, saltNumber);
+  const result = await User.findByIdAndUpdate(
+    id,
+    { password: hashedPassword, passwordChangedAt: new Date() },
+    { new: true },
+  );
+  if (!result) {
+    throw new AppError(StatusCodes.GATEWAY_TIMEOUT, 'time out');
+  }
+  const jwtPayload = {
+    userId: result?._id.toString(),
+    userRole: result?.role as TUSerRole,
+  };
+  // jwt refresh token creation
+  const refreshToken = createToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
+  );
+  const refresh = `Bearer ${refreshToken}`;
+  return refresh;
+};
+
 const sendOTP = async (id: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
@@ -280,4 +368,7 @@ export const authService = {
   sendOTP,
   getUser,
   retrivePassword,
+  matchOtp,
+  otpResend,
+  updateNewPassword,
 };

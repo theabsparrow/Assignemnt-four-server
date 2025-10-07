@@ -1,19 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { NextFunction, Request, Response } from 'express';
+import { TUSerRole } from '../module/users/user.interface';
 import { catchAsync } from '../utills/catchAsync';
 import AppError from '../error/AppError';
 import { StatusCodes } from 'http-status-codes';
-import { JwtPayload } from 'jsonwebtoken';
-import config from '../config';
-import { User } from '../module/users/user.model';
-import { TUSerRole } from '../module/users/user.interface';
 import { verifyToken } from '../module/auth/auth.utills';
+import config from '../config';
+import { JwtPayload } from 'jsonwebtoken';
+import { User } from '../module/users/user.model';
 
-export const resetAuth = (...requiredRoles: TUSerRole[]) => {
+export const resetRefresh = (...requiredRoles: TUSerRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { refreshToken1 } = req.cookies;
-    const token = refreshToken1?.split(' ')[1];
+    const { refreshToken3 } = req.cookies;
+    const token = refreshToken3?.split(' ')[1];
     if (!token) {
       throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
     }

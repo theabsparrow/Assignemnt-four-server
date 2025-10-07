@@ -16,6 +16,8 @@ const login = catchAsync(
     const { access, refresh } = result;
     res.cookie('refreshToken', refresh, cookieOptions);
     res.clearCookie('refreshToken1', CookieOptions1);
+    res.clearCookie('refreshToken2', CookieOptions1);
+    res.clearCookie('refreshToken3', CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -29,6 +31,8 @@ const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('refreshToken', cookieOptions);
     res.clearCookie('refreshToken1', CookieOptions1);
+    res.clearCookie('refreshToken2', CookieOptions1);
+    res.clearCookie('refreshToken3', CookieOptions1);
     res
       .status(StatusCodes.OK)
       .json({ success: true, message: 'successfully logged out' });
@@ -37,6 +41,8 @@ const logout = catchAsync(
 const clearToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie('refreshToken1', CookieOptions1);
+    res.clearCookie('refreshToken2', CookieOptions1);
+    res.clearCookie('refreshToken3', CookieOptions1);
     res
       .status(StatusCodes.OK)
       .json({ success: true, message: 'successfully logged out' });
@@ -115,9 +121,57 @@ const retrivePassword = catchAsync(
   },
 );
 
+const otpResend = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.user as JwtPayload;
+    const { refresh } = await authService.otpResend(userId);
+    res.cookie('refreshToken3', refresh, CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'otp sent successfully',
+      data: null,
+    });
+  },
+);
+
+const matchOtp = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.user as JwtPayload;
+    const { refreshToken3: token } = req.cookies;
+    const { otp } = req.body;
+    const result = await authService.matchOtp({ userId, token, otp });
+    res.cookie('refreshToken3', result, CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'otp sent successfully',
+      data: null,
+    });
+  },
+);
+
+const updateNewPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.user as JwtPayload;
+    const { newPassword } = req.body;
+    const result = await authService.updateNewPassword(userId, newPassword);
+    res.cookie('refreshToken', result, cookieOptions);
+    res.clearCookie('refreshToken3', CookieOptions1);
+    res.clearCookie('refreshToken2', CookieOptions1);
+    res.clearCookie('refreshToken1', CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'otp sent successfully',
+      data: null,
+    });
+  },
+);
+
 const sendOTP = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.body;
+    const id = req.params.id;
     const { refresh } = await authService.sendOTP(id);
     res.cookie('refreshToken1', refresh, CookieOptions1);
     sendResponse(res, {
@@ -171,4 +225,7 @@ export const authController = {
   sendOTP,
   getUser,
   retrivePassword,
+  otpResend,
+  matchOtp,
+  updateNewPassword,
 };

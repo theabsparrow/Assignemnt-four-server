@@ -5,6 +5,7 @@ import { authController } from './auth.controller';
 import { auth } from '../../middlewire/auth';
 import { USER_ROLE } from '../users/user.constant';
 import { resetAuth } from '../../middlewire/resetAuth';
+import { resetRefresh } from '../../middlewire/resetRefresh';
 
 const router = Router();
 router.post(
@@ -46,10 +47,23 @@ router.post(
   authController.retrivePassword,
 );
 router.post(
-  '/send-otp',
-  validateRequest(authValidation.sendOtpValidationSchema),
-  authController.sendOTP,
+  '/otp-resend',
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.otpResend,
 );
+router.post(
+  '/match-otp',
+  validateRequest(authValidation.resetPasswordValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.matchOtp,
+);
+router.post(
+  '/update-newPassword',
+  validateRequest(authValidation.setNewPasswordValidationSchema),
+  resetRefresh(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.updateNewPassword,
+);
+router.post('/send-otp/:id', authController.sendOTP);
 router.post(
   '/reset-password',
   validateRequest(authValidation.resetPasswordValidationSchema),
