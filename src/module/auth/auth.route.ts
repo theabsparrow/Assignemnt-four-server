@@ -40,6 +40,12 @@ router.post(
   authController.forgetPassword,
 );
 router.post(
+  '/retrive-password',
+  validateRequest(authValidation.forgetPasswordValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  authController.retrivePassword,
+);
+router.post(
   '/send-otp',
   validateRequest(authValidation.sendOtpValidationSchema),
   authController.sendOTP,

@@ -179,12 +179,16 @@ const deleteAccount = catchAsync(
     const { password } = req.body;
     const user = req.user;
     const result = await userSrevice.deleteAccount(password, user);
-    res.clearCookie('refreshToken', cookieOptions);
+    if (result) {
+      res.clearCookie('refreshToken', cookieOptions);
+      res.clearCookie('refreshToken1', CookieOptions1);
+      res.clearCookie('refreshToken2', CookieOptions1);
+    }
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'account deleted successfully',
-      data: result,
+      data: null,
     });
   },
 );

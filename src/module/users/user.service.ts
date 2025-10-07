@@ -308,7 +308,7 @@ const getMe = async (user: JwtPayload, query: Record<string, unknown>) => {
     }
   } else if (query.for === 'settings') {
     result = await User.findById(userId).select(
-      'name email phoneNumber gender dateOfBirth',
+      'name email phoneNumber gender dateOfBirth verifyWithEmail profileImage',
     );
     if (!result) {
       throw new AppError(StatusCodes.NOT_FOUND, 'information not found');

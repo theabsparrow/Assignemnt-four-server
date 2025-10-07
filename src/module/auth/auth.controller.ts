@@ -100,6 +100,21 @@ const forgetPassword = catchAsync(
   },
 );
 
+const retrivePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+    const { userId } = req.user as JwtPayload;
+    const { refresh } = await authService.retrivePassword(userId, payload);
+    res.cookie('refreshToken3', refresh, CookieOptions1);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'otp sent successfully',
+      data: null,
+    });
+  },
+);
+
 const sendOTP = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.body;
@@ -155,4 +170,5 @@ export const authController = {
   clearToken,
   sendOTP,
   getUser,
+  retrivePassword,
 };

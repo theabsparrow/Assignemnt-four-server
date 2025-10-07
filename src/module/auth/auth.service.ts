@@ -151,6 +151,41 @@ const forgetPassword = async (email: string) => {
   return result;
 };
 
+const retrivePassword = async (id: string, payload: { email: string }) => {
+  const saltNumber = Number(config.bcrypt_salt_round);
+  const result = await User.findById(id).select('email role');
+  if (result?.email !== payload.email) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      'this is not your email address ',
+    );
+  }
+  const otp = generateOTP().toString();
+  const hashedOTP = await bcrypt.hash(otp, saltNumber);
+  const jwtPayload = {
+    userId: `${id} ${hashedOTP}`,
+    userRole: result?.role as TUSerRole,
+  };
+  const refreshToken3 = createToken(
+    jwtPayload,
+    config.jwt_reset_secret as string,
+    config.jwt_reset_expires_in as string,
+  );
+  if (refreshToken3) {
+    const refresh = `Bearer ${refreshToken3}`;
+    const html = otpEmailTemplate(otp);
+    await sendEmail({
+      to: result?.email,
+      html,
+      subject: 'Your one time password(OTP)',
+      text: 'This one time password is valid for only 5 minutes',
+    });
+    return { refresh };
+  } else {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'something went wrong');
+  }
+};
+
 const sendOTP = async (id: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
@@ -244,4 +279,5 @@ export const authService = {
   setNewPassword,
   sendOTP,
   getUser,
+  retrivePassword,
 };
