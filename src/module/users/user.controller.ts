@@ -27,8 +27,8 @@ const createUSer = catchAsync(
 
 const resendOTP = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-    const result = await userSrevice.resendOTP(id);
+    const { userID } = req.user as JwtPayload;
+    const result = await userSrevice.resendOTP(userID);
     res.cookie('refreshToken2', result, CookieOptions1);
     sendResponse(res, {
       success: true,

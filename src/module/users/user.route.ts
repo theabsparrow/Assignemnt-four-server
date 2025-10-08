@@ -14,7 +14,7 @@ router.post(
   userController.createUSer,
 );
 router.post(
-  '/send-otp/:id',
+  '/send-otp',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   userController.resendOTP,
 );

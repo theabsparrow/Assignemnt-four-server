@@ -106,9 +106,14 @@ const createUser = async (payload: TUser) => {
 const resendOTP = async (id: string) => {
   const saltNumber = Number(config.bcrypt_salt_round);
   // check user existance
-  const result = await User.findById(id).select('isDeleted status email role');
+  const result = await User.findById(id).select(
+    'isDeleted status email role verifyWithEmail',
+  );
   if (!result || result?.isDeleted || result?.status === 'deactive') {
     throw new AppError(StatusCodes.NOT_FOUND, 'No account found ');
+  }
+  if (result?.verifyWithEmail) {
+    throw new AppError(StatusCodes.CONFLICT, ' this email is already verified');
   }
   const otp = generateOTP().toString();
   const hashedOTP = await bcrypt.hash(otp, saltNumber);
