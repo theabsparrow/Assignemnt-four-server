@@ -156,15 +156,12 @@ const updateNewPassword = catchAsync(
     const { userId } = req.user as JwtPayload;
     const { newPassword } = req.body;
     const result = await authService.updateNewPassword(userId, newPassword);
-    res.cookie('refreshToken', result, cookieOptions);
     res.clearCookie('refreshToken3', CookieOptions1);
-    res.clearCookie('refreshToken2', CookieOptions1);
-    res.clearCookie('refreshToken1', CookieOptions1);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'otp sent successfully',
-      data: null,
+      data: result,
     });
   },
 );

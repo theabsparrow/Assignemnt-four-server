@@ -260,18 +260,8 @@ const updateNewPassword = async (id: string, newPassword: string) => {
   if (!result) {
     throw new AppError(StatusCodes.GATEWAY_TIMEOUT, 'time out');
   }
-  const jwtPayload = {
-    userId: result?._id.toString(),
-    userRole: result?.role as TUSerRole,
-  };
-  // jwt refresh token creation
-  const refreshToken = createToken(
-    jwtPayload,
-    config.jwt_refresh_secret as string,
-    config.jwt_refresh_expires_in as string,
-  );
-  const refresh = `Bearer ${refreshToken}`;
-  return refresh;
+
+  return null;
 };
 
 const sendOTP = async (id: string) => {

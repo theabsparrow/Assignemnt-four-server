@@ -327,15 +327,15 @@ const getMe = async (user: JwtPayload, query: Record<string, unknown>) => {
 
 const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
   const { userId } = user;
-
-  const { name, email, phoneNumber, dateOfBirth, ...remainingInfo } = payload;
+  const { name, email, phoneNumber, dateOfBirth, password, ...remainingInfo } =
+    payload;
   const modifiedData: Record<string, unknown> = { ...remainingInfo };
 
   // check existing user
   const existingUser = await User.findOne({
     isDeleted: false,
     $or: [{ email: email }, { phoneNumber: phoneNumber }],
-  }).select('email phoneNumber');
+  }).select('email phoneNumber password');
 
   if (existingUser) {
     if (existingUser.email === email) {
@@ -348,6 +348,8 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
       );
     }
   }
+  // check if the email and the password both are provided
+
   // check if the user age is under 18
   if (dateOfBirth) {
     const age = calculateAge(dateOfBirth);
@@ -379,6 +381,22 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
     }
   }
   if (email) {
+    if (!password) {
+      throw new AppError(
+        StatusCodes.NOT_FOUND,
+        'please provide your password to update your email',
+      );
+    }
+    const isPasswordMatched = await passwordMatching(
+      password,
+      existingUser?.password as string,
+    );
+    if (!isPasswordMatched) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        'the password you have provided is wrong',
+      );
+    }
     modifiedData.email = email;
     modifiedData.verifyWithEmail = false;
   }

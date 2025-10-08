@@ -78,6 +78,10 @@ const updateUserInfoValidationSchema = z.object({
   coverImage: z.string().optional(),
   homeTown: z.string().optional(),
   currentAddress: z.string().optional(),
+  password: z
+    .string()
+    .max(20, 'more than 20 character is not acceptable')
+    .optional(),
 });
 
 const userStatusValidationSchema = z.object({
