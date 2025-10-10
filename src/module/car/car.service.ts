@@ -31,6 +31,15 @@ const createCar = async (payload: TcarInfoPayload, userId: string) => {
   ) {
     payload.basicInfo.negotiable = true;
   }
+  if (
+    deliveryAndPayment.paymentMethod.includes('Online Payment') &&
+    !deliveryAndPayment.paymentOption?.length
+  ) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      'payment option is missing for online payment',
+    );
+  }
   payload.basicInfo.user = new Types.ObjectId(userId);
   const session = await mongoose.startSession();
   try {

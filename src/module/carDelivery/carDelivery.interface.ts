@@ -1,7 +1,6 @@
 export type TPaymentMethod = 'Cash on Delivery' | 'Online Payment';
 export type TPaymentOptions = 'SSLCommerz' | 'Stripe' | 'SurjoPay';
-
-export type TDeliveryMethod = 'Home Delivery' | 'Pickup' | 'Express Delivery';
+export type TDeliveryOptions = 'Home Delivery' | 'Pickup' | 'Express Delivery';
 
 export type TEstimatedTime =
   | '24 hours'
@@ -12,12 +11,16 @@ export type TEstimatedTime =
   | '9 days'
   | '10 days';
 
-export type TDeliveryAndPayment = {
-  paymentMethod: TPaymentMethod[];
-  paymentOption: TPaymentOptions[];
-  deliveryMethod: TDeliveryMethod;
+export type TDeliveryMethod = {
+  deliveryOption: TDeliveryOptions;
   estimatedTime: TEstimatedTime;
   deliveryCost: number;
+};
+
+export type TDeliveryAndPayment = {
+  paymentMethod: TPaymentMethod[];
+  paymentOption?: TPaymentOptions[];
+  deliveryMethod: TDeliveryMethod[];
   isDeleted: boolean;
 };
 

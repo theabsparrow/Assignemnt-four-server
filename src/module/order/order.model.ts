@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { Torder, TTrackingInfo } from './order.interface';
 import { orderStatus, trackingStatus } from './order.const';
 import {
-  deliveryMethods,
+  deliveryOptions,
   paymentMethod,
   paymentOptions,
 } from '../carDelivery/carDelivery.const';
@@ -65,7 +65,7 @@ const orderSchema = new Schema<Torder>(
     date_time: String,
     deliveryMethod: {
       type: String,
-      enum: deliveryMethods,
+      enum: deliveryOptions,
       required: [true, 'delivery method is required'],
     },
     tracking: trackingSchema,

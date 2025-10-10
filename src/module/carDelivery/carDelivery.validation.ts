@@ -1,10 +1,20 @@
 import { z } from 'zod';
 import {
-  deliveryMethods,
+  deliveryOptions,
   estimatedTimes,
   paymentMethod,
   paymentOptions,
 } from './carDelivery.const';
+
+const deliveryMethodValidationSchema = z.object({
+  deliveryOption: z.enum([...deliveryOptions] as [string, ...string[]], {
+    required_error: 'delivery methods is required',
+  }),
+  estimatedTime: z.enum([...estimatedTimes] as [string, ...string[]], {
+    required_error: 'estimated time is required',
+  }),
+  deliveryCost: z.number({ required_error: 'delivery const is required' }),
+});
 
 export const deliveryAndPaymentValidationSchema = z.object({
   paymentMethod: z.array(
@@ -13,17 +23,13 @@ export const deliveryAndPaymentValidationSchema = z.object({
     }),
   ),
   paymentOption: z.array(
-    z.enum([...paymentOptions] as [string, ...string[]], {
-      required_error: 'payment options are required',
-    }),
+    z
+      .enum([...paymentOptions] as [string, ...string[]], {
+        required_error: 'payment options are required',
+      })
+      .optional(),
   ),
-  deliveryMethod: z.enum([...deliveryMethods] as [string, ...string[]], {
-    required_error: 'delivery methods is required',
-  }),
-  estimatedTime: z.enum([...estimatedTimes] as [string, ...string[]], {
-    required_error: 'estimated time is required',
-  }),
-  deliveryCost: z.number({ required_error: 'delivery const is required' }),
+  deliveryMethod: z.array(deliveryMethodValidationSchema),
 });
 
 export const updateDeliveryAndPaymentValidatonSchema = z.object({
@@ -54,19 +60,6 @@ export const updateDeliveryAndPaymentValidatonSchema = z.object({
         required_error: 'payment options are required',
       }),
     )
-    .optional(),
-  deliveryMethod: z
-    .enum([...deliveryMethods] as [string, ...string[]], {
-      required_error: 'delivery methods is required',
-    })
-    .optional(),
-  estimatedTime: z
-    .enum([...estimatedTimes] as [string, ...string[]], {
-      required_error: 'estimated time is required',
-    })
-    .optional(),
-  deliveryCost: z
-    .number({ required_error: 'delivery const is required' })
     .optional(),
 });
 
