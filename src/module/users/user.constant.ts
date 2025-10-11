@@ -10,7 +10,6 @@ export const gender: TGender[] = ['male', 'female', 'others'];
 
 export const searchableFields: string[] = [
   'email',
-  'phoneNumber',
   'name.firstName',
   'name.lastName',
   'name.middleName',

@@ -185,12 +185,18 @@ const getAllCars = async (query: Record<string, unknown>) => {
 const getAllCarList = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   filter.isDeleted = false;
+  if (query?.inStock) {
+    filter.inStock = query.inStock === 'Available' ? true : false;
+  }
+  if (query?.negotiable) {
+    filter.negotiable = query.negotiable === 'Yes';
+  }
   query.limit = 30;
   query = {
-    ...filter,
+    ...query,
     fields:
       ' model, brand, category, condition, year, madeIn, inStock, negotiable, createdAt, price',
-    ...query,
+    ...filter,
   };
   const carQuery = new QueryBuilder(Car.find(), query)
     .search(carSearchAbleFields)

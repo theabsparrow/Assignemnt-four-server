@@ -74,12 +74,8 @@ const getAllUsers = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message:
-        result?.result.length > 0
-          ? 'users are retrived successfully'
-          : 'no user right now',
-      meta: result?.meta,
-      data: result?.result,
+      message: 'users are retrived successfully',
+      data: result,
     });
   },
 );

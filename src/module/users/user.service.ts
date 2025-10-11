@@ -178,22 +178,30 @@ const verifyEmail = async ({
 
 const getAllUser = async (role: string, query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
-  if (role === USER_ROLE.admin) {
-    filter.isDeleted = false;
-    filter.role = USER_ROLE.user;
-  }
-  query = { ...query, ...filter };
+  filter.isDeleted = false;
+  filter.role = { $in: ['admin', 'user'] };
+  query = {
+    ...query,
+    fields:
+      'name, email, profileImage, phoneNumber, gender, dateOfBirth, status, role, verifyWithEmail',
+    ...filter,
+  };
   const usersQuery = new QueryBuilder(User.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
     .paginateQuery()
     .fields();
-
   const result = await usersQuery.modelQuery;
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'no data found');
+  }
+  const totalUser = await User.countDocuments({
+    role: { $in: ['admin', 'user'] },
+    isDeleted: false,
+  });
   const meta = await usersQuery.countTotal();
-
-  return { meta, result };
+  return { meta, result, totalUser };
 };
 
 const getASingleUSer = async (id: string, user: JwtPayload) => {
