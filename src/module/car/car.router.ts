@@ -15,6 +15,11 @@ router.post(
 );
 
 router.get('/get-allCars', carController.getAllCars);
+router.get(
+  '/all-carsList',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  carController.getAllCarList,
+);
 router.get('/get-models', carController.getModelsByBrand);
 router.get('/get-categories', carController.getCarCategories);
 router.get('/get-brands', carController.getCarBrands);

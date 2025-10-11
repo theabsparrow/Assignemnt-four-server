@@ -137,7 +137,7 @@ const createCar = async (payload: TcarInfoPayload, userId: string) => {
 
 const getAllCars = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
-  // filter.isDeleted = false;
+  filter.isDeleted = false;
   filter.inStock = query?.inStock ? query.inStock === 'yes' : true;
   query.limit = query?.limit ? query.limit : '21';
   query = {
@@ -161,11 +161,17 @@ const getAllCars = async (query: Record<string, unknown>) => {
     if (query?.brand) {
       models = await Car.distinct('model', { brand: query.brand });
     }
-    const totalCar = await Car.countDocuments({ inStock: true });
-    const highestCarPrice = await Car.findOne({}, { price: 1 })
+    const totalCar = await Car.countDocuments({
+      inStock: true,
+      isDeleted: false,
+    });
+    const highestCarPrice = await Car.findOne(
+      { isDeleted: false },
+      { price: 1 },
+    )
       .sort({ price: -1 })
       .lean();
-    const lowestPrice = await Car.findOne({}, { price: 1 })
+    const lowestPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
       .sort({ price: 1 })
       .lean();
     const maxPrice = highestCarPrice?.price ?? 0;
@@ -176,8 +182,49 @@ const getAllCars = async (query: Record<string, unknown>) => {
   }
 };
 
+const getAllCarList = async (query: Record<string, unknown>) => {
+  const filter: Record<string, unknown> = {};
+  filter.isDeleted = false;
+  query.limit = 30;
+  query = {
+    ...filter,
+    fields:
+      ' model, brand, category, condition, year, madeIn, inStock, negotiable, createdAt, price',
+    ...query,
+  };
+  const carQuery = new QueryBuilder(Car.find(), query)
+    .search(carSearchAbleFields)
+    .filter()
+    .sort()
+    .paginateQuery()
+    .fields();
+  const result = await carQuery.modelQuery;
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No data found');
+  }
+  const meta = await carQuery.countTotal();
+  let models: string[] = [];
+  if (query?.brand) {
+    models = await Car.distinct('model', { brand: query.brand });
+  }
+  const totalCar = await Car.countDocuments({
+    inStock: true,
+    isDeleted: false,
+  });
+
+  const highestCarPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
+    .sort({ price: -1 })
+    .lean();
+  const lowestPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
+    .sort({ price: 1 })
+    .lean();
+  const maxPrice = highestCarPrice?.price ?? 0;
+  const minPrice = lowestPrice?.price ?? 0;
+  return { meta, result, models, totalCar, maxPrice, minPrice };
+};
+
 const getModelsByBrand = async (query: Record<string, unknown>) => {
-  const highestCarPrice = await Car.findOne({}, { price: 1 })
+  const highestCarPrice = await Car.findOne({}, { price: 1, isDeleted: false })
     .sort({ price: -1 })
     .lean();
   const lowestPrice = await Car.findOne({}, { price: 1 })
@@ -434,6 +481,7 @@ const deleteCar = async (id: string) => {
 export const carService = {
   createCar,
   getAllCars,
+  getAllCarList,
   getModelsByBrand,
   getSingleCar,
   updateCarInfo,
