@@ -13,9 +13,11 @@ const safetyFeatureValidationSchema = z.object({
     }),
   ),
   airbags: z.enum([...airBags] as [string, ...string[]]).optional(),
-  warranty: z.enum([...warranty] as [string, ...string[]], {
-    required_error: 'warenty is required',
-  }),
+  warranty: z
+    .enum([...warranty] as [string, ...string[]], {
+      required_error: 'warenty is required',
+    })
+    .optional(),
   safetyRating: z.enum([...safetyRating] as [string, ...string[]], {
     required_error: 'safety rating is required',
   }),

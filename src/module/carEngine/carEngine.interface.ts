@@ -19,7 +19,16 @@ export type TEngineType =
   | '2.0L 4-cylinder'
   | '2.2L 4-cylinder'
   | '2.5L 4-cylinder'
+  | '1.0L Turbocharged 4-cylinder'
+  | '1.2L Turbocharged 4-cylinder'
+  | '1.3L Turbocharged 4-cylinder'
+  | '1.4L Turbocharged 4-cylinder'
+  | '1.5L Turbocharged 4-cylinder'
+  | '1.6L Turbocharged 4-cylinder'
+  | '1.8L Turbocharged 4-cylinder'
+  | '2.5L Turbocharged 4-cylinder'
   | '2.0L Turbocharged 4-cylinder'
+  | '2.2L Turbocharged 4-cylinder'
   | '2.5L Turbocharged 4-cylinder'
   | '3.0L V6'
   | '3.5L Twin Turbo V6'
@@ -73,6 +82,7 @@ export type TTransmission =
   | 'Electric Drive';
 
 export type TDriveTrain = 'FWD' | 'RWD' | 'AWD' | '4WD' | 'All-Wheel Drive';
+
 export type THorsePower =
   | '50'
   | '60'
@@ -121,18 +131,33 @@ export type THorsePower =
   | 'Less than 50';
 
 export type TTorque =
+  | '50'
+  | '75'
   | '100'
+  | '125'
   | '150'
+  | '175'
   | '200'
+  | '225'
   | '250'
+  | '275'
   | '300'
+  | '325'
   | '350'
+  | '375'
   | '400'
+  | '425'
   | '450'
+  | '475'
   | '500'
+  | '550'
   | '600'
+  | '650'
   | '700'
-  | '800+';
+  | '750'
+  | '800'
+  | '900'
+  | '1000+';
 
 export type TTopSpeed =
   | '120'
@@ -145,6 +170,7 @@ export type TTopSpeed =
   | '280'
   | '300+';
 export type TAccelaration =
+  | '3.0'
   | '3.5'
   | '4.0'
   | '4.5'
@@ -154,7 +180,12 @@ export type TAccelaration =
   | '6.5'
   | '7.0'
   | '7.5'
-  | '8.0+';
+  | '8.0'
+  | '8.5'
+  | '9.0'
+  | '9.5'
+  | '10.0'
+  | '10+';
 
 export type TCarEngine = {
   engine: TEngineType;
@@ -162,9 +193,9 @@ export type TCarEngine = {
   mileage: number;
   fuelType: TFuelType;
   driveTrain: TDriveTrain;
-  horsePower: THorsePower;
-  torque: TTorque;
-  topSpeed: TTopSpeed;
-  acceleration: TAccelaration;
+  horsePower: string;
+  torque: string;
+  topSpeed: string;
+  acceleration: string;
   isDeleted: boolean;
 };

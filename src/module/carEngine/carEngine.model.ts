@@ -1,15 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { TCarEngine } from './carEngine.interface';
-import {
-  accelaration,
-  driveTrain,
-  engine,
-  fuelType,
-  horsePower,
-  topSpeed,
-  torque,
-  transmission,
-} from './carEngine.const';
+import { driveTrain, engine, fuelType, transmission } from './carEngine.const';
 
 const carEngineSchema = new Schema<TCarEngine>(
   {
@@ -39,22 +30,22 @@ const carEngineSchema = new Schema<TCarEngine>(
     },
     horsePower: {
       type: String,
-      enum: horsePower,
+      max: [4, 'horse power can`t be more than 4 character'],
       required: [true, 'horse power is required'],
     },
     torque: {
       type: String,
-      enum: torque,
+      max: [4, 'torque can`t be more than 4 character'],
       required: [true, 'torque is required'],
     },
     topSpeed: {
       type: String,
-      enum: topSpeed,
+      max: [4, 'torque can`t be more than 4 character'],
       required: [true, 'torque is required'],
     },
     acceleration: {
       type: String,
-      enum: accelaration,
+      max: [4, 'accelaration can`t be more than 4 character'],
       required: [true, 'accelaration is required'],
     },
     isDeleted: {

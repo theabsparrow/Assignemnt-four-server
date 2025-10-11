@@ -26,7 +26,6 @@ const safetyFeatureSchema = new Schema<TSafetyFeature>(
     warranty: {
       type: String,
       enum: warranty,
-      required: [true, 'warrenty is required'],
     },
     isDeleted: {
       type: Boolean,

@@ -25,12 +25,29 @@ const createCar = async (payload: TcarInfoPayload, userId: string) => {
   basicInfo.carBrandLogo = logo as string;
   basicInfo.model =
     basicInfo.model.charAt(0).toUpperCase() + basicInfo.model.slice(1);
+  // validate basic info
   if (
     payload?.basicInfo?.condition === 'Used' ||
     payload?.basicInfo?.condition === 'Certified Pre-Owned'
   ) {
     payload.basicInfo.negotiable = true;
   }
+  // validate safety feature
+  if (safetyFeature) {
+    if (
+      safetyFeature?.features.includes('Air Bags') &&
+      !safetyFeature.airbags
+    ) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'air bag is missing');
+    }
+    if (basicInfo.condition === 'New' && !safetyFeature.warranty) {
+      throw new AppError(
+        StatusCodes.NOT_FOUND,
+        'brand new car must has a warranty',
+      );
+    }
+  }
+  // validate delivery and payment
   if (
     deliveryAndPayment.paymentMethod.includes('Online Payment') &&
     !deliveryAndPayment.paymentOption?.length

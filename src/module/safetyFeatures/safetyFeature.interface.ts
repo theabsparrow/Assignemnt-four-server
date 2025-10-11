@@ -1,6 +1,7 @@
 export type TSafetyRating = '1' | '2' | '3' | '4' | '5';
 export type TAirbags = '2' | '4' | '6' | '8' | '10' | '12';
 export type TFeature =
+  | 'Air Bags'
   | 'ABS'
   | 'Cruise Control'
   | 'Rear Camera'
@@ -32,7 +33,7 @@ export type TSafetyFeature = {
   safetyRating: TSafetyRating;
   airbags?: TAirbags;
   features: TFeature[];
-  warranty: TWarranty;
+  warranty?: TWarranty;
   isDeleted: boolean;
 };
 

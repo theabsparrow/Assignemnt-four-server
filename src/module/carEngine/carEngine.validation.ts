@@ -1,14 +1,5 @@
 import { z } from 'zod';
-import {
-  accelaration,
-  driveTrain,
-  engine,
-  fuelType,
-  horsePower,
-  topSpeed,
-  torque,
-  transmission,
-} from './carEngine.const';
+import { driveTrain, engine, fuelType, transmission } from './carEngine.const';
 
 const engineInfoValidationSchema = z.object({
   engine: z.enum([...engine] as [string, ...string[]], {
@@ -27,18 +18,18 @@ const engineInfoValidationSchema = z.object({
   driveTrain: z.enum([...driveTrain] as [string, ...string[]], {
     required_error: 'Drive train is required',
   }),
-  horsePower: z.enum([...horsePower] as [string, ...string[]], {
-    required_error: 'Horsepower is required',
-  }),
-  torque: z.enum([...torque] as [string, ...string[]], {
-    required_error: 'Torque is required',
-  }),
-  topSpeed: z.enum([...topSpeed] as [string, ...string[]], {
-    required_error: 'Top speed is required',
-  }),
-  acceleration: z.enum([...accelaration] as [string, ...string[]], {
-    required_error: 'Acceleration is required',
-  }),
+  horsePower: z
+    .string({ required_error: 'horse power is required' })
+    .max(1000, { message: 'milage can`t be more than 1000 character' }),
+  torque: z
+    .string({ required_error: 'torquer is required' })
+    .max(1000, { message: 'torque can`t be more than 1000 character' }),
+  topSpeed: z
+    .string({ required_error: 'top speed is required' })
+    .max(1000, { message: 'top speed can`t be more than 1000 character' }),
+  acceleration: z
+    .string({ required_error: 'acceleration power is required' })
+    .max(1000, { message: 'acceleration can`t be more than 1000 character' }),
 });
 
 const updateEngineInfoValidationSchema = z.object({
@@ -68,24 +59,20 @@ const updateEngineInfoValidationSchema = z.object({
     })
     .optional(),
   horsePower: z
-    .enum([...horsePower] as [string, ...string[]], {
-      required_error: 'Horsepower is required',
-    })
+    .string({ required_error: 'horse power is required' })
+    .max(1000, { message: 'milage can`t be more than 1000 character' })
     .optional(),
   torque: z
-    .enum([...torque] as [string, ...string[]], {
-      required_error: 'Torque is required',
-    })
+    .string({ required_error: 'torquer is required' })
+    .max(1000, { message: 'torque can`t be more than 1000 character' })
     .optional(),
   topSpeed: z
-    .enum([...topSpeed] as [string, ...string[]], {
-      required_error: 'Top speed is required',
-    })
+    .string({ required_error: 'top speed is required' })
+    .max(1000, { message: 'top speed can`t be more than 1000 character' })
     .optional(),
   acceleration: z
-    .enum([...accelaration] as [string, ...string[]], {
-      required_error: 'Acceleration is required',
-    })
+    .string({ required_error: 'acceleration power is required' })
+    .max(1000, { message: 'acceleration can`t be more than 1000 character' })
     .optional(),
 });
 

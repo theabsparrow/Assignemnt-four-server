@@ -10,6 +10,7 @@ export const safetyRating: TSafetyRating[] = ['1', '2', '3', '4', '5'] as const;
 export const airBags: TAirbags[] = ['2', '4', '6', '8', '10', '12'] as const;
 
 export const features: TFeature[] = [
+  'Air Bags',
   'ABS',
   'Cruise Control',
   'Rear Camera',

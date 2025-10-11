@@ -27,12 +27,10 @@ const registrationDataSchema = new Schema<TRegistrationdata>(
     previousOwner: {
       type: String,
       trim: true,
-      required: [true, 'previous owner is required'],
     },
     previousOwnerAddress: {
       type: String,
       trim: true,
-      required: [true, 'previous owner address is required'],
     },
     registrationCountry: {
       type: String,

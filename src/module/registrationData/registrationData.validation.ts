@@ -25,7 +25,6 @@ const registrationDataValidationSchema = z.object({
   previousOwner: z
     .string()
     .trim()
-    .min(1, { message: 'Previous owner is required' })
     .max(50, {
       message: 'previous owner info can`t be more than  50 character',
     })
@@ -33,7 +32,6 @@ const registrationDataValidationSchema = z.object({
   previousOwnerAddress: z
     .string()
     .trim()
-    .min(1, { message: 'Previous owner address is required' })
     .max(50, {
       message: 'previous owner adress can`t be more than 50 haracter',
     })
