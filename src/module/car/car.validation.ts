@@ -58,8 +58,7 @@ export const carValidationSchema = z.object({
   engineInfo: engineInfoValidation.engineInfoValidationSchema,
   deliveryAndPayment:
     deliveryAndPaymentValidation.deliveryAndPaymentValidationSchema,
-  registrationData:
-    registrationDataValidation.registrationDataValidationSchema.optional(),
+  registrationData: registrationDataValidation.registrationDataValidationSchema,
   safetyFeature:
     safetyFeatureValidation.safetyFeatureValidationSchema.optional(),
   serviceHistory:

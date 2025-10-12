@@ -30,7 +30,7 @@ const carSchema = new Schema<TCar>(
     },
     safetyFeature: {
       type: Schema.Types.ObjectId,
-      ref: 'ServiceHistory',
+      ref: 'SafetyFeature',
     },
     user: {
       type: Schema.Types.ObjectId,

@@ -5,23 +5,20 @@ const registrationDataSchema = new Schema<TRegistrationdata>(
   {
     licensePlate: {
       type: String,
-      required: [true, 'License plate is required'],
-      unique: true,
       trim: true,
     },
     vin: {
       type: String,
       required: [true, 'VIN (Vehicle Identification Number) is required'],
-      unique: true,
       trim: true,
+      minlength: [17, 'VIN must be exactly 17 characters long'],
+      maxlength: [17, 'VIN must be exactly 17 characters long'],
     },
     registrationYear: {
       type: String,
-      required: [true, 'Registration year is required'],
     },
     registrationAuthority: {
       type: String,
-      required: [true, 'Registration authority is required'],
       trim: true,
     },
     previousOwner: {
@@ -34,12 +31,11 @@ const registrationDataSchema = new Schema<TRegistrationdata>(
     },
     registrationCountry: {
       type: String,
-      required: [true, 'Registration country is required'],
       trim: true,
     },
     roadTaxPaid: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     isDeleted: {
       type: Boolean,

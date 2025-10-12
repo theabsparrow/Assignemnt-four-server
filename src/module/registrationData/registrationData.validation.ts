@@ -6,22 +6,30 @@ const registrationDataValidationSchema = z.object({
     .string({ required_error: 'license plate is required' })
     .trim()
     .min(1, { message: 'License plate is required' })
-    .max(20, { message: 'License plate cannot exceed 20 characters' }),
+    .max(20, { message: 'License plate cannot exceed 20 characters' })
+    .optional(),
   vin: z
     .string({ required_error: 'VIN is required' })
     .trim()
-    .min(1, { message: 'VIN (Vehicle Identification Number) is required' })
-    .max(17, { message: 'VIN cannot exceed 17 characters' }),
-  registrationYear: z.enum([...years] as [string, ...string[]], {
-    required_error: 'registration year is required',
-  }),
+    .min(17, {
+      message: 'VIN (Vehicle Identification Number) must be 17 character',
+    })
+    .max(17, {
+      message: 'VIN (Vehicle Identification Number) must be 17 character',
+    }),
+  registrationYear: z
+    .enum([...years] as [string, ...string[]], {
+      required_error: 'registration year is required',
+    })
+    .optional(),
   registrationAuthority: z
     .string({ required_error: 'registration authority is required' })
     .trim()
     .min(1, { message: 'Registration authority is required' })
     .max(50, {
       message: 'registration authority can`t be more than 50 character',
-    }),
+    })
+    .optional(),
   previousOwner: z
     .string()
     .trim()
@@ -40,7 +48,11 @@ const registrationDataValidationSchema = z.object({
     .string({ required_error: 'registration authority is required' })
     .trim()
     .min(1, { message: 'Registration country is required' })
-    .max(30, { message: 'country can`t be more than 30 character' }),
+    .max(30, { message: 'country can`t be more than 30 character' })
+    .optional(),
+  roadTaxPaid: z
+    .boolean({ invalid_type_error: ' road tax paid must be boolean value' })
+    .optional(),
 });
 
 const updateRegistrationDataValidationSchema = z.object({

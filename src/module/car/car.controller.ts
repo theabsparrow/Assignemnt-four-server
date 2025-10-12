@@ -68,7 +68,21 @@ const getSingleCar = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: 'Cars info is retrived successfully',
+      message: 'Car info is retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const getCheckoutCar = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const { userId } = req.user as JwtPayload;
+    const result = await carService.getCheckoutCar(id, userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Car checkout info is retrived successfully',
       data: result,
     });
   },
@@ -132,6 +146,7 @@ export const carController = {
   getAllCars,
   getAllCarList,
   getSingleCar,
+  getCheckoutCar,
   updatCarInfo,
   deleteCar,
   getModelsByBrand,

@@ -88,7 +88,7 @@ export type TCondition = 'New' | 'Used' | 'Certified Pre-Owned';
 export type TCar = {
   carEngine: Types.ObjectId;
   deliveryAndPayment: Types.ObjectId;
-  registrationData?: Types.ObjectId;
+  registrationData: Types.ObjectId;
   serviceHistory?: Types.ObjectId;
   safetyFeature?: Types.ObjectId;
   user: Types.ObjectId;
@@ -114,7 +114,7 @@ export type TcarInfoPayload = {
   basicInfo: TCar;
   engineInfo: TCarEngine;
   deliveryAndPayment: TDeliveryAndPayment;
-  registrationData?: TRegistrationdata;
+  registrationData: TRegistrationdata;
   safetyFeature?: TSafetyFeature;
   serviceHistory?: TserviceHistory;
 };

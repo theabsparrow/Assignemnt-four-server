@@ -252,7 +252,34 @@ const getSingleCar = async (id: string) => {
   if (!result || result?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
   }
-  return result;
+  const carBrand = await Car.find({
+    brand: result?.brand,
+    isDeleted: false,
+  })
+    .sort('-createdAt')
+    .limit(5)
+    .select('brand model image price category negotiable inStock');
+  const carCategory = await Car.find({
+    category: result?.category,
+    isDeleted: false,
+  })
+    .sort('-createdAt')
+    .limit(5)
+    .select('brand model image price category negotiable inStock');
+  return { result, carBrand, carCategory };
+};
+
+const getCheckoutCar = async (id: string, userId: string) => {
+  const car = await Car.findOne({ _id: id, isDeleted: false })
+    .select(
+      'brand model category image price year condition negotiable inStock deliveryAndPayment',
+    )
+    .populate('deliveryAndPayment');
+  if (!car) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'car checkout data not found');
+  }
+  console.log(userId);
+  return { car };
 };
 
 const getCarCategories = async (query: Record<string, unknown>) => {
@@ -490,6 +517,7 @@ export const carService = {
   getAllCarList,
   getModelsByBrand,
   getSingleCar,
+  getCheckoutCar,
   updateCarInfo,
   deleteCar,
   getCarCategories,

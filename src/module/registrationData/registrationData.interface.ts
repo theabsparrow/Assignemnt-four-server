@@ -1,11 +1,11 @@
 export type TRegistrationdata = {
-  licensePlate: string;
+  licensePlate?: string;
   vin: string;
-  registrationYear: string;
-  registrationAuthority: string;
+  registrationYear?: string;
+  registrationAuthority?: string;
   previousOwner?: string;
   previousOwnerAddress?: string;
-  registrationCountry: string;
+  registrationCountry?: string;
   roadTaxPaid: boolean;
   isDeleted: boolean;
 };
