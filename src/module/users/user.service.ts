@@ -257,32 +257,6 @@ const updateUSerStatus = async ({
   return result;
 };
 
-const deleteUser = async (id: string, user: JwtPayload) => {
-  const { userRole } = user;
-  // check if the user is exists
-  const isUserExists = await User.findById(id).select(' role isDeleted');
-  if (!isUserExists || isUserExists?.isDeleted) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
-  }
-  // check if the user role didn`t conflict
-  const role = isUserExists?.role;
-  if (
-    userRole === USER_ROLE.admin &&
-    (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
-  ) {
-    throw new AppError(
-      StatusCodes.FORBIDDEN,
-      'you can`t change the status of an admin as well as super admin',
-    );
-  }
-  const result = await User.findByIdAndUpdate(
-    id,
-    { isDeleted: true },
-    { new: true },
-  );
-  return result;
-};
-
 const makeAdmin = async (id: string, payload: TUser) => {
   const isUserExists = await User.findById(id).select('role isDeleted');
   if (!isUserExists || isUserExists?.isDeleted) {
@@ -422,6 +396,32 @@ const updateUserInfo = async (user: JwtPayload, payload: Partial<TUser>) => {
     throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update.');
   }
 
+  return result;
+};
+
+const deleteUser = async (id: string, user: JwtPayload) => {
+  const { userRole } = user;
+  // check if the user is exists
+  const isUserExists = await User.findById(id).select(' role isDeleted');
+  if (!isUserExists || isUserExists?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this user is not available');
+  }
+  // check if the user role didn`t conflict
+  const role = isUserExists?.role;
+  if (
+    userRole === USER_ROLE.admin &&
+    (role === USER_ROLE.admin || role === USER_ROLE.superAdmin)
+  ) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      'you can`t change the status of an admin as well as super admin',
+    );
+  }
+  const result = await User.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  );
   return result;
 };
 

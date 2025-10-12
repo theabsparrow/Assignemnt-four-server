@@ -246,9 +246,9 @@ const getModelsByBrand = async (query: Record<string, unknown>) => {
 };
 
 const getSingleCar = async (id: string) => {
-  const result = await Car.findById(id).populate(
-    'carEngine registrationData serviceHistory safetyFeature',
-  );
+  const result = await Car.findById(id)
+    .select('-updatedAt')
+    .populate('carEngine registrationData serviceHistory safetyFeature');
   if (!result || result?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
   }
