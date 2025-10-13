@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import {
-  TDeliveryMethod,
+  TDeliveryOptions,
   TPaymentMethod,
   TPaymentOptions,
 } from '../carDelivery/carDelivery.interface';
@@ -37,15 +37,14 @@ export type Torder = {
   sp_message: string;
   method: string;
   date_time: string;
-  deliveryMethod: TDeliveryMethod;
-  tracking: TTrackingInfo;
-  location?: string;
-  nearestDealer?: string;
-  estimatedDeliveryTime: string;
-  phoneNumber: string;
-  deliveryCost: number;
+  deliveryOption: TDeliveryOptions;
   paymentMethod: TPaymentMethod;
   paymentOption?: TPaymentOptions;
+  estimatedDeliveryTime: string;
+  deliveryCost: number;
+  location: string;
+  phoneNumber: string;
+  tracking: TTrackingInfo;
   isDeleted: boolean;
 };
 

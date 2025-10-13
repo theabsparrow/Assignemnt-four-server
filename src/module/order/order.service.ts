@@ -68,9 +68,7 @@ const createOrder = async (
       order_id: id,
       currency: 'BDT',
       customer_name: `${isUserExists?.name?.firstName} ${isUserExists?.name?.lastName}`,
-      customer_address: payload?.location
-        ? payload?.location
-        : payload?.nearestDealer,
+      customer_address: payload?.location,
       customer_email: isUserExists?.email,
       customer_phone: isUserExists?.phoneNumber,
       customer_city: isUserExists?.currentAddress

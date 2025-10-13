@@ -7,14 +7,13 @@ import {
 } from '../carDelivery/carDelivery.const';
 
 const orderValidationSchema = z.object({
-  deliveryMethod: z.enum([...deliveryOptions] as [string, ...string[]]),
-  estimatedDeliveryTime: z.string(),
-  location: z.string().optional(),
-  nearestDealer: z.string().optional(),
-  phoneNumber: z.string(),
-  deliveryCost: z.number(),
+  deliveryOption: z.enum([...deliveryOptions] as [string, ...string[]]),
   paymentMethod: z.enum([...paymentMethod] as [string, ...string[]]),
   paymentOption: z.enum([...paymentOptions] as [string, ...string[]]),
+  estimatedDeliveryTime: z.string(),
+  deliveryCost: z.number(),
+  location: z.string(),
+  phoneNumber: z.string(),
 });
 
 const orderTrackingValidationSchema = z.object({

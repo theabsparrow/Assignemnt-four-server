@@ -63,25 +63,10 @@ const orderSchema = new Schema<Torder>(
     sp_message: String,
     method: String,
     date_time: String,
-    deliveryMethod: {
+    deliveryOption: {
       type: String,
       enum: deliveryOptions,
-      required: [true, 'delivery method is required'],
-    },
-    tracking: trackingSchema,
-    location: String,
-    nearestDealer: String,
-    phoneNumber: {
-      type: String,
-      required: [true, 'phone number is required'],
-    },
-    deliveryCost: {
-      type: Number,
-      required: [true, 'delivery cost is required'],
-    },
-    estimatedDeliveryTime: {
-      type: String,
-      required: [true, 'delivery time is required'],
+      required: [true, 'delivery option is required'],
     },
     paymentMethod: {
       type: String,
@@ -92,6 +77,24 @@ const orderSchema = new Schema<Torder>(
       type: String,
       enum: paymentOptions,
     },
+    deliveryCost: {
+      type: Number,
+      required: [true, 'delivery cost is required'],
+    },
+    estimatedDeliveryTime: {
+      type: String,
+      required: [true, 'delivery time is required'],
+    },
+    location: {
+      type: String,
+      required: [true, 'location is required'],
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, 'phone number is required'],
+    },
+    tracking: trackingSchema,
+
     isDeleted: {
       type: Boolean,
       default: false,
