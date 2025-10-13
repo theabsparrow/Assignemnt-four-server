@@ -11,6 +11,7 @@ import { RegistrationData } from '../registrationData/registrationData.model';
 import { SafetyFeature } from '../safetyFeatures/safetyFeature.model';
 import { ServiceHistory } from '../serviceHistory/serviceHistory.moodel';
 import { DeliveryAndPayment } from '../carDelivery/carDelivery.model';
+import { User } from '../users/user.model';
 
 const createCar = async (payload: TcarInfoPayload, userId: string) => {
   const {
@@ -142,7 +143,7 @@ const getAllCars = async (query: Record<string, unknown>) => {
   query.limit = query?.limit ? query.limit : '21';
   query = {
     ...filter,
-    fields: 'brand, model, price, year, image, category, condition',
+    fields: 'brand, model, price, year, image, category, condition negotiable',
     ...query,
   };
   const carQuery = new QueryBuilder(Car.find(), query)
@@ -258,14 +259,14 @@ const getSingleCar = async (id: string) => {
   })
     .sort('-createdAt')
     .limit(5)
-    .select('brand model image price category negotiable inStock');
+    .select('brand model image price category year condition negotiable');
   const carCategory = await Car.find({
     category: result?.category,
     isDeleted: false,
   })
     .sort('-createdAt')
     .limit(5)
-    .select('brand model image price category negotiable inStock');
+    .select('brand model image price category year condition negotiable');
   return { result, carBrand, carCategory };
 };
 
@@ -278,8 +279,13 @@ const getCheckoutCar = async (id: string, userId: string) => {
   if (!car) {
     throw new AppError(StatusCodes.NOT_FOUND, 'car checkout data not found');
   }
-  console.log(userId);
-  return { car };
+  const userInfo = await User.findById(userId).select(
+    'name email phoneNumber gender profileImage verifyWithEmail',
+  );
+  if (!userInfo) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'car checkout data not found');
+  }
+  return { car, userInfo };
 };
 
 const getCarCategories = async (query: Record<string, unknown>) => {

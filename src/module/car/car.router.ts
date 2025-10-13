@@ -23,6 +23,11 @@ router.get(
 router.get('/get-models', carController.getModelsByBrand);
 router.get('/get-categories', carController.getCarCategories);
 router.get('/get-brands', carController.getCarBrands);
+router.get(
+  '/checkout/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  carController.getCheckoutCar,
+);
 router.get('/:id', carController.getSingleCar);
 router.patch(
   '/update-info/:id',

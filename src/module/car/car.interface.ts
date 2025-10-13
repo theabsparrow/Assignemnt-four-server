@@ -132,6 +132,7 @@ export type TUpdateCarInfo = {
   seatingCapacity: TSeatingCapacity;
   madeIn: string;
   image: string;
+  negotiable: boolean;
   addGalleryImage: string[];
   removeGalleryImage: string[];
 };

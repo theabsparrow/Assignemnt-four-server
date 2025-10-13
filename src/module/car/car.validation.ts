@@ -113,6 +113,9 @@ const updateCArInfoValidationSchema = z.object({
     )
     .max(5, { message: 'You can upload a maximum of 5 images' })
     .optional(),
+  negotiable: z
+    .boolean({ invalid_type_error: 'negitiable should be boolean' })
+    .optional(),
 });
 
 export const carValidation = {
