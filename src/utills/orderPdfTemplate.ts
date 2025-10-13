@@ -181,7 +181,7 @@ export const generateOrderHTML = ({
           <span class="status">${orderInfo?.status}</span>
         </p>
         <p><strong>Date & Time:</strong> ${orderInfo?.date_time}</p>
-        <p><strong>Delivery Method:</strong> ${orderInfo?.deliveryMethod}</p>
+        <p><strong>Delivery Method:</strong> ${orderInfo?.deliveryOption}</p>
         <p>
           <strong>Estimated Delivery:</strong> ${orderInfo?.estimatedDeliveryTime}
         </p>
