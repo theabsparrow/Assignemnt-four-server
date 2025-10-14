@@ -7,6 +7,7 @@ export default {
   port: process.env.PORT,
   database_url: process.env.DATABASE_URL,
   NODE_ENV: process.env.NODE_ENV,
+  client_url: process.env.CLIENT_URL,
   // bcrypt
   bcrypt_salt_round: process.env.BCRYPT_SALT_ROUND,
   // jwt

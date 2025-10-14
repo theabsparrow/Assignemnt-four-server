@@ -15,7 +15,7 @@ const corsOptions = {
     'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://lambo-car-frontend.vercel.app',
+    config.client_url as string,
   ],
   credentials: true,
 };

@@ -4,9 +4,9 @@ This is an advance backend application with rest apis built with the powerfull t
 
 ---
 
-## **Live Demo server site** : https://lambo-car.vercel.app/
+## **Live Demo server site** : https://lambocar.vercel.app/
 
-## **api common inception** : https://lambo-car.vercel.app/api
+## **api common inception** : https://lambocar.vercel.app/api
 
 ## **client site live link** : https://lambo-car-frontend.vercel.app/
 
@@ -73,13 +73,12 @@ git clone https://github.com/theabsparrow/Assignemnt-four-server.git
    PORT
    DATABASE_URL
    NODE_ENV
+   CLIENT_URL
    BCRYPT_SALT_ROUND
-   <!-- jwt token -->
    JWT_ACCESS_SECRET
    JWT_REFRESH_SECRET
    JWT_ACCESS_EXPIRES_IN
    JWT_REFRESH_EXPIRES_IN
-   <!-- super admin -->
    SUPER_ADMIN_EMAIL
    SUPER_ADMIN_PASS
    SUPER_ADMIN_PHONE
@@ -87,12 +86,10 @@ git clone https://github.com/theabsparrow/Assignemnt-four-server.git
    SUPER_ADMIN_FIRST_NAME
    SUPER_ADMIN_MIDDLE_NAME
    SUPER_ADMIN_LAST_NAME
-   <!-- # nodemailer -->
    EMAIL_APP_PASSWORD
    EMAIL_SENT_FROM
    SMTP_HOST
    SMTP_PORT
-   <!-- # surjopay -->
    SP_ENDPOINT
    SP_USERNAME
    SP_PASSWORD
