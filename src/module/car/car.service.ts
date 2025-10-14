@@ -231,10 +231,10 @@ const getAllCarList = async (query: Record<string, unknown>) => {
 };
 
 const getModelsByBrand = async (query: Record<string, unknown>) => {
-  const highestCarPrice = await Car.findOne({}, { price: 1, isDeleted: false })
+  const highestCarPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
     .sort({ price: -1 })
     .lean();
-  const lowestPrice = await Car.findOne({}, { price: 1 })
+  const lowestPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
     .sort({ price: 1 })
     .lean();
   const maxPrice = highestCarPrice?.price ?? 0;
