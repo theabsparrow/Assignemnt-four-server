@@ -8,7 +8,7 @@ This is an advance backend application with rest apis built with the powerfull t
 
 ## **api common inception** : https://lambocar.vercel.app/api
 
-## **client site live link** : https://lambo-car-frontend.vercel.app/
+## **client site live link** : https://lambo-car.vercel.app/
 
 ## **client site github repo** : https://github.com/theabsparrow/Assignment-four-client.git
 
