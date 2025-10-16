@@ -14,4 +14,14 @@ router.get(
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   reactionController.getMyReaction,
 );
+router.patch(
+  '/create-commentReaction/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  reactionController.createCommentReaction,
+);
+router.get(
+  '/get-myReaction/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  reactionController.getMyCommentReaction,
+);
 export const reactionRoute = router;

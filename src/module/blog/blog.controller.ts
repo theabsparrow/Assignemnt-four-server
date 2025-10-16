@@ -10,10 +10,10 @@ import { JwtPayload } from 'jsonwebtoken';
 
 const createBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const payloade = req.body;
+    const payload = req.body;
     const user = req.user as JwtPayload;
     const { userId } = user;
-    const result = await blogService.createBlog(userId, payloade);
+    const result = await blogService.createBlog(userId, payload);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.CREATED,

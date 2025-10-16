@@ -39,7 +39,43 @@ const getMyReaction = catchAsync(
   },
 );
 
+const createCommentReaction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const commentId = req.params.id;
+    const { userId } = req.user as JwtPayload;
+    const result = await reactionService.createCommentReaction({
+      userId,
+      commentId,
+    });
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'you have reacted successfully',
+      data: result,
+    });
+  },
+);
+
+const getMyCommentReaction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const commentId = req.params.id;
+    const { userId } = req.user as JwtPayload;
+    const result = await reactionService.getMyCommentReaction(
+      commentId,
+      userId,
+    );
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'successfully retrived',
+      data: result,
+    });
+  },
+);
+
 export const reactionController = {
   createReaction,
   getMyReaction,
+  createCommentReaction,
+  getMyCommentReaction,
 };

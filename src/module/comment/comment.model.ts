@@ -6,8 +6,9 @@ const commentSchema = new Schema<TComment>(
     blogId: {
       type: Schema.Types.ObjectId,
       ref: 'Blog',
+      required: [true, 'vkog id is required'],
     },
-    parentId: {
+    commentId: {
       type: Schema.Types.ObjectId,
       ref: 'Comment',
     },
@@ -19,8 +20,8 @@ const commentSchema = new Schema<TComment>(
     content: {
       type: String,
       required: [true, 'content is required'],
-      min: [1, 'content can`t be blank'],
-      max: [200, 'content can`t be more than 200 character'],
+      minlength: [1, 'content can`t be blank'],
+      maxlength: [500, 'content can`t be more than 200 character'],
     },
     isDeleted: {
       type: Boolean,

@@ -15,6 +15,7 @@ const serviceHistorySchema = new Schema<TserviceHistory>(
     serviceDetails: {
       type: String,
       required: [true, 'Service details are required'],
+      maxlength: [500, 'max length can`t be more than 500 character'],
       trim: true,
     },
     cost: {

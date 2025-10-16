@@ -68,6 +68,8 @@ const carSchema = new Schema<TCar>(
     },
     description: {
       type: String,
+      minlength: [10, 'description should be at least 10 character'],
+      maxlength: [1000, 'max length should be at least  1000 character'],
     },
     inStock: {
       type: Boolean,

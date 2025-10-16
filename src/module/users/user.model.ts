@@ -9,16 +9,19 @@ const userNameSchema = new Schema<TUSerName>({
   firstName: {
     type: String,
     required: [true, 'first name is required'],
+    maxlength: [50, 'first name can`t be more than 50 character'],
     trim: true,
   },
   middleName: {
     type: String,
     trim: true,
+    maxlength: [50, 'middle name name can`t be more than 50 character'],
   },
   lastName: {
     type: String,
     required: [true, 'last name is required'],
     trim: true,
+    maxlength: [50, 'last name can`t be more than 50 character'],
   },
 });
 
@@ -32,11 +35,13 @@ const userSchema = new Schema<TUser>(
       type: String,
       required: [true, 'email is required'],
       trim: true,
+      maxlength: [100, 'email can`t be more than 50 character'],
     },
     password: {
       type: String,
       required: [true, 'password is required'],
       select: 0,
+      maxlength: [20, 'password can`t be more than 50 character'],
     },
     phoneNumber: {
       type: String,
@@ -70,10 +75,12 @@ const userSchema = new Schema<TUser>(
     },
     homeTown: {
       type: String,
+      maxlength: [50, 'home town can`t be more than 50 character'],
       default: '',
     },
     currentAddress: {
       type: String,
+      maxlength: [50, 'current address can`t be more than 50 character'],
       default: '',
     },
     verifyWithEmail: {

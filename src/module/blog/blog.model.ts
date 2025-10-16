@@ -12,15 +12,15 @@ const blogSchema = new Schema<TBlog>(
     title: {
       type: String,
       required: [true, 'title is required'],
-      min: [1, 'title can`t be blank'],
-      max: [100, 'title can`t be more that 100 character'],
+      minlength: [1, 'title can`t be blank'],
+      maxlength: [100, 'title can`t be more that 100 character'],
     },
     content: {
       type: String,
       required: [true, 'content is required'],
       trim: true,
-      min: [50, ' content can`t be blank'],
-      max: [5000, 'content can`t be more than 5000 character'],
+      minlength: [50, ' content can`t be blank'],
+      maxlength: [5000, 'content can`t be more than 5000 character'],
     },
     image: {
       type: String,

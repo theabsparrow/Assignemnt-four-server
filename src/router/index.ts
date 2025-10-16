@@ -10,6 +10,7 @@ import { carEngineRouter } from '../module/carEngine/carEngine.router';
 import { registrationdataRouter } from '../module/registrationData/registrationdata.router';
 import { safetyFeatureRouter } from '../module/safetyFeatures/safetyfeature.router';
 import { serviceHistoryRouter } from '../module/serviceHistory/serviceHistory.router';
+import { commentRouter } from '../module/comment/comment.route';
 
 const router = Router();
 const moduleRoutes = [
@@ -56,6 +57,10 @@ const moduleRoutes = [
   {
     path: '/service-history',
     route: serviceHistoryRouter,
+  },
+  {
+    path: '/comment',
+    route: commentRouter,
   },
 ];
 
