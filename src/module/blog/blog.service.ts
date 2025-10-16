@@ -7,13 +7,10 @@ import { Blog } from './blog.model';
 import mongoose, { Types } from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { blogSearchAbleFields } from './blog.const';
-import { TReaction } from '../reaction/reaction.interface';
-import { Reaction } from '../reaction/reaction.model';
 
 const createBlog = async (userId: string, payload: TBlog) => {
   const userInfo = await User.findById(userId).select('name');
   payload.authorId = userInfo?._id as Types.ObjectId;
-  payload.name = `${userInfo?.name?.firstName} ${userInfo?.name?.middleName} ${userInfo?.name?.lastName}`;
   const result = await Blog.create(payload);
   if (!result) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'falid to create the blog');
@@ -24,17 +21,27 @@ const createBlog = async (userId: string, payload: TBlog) => {
 const getallBlogs = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   filter.isDeleted = false;
-  if (!query.status) {
-    filter.status = 'published';
+  filter.status = 'published';
+  if (!query.limit) {
+    query.limit = 5;
   }
-  query = { ...query, ...filter };
+  query = {
+    ...query,
+    fields:
+      'authorId, title, content, image, tags, reaction, comments, createdAt',
+    ...filter,
+  };
+
   const blogQuery = new QueryBuilder(Blog.find(), query)
     .search(blogSearchAbleFields)
     .sort()
     .filter()
     .paginateQuery()
     .fields();
-  const result = await blogQuery.modelQuery;
+  const result = await blogQuery.modelQuery.populate({
+    path: 'authorId',
+    select: 'name profileImage',
+  });
   const meta = await blogQuery.countTotal();
   if (result.length < 1) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blogs found');
@@ -43,13 +50,14 @@ const getallBlogs = async (query: Record<string, unknown>) => {
 };
 
 const getASingleBlog = async (id: string) => {
-  const isBlogExists = await Blog.findById(id);
+  const isBlogExists = await Blog.findById(id).populate({
+    path: 'authorId',
+    select: 'name profileImage',
+  });
   if (!isBlogExists || isBlogExists?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
   }
-  await Blog.findByIdAndUpdate(id, { $inc: { view: 1 } }, { new: true });
-  const result = await Blog.findById(id);
-  return result;
+  return isBlogExists;
 };
 
 const getMyBlogs = async (userId: string, query: Record<string, unknown>) => {
@@ -186,99 +194,6 @@ const deleteBlog = async (id: string) => {
   return result;
 };
 
-const countReaction = async ({
-  userId,
-  blogId,
-  payload,
-}: {
-  userId: string;
-  blogId: string;
-  payload: TReaction;
-}) => {
-  const isBlogExists = await Blog.findById(blogId).select('isDeleted');
-  if (!isBlogExists || isBlogExists?.isDeleted) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'data not found');
-  }
-  payload.blogId = isBlogExists?._id;
-  const updateField = `reaction.${payload.reaction}`;
-  const session = await mongoose.startSession();
-  try {
-    session.startTransaction();
-    // find if there is already a reaction
-    const reactionForThisUserOfThisBlogExists = await Reaction.findOne({
-      blogId: isBlogExists?._id,
-      userId,
-    }).select('reaction');
-    // decrease reaction count if alreadyb react
-    if (
-      reactionForThisUserOfThisBlogExists &&
-      reactionForThisUserOfThisBlogExists?.reaction === payload.reaction
-    ) {
-      const reactResult = await Blog.findByIdAndUpdate(
-        isBlogExists?._id,
-        { $inc: { [updateField]: -1 } },
-        { session, new: true, runValidators: true },
-      );
-      if (!reactResult) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-      const reactionInfo = await Reaction.deleteOne(
-        { blogId: isBlogExists?._id, userId },
-        { session },
-      );
-      if (reactionInfo.deletedCount === 0) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-    }
-    // change the reaction if already reacted
-    if (
-      reactionForThisUserOfThisBlogExists &&
-      reactionForThisUserOfThisBlogExists?.reaction !== payload.reaction
-    ) {
-      const decreaseReaction = `reaction.${reactionForThisUserOfThisBlogExists?.reaction}`;
-      const reactResult = await Blog.findByIdAndUpdate(
-        isBlogExists?._id,
-        { $inc: { [updateField]: 1, [decreaseReaction]: -1 } },
-        { session, new: true, runValidators: true },
-      );
-      if (!reactResult) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-      const updateFromReaction = await Reaction.findOneAndUpdate(
-        { blogId: isBlogExists?._id, userId },
-        { reaction: payload.reaction },
-        { session, new: true, runValidators: true },
-      );
-      if (!updateFromReaction) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-    }
-
-    if (!reactionForThisUserOfThisBlogExists) {
-      const reactResult = await Blog.findByIdAndUpdate(
-        isBlogExists?._id,
-        { $inc: { [updateField]: 1 } },
-        { session, new: true, runValidators: true },
-      );
-      if (!reactResult) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-      const reactionInfo = await Reaction.create([payload], { session });
-      if (!reactionInfo.length) {
-        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
-      }
-    }
-    await session.commitTransaction();
-    await session.endSession();
-    const result = await Blog.findById(blogId);
-    return result;
-  } catch (err: any) {
-    await session.abortTransaction();
-    await session.endSession();
-    throw new AppError(StatusCodes.BAD_REQUEST, err);
-  }
-};
-
 export const blogService = {
   createBlog,
   getallBlogs,
@@ -288,5 +203,4 @@ export const blogService = {
   deleteMyBlog,
   updateMyBlog,
   deleteBlog,
-  countReaction,
 };

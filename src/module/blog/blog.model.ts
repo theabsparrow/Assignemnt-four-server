@@ -1,21 +1,6 @@
 import { model, Schema } from 'mongoose';
-import { TBlog, TBlogReaction } from './blog.interface';
 import { blogStatus } from './blog.const';
-
-const blogReactionSchema = new Schema<TBlogReaction>({
-  like: {
-    type: Number,
-    default: 0,
-  },
-  love: {
-    type: Number,
-    default: 0,
-  },
-  dislike: {
-    type: Number,
-    default: 0,
-  },
-});
+import { TBlog } from './blog.interface';
 
 const blogSchema = new Schema<TBlog>(
   {
@@ -23,10 +8,6 @@ const blogSchema = new Schema<TBlog>(
       type: Schema.Types.ObjectId,
       required: [true, ' author is required'],
       ref: 'User',
-    },
-    name: {
-      type: String,
-      required: [true, 'author name is required'],
     },
     title: {
       type: String,
@@ -38,7 +19,7 @@ const blogSchema = new Schema<TBlog>(
       type: String,
       required: [true, 'content is required'],
       trim: true,
-      min: [1, ' content can`t be blank'],
+      min: [50, ' content can`t be blank'],
       max: [5000, 'content can`t be more than 5000 character'],
     },
     image: {
@@ -55,16 +36,16 @@ const blogSchema = new Schema<TBlog>(
     },
     status: {
       type: String,
-      required: [true, 'status is required'],
       enum: blogStatus,
+      default: 'published',
     },
-    view: {
+    reaction: {
       type: Number,
       default: 0,
     },
-    reaction: {
-      type: blogReactionSchema,
-      default: () => ({}),
+    comments: {
+      type: Number,
+      default: 0,
     },
     isDeleted: {
       type: Boolean,

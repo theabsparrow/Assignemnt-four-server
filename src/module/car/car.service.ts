@@ -196,7 +196,7 @@ const getAllCarList = async (query: Record<string, unknown>) => {
   query = {
     ...query,
     fields:
-      ' model, brand, category, condition, year, madeIn, inStock, negotiable, createdAt, price',
+      'model, brand, category, condition, year, madeIn, inStock, negotiable, createdAt, price',
     ...filter,
   };
   const carQuery = new QueryBuilder(Car.find(), query)
@@ -273,7 +273,7 @@ const getSingleCar = async (id: string) => {
 const getCheckoutCar = async (id: string, userId: string) => {
   const car = await Car.findOne({ _id: id, isDeleted: false })
     .select(
-      'brand model category image price year condition negotiable inStock deliveryAndPayment',
+      'brand model category image price year condition negotiable inStock deliveryAndPayment user',
     )
     .populate('deliveryAndPayment');
   if (!car) {

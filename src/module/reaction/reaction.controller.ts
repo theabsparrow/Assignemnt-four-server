@@ -8,11 +8,28 @@ import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
 import { reactionService } from './reaction.service';
 
+const createReaction = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const blogId = req.params.id;
+    const { userId } = req.user as JwtPayload;
+    const result = await reactionService.createReaction({
+      userId,
+      blogId,
+    });
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'you have reacted successfully',
+      data: result,
+    });
+  },
+);
+
 const getMyReaction = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const blogId = req.params.id;
-    const { userEmail } = req.user as JwtPayload;
-    const result = await reactionService.getMyReaction(blogId, userEmail);
+    const { userId } = req.user as JwtPayload;
+    const result = await reactionService.getMyReaction(blogId, userId);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
@@ -23,5 +40,6 @@ const getMyReaction = catchAsync(
 );
 
 export const reactionController = {
+  createReaction,
   getMyReaction,
 };
