@@ -6,7 +6,8 @@ const commentValidationSchema = z.object({
     .optional(),
   content: z
     .string({ required_error: 'content is required' })
-    .max(500, 'content can`t be more than 500 character'),
+    .max(500, 'content can`t be more than 500 character')
+    .trim(),
 });
 
 const updateCommentValidationSchema = z.object({

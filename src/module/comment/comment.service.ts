@@ -22,7 +22,13 @@ const createComment = async ({
   payload.blogId = isBlogExists?._id;
   payload.userId = new Types.ObjectId(userId);
   if (payload?.commentId) {
-    payload.commentId = new Types.ObjectId(payload?.commentId);
+    const commentInfo = await Comment.findOne({
+      _id: payload?.commentId,
+      isDeleted: false,
+    }).select('_id');
+    if (commentInfo) {
+      payload.commentId = commentInfo._id;
+    }
   }
   const session = await mongoose.startSession();
   try {
@@ -37,7 +43,18 @@ const createComment = async ({
       { session, new: true, runValidators: true },
     );
     if (!countComment) {
-      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to react');
+      throw new AppError(StatusCodes.BAD_REQUEST, 'faild to post the comment');
+    }
+    if (payload?.commentId) {
+      const countReply = await Comment.findByIdAndUpdate(payload?.commentId, {
+        $inc: { replies: 1 },
+      });
+      if (!countReply) {
+        throw new AppError(
+          StatusCodes.BAD_REQUEST,
+          'faild to post the comment',
+        );
+      }
     }
     await session.commitTransaction();
     await session.endSession();

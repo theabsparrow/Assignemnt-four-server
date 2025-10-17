@@ -22,7 +22,13 @@ const commentSchema = new Schema<TComment>(
       required: [true, 'content is required'],
       minlength: [1, 'content can`t be blank'],
       maxlength: [500, 'content can`t be more than 200 character'],
+      trim: true,
     },
+    recation: {
+      type: Number,
+      default: 0,
+    },
+    replies: Number,
     isDeleted: {
       type: Boolean,
       default: false,

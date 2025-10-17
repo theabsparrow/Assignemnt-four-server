@@ -6,5 +6,6 @@ export type TComment = {
   userId: Types.ObjectId;
   content: string;
   recation: number;
+  replies: number;
   isDeleted: boolean;
 };
