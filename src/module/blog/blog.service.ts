@@ -22,8 +22,11 @@ const getallBlogs = async (query: Record<string, unknown>) => {
   const filter: Record<string, unknown> = {};
   filter.isDeleted = false;
   filter.status = 'published';
+  if (!query.page) {
+    query.page = 1;
+  }
   if (!query.limit) {
-    query.limit = 5;
+    query.limit = 20;
   }
   query = {
     ...query,

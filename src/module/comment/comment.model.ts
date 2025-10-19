@@ -24,7 +24,7 @@ const commentSchema = new Schema<TComment>(
       maxlength: [500, 'content can`t be more than 200 character'],
       trim: true,
     },
-    recation: {
+    reaction: {
       type: Number,
       default: 0,
     },

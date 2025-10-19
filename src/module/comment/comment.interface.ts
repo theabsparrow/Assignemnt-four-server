@@ -5,7 +5,7 @@ export type TComment = {
   commentId?: Types.ObjectId;
   userId: Types.ObjectId;
   content: string;
-  recation: number;
+  reaction: number;
   replies: number;
   isDeleted: boolean;
 };

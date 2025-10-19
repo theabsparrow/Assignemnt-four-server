@@ -100,7 +100,6 @@ const createCommentReaction = async ({
     commentId: isCommentExists?._id,
     userId: new Types.ObjectId(userId),
   };
-
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
