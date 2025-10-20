@@ -41,7 +41,7 @@ router.get('/:id', carController.getSingleCar);
 router.patch(
   '/update-info/:id',
   validateRequest(carValidation.updateCArInfoValidationSchema),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   carController.updatCarInfo,
 );
 router.delete(

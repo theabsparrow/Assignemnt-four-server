@@ -437,10 +437,21 @@ const getCarBrands = async (query: Record<string, unknown>) => {
   }
 };
 
-const updateCarInfo = async (id: string, payload: Partial<TUpdateCarInfo>) => {
-  const isCarExists = await Car.findById(id).select('isDeleted');
+const updateCarInfo = async ({
+  id,
+  payload,
+  userId,
+}: {
+  id: string;
+  payload: Partial<TUpdateCarInfo>;
+  userId: string;
+}) => {
+  const isCarExists = await Car.findById(id).select('isDeleted, user');
   if (!isCarExists || isCarExists?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'car data not found');
+  }
+  if (isCarExists?.user.toString() !== userId) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'you are not authorized');
   }
   const { addGalleryImage, removeGalleryImage, ...remaining } = payload;
   const session = await mongoose.startSession();

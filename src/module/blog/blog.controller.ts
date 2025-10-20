@@ -66,8 +66,8 @@ const getMyBlogs = catchAsync(
 const getMySingleBlog = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const { userEmail } = req.user as JwtPayload;
-    const result = await blogService.getMySingleBlog(userEmail, id);
+    const { userId } = req.user as JwtPayload;
+    const result = await blogService.getMySingleBlog(userId, id);
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,

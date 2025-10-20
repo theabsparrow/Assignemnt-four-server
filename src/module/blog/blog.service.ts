@@ -82,16 +82,18 @@ const getMyBlogs = async (userId: string, query: Record<string, unknown>) => {
 };
 
 const getMySingleBlog = async (userId: string, id: string) => {
-  const result = await Blog.findById(id);
-  if (!result || result?.isDeleted) {
+  const result = await Blog.findOne({
+    _id: id,
+    authorId: userId,
+    isDeleted: false,
+  }).populate({
+    path: 'authorId',
+    select: 'name profileImage',
+  });
+  if (!result) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
   }
-  if (result?.authorId.toString() !== userId) {
-    throw new AppError(
-      StatusCodes.UNAUTHORIZED,
-      'you are not authorized to view this blog',
-    );
-  }
+
   return result;
 };
 

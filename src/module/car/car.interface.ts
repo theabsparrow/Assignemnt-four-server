@@ -133,6 +133,7 @@ export type TUpdateCarInfo = {
   madeIn: string;
   image: string;
   negotiable: boolean;
+  inStock: boolean;
   addGalleryImage: string[];
   removeGalleryImage: string[];
 };

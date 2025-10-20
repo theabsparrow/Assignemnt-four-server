@@ -145,8 +145,9 @@ const getCarBrands = catchAsync(
 const updatCarInfo = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
+    const { userId } = req.user as JwtPayload;
     const payload = req.body;
-    const result = await carService.updateCarInfo(id, payload);
+    const result = await carService.updateCarInfo({ id, payload, userId });
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
