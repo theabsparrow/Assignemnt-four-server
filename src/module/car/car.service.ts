@@ -230,6 +230,70 @@ const getAllCarList = async (query: Record<string, unknown>) => {
   return { meta, result, models, totalCar, maxPrice, minPrice };
 };
 
+const getMyCars = async (query: Record<string, unknown>, id: string) => {
+  const filter: Record<string, unknown> = {};
+  filter.isDeleted = false;
+  filter.user = id;
+  if (query?.negotiable) {
+    filter.negotiable = query.negotiable === 'Yes';
+  }
+  query.limit = 30;
+  query = {
+    ...query,
+    fields: 'brand, model, price, year, image, category, condition negotiable',
+    ...filter,
+  };
+  const carQuery = new QueryBuilder(Car.find(), query)
+    .search(carSearchAbleFields)
+    .filter()
+    .sort()
+    .paginateQuery()
+    .fields();
+  const result = await carQuery.modelQuery;
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No data found');
+  }
+  const meta = await carQuery.countTotal();
+  let models: string[] = [];
+  if (query?.brand) {
+    models = await Car.distinct('model', { brand: query.brand });
+  }
+  const totalCar = await Car.countDocuments({
+    user: id,
+    isDeleted: false,
+  });
+  const highestCarPrice = await Car.findOne(
+    { isDeleted: false, user: id },
+    { price: 1 },
+  )
+    .sort({ price: -1 })
+    .lean();
+  const lowestPrice = await Car.findOne(
+    { isDeleted: false, user: id },
+    { price: 1 },
+  )
+    .sort({ price: 1 })
+    .lean();
+  const maxPrice = highestCarPrice?.price ?? 0;
+  const minPrice = lowestPrice?.price ?? 0;
+  return { meta, result, models, totalCar, maxPrice, minPrice };
+};
+
+const getMySIngleCar = async (id: string, userId: string) => {
+  const result = await Car.findById(id)
+    .select('-updatedAt ')
+    .populate(
+      'carEngine registrationData serviceHistory safetyFeature deliveryAndPayment',
+    );
+  if (!result || result?.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
+  }
+  if (result?.user.toString() !== userId) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
+  }
+  return result;
+};
+
 const getModelsByBrand = async (query: Record<string, unknown>) => {
   const highestCarPrice = await Car.findOne({ isDeleted: false }, { price: 1 })
     .sort({ price: -1 })
@@ -248,7 +312,7 @@ const getModelsByBrand = async (query: Record<string, unknown>) => {
 
 const getSingleCar = async (id: string) => {
   const result = await Car.findById(id)
-    .select('-updatedAt')
+    .select('-updatedAt -deliveryAndPayment')
     .populate('carEngine registrationData serviceHistory safetyFeature');
   if (!result || result?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'this car data not found');
@@ -521,6 +585,8 @@ export const carService = {
   createCar,
   getAllCars,
   getAllCarList,
+  getMyCars,
+  getMySIngleCar,
   getModelsByBrand,
   getSingleCar,
   getCheckoutCar,

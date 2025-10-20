@@ -188,7 +188,7 @@ export type TAccelaration =
   | '10+';
 
 export type TCarEngine = {
-  engine: TEngineType;
+  engine: string;
   transmission: TTransmission;
   mileage: number;
   fuelType: TFuelType;

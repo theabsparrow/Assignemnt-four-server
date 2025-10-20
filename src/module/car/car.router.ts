@@ -13,12 +13,16 @@ router.post(
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   carController.createCar,
 );
-
 router.get('/get-allCars', carController.getAllCars);
 router.get(
   '/all-carsList',
-  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   carController.getAllCarList,
+);
+router.get(
+  '/my-cars',
+  auth(USER_ROLE.admin, USER_ROLE.user),
+  carController.getMyCars,
 );
 router.get('/get-models', carController.getModelsByBrand);
 router.get('/get-categories', carController.getCarCategories);
@@ -28,6 +32,11 @@ router.get(
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   carController.getCheckoutCar,
 );
+router.get(
+  '/myCars/:id',
+  auth(USER_ROLE.admin, USER_ROLE.user),
+  carController.getMySIngleCar,
+);
 router.get('/:id', carController.getSingleCar);
 router.patch(
   '/update-info/:id',
@@ -35,7 +44,6 @@ router.patch(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   carController.updatCarInfo,
 );
-
 router.delete(
   '/delete/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),

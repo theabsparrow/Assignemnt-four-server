@@ -48,6 +48,34 @@ const getAllCarList = catchAsync(
   },
 );
 
+const getMyCars = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const { userId } = req.user as JwtPayload;
+    const result = await carService.getMyCars(query, userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Cars info are retrived successfully',
+      data: result,
+    });
+  },
+);
+
+const getMySIngleCar = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const { userId } = req.user as JwtPayload;
+    const result = await carService.getMySIngleCar(id, userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Car info is retrived successfully',
+      data: result,
+    });
+  },
+);
+
 const getModelsByBrand = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
@@ -145,6 +173,8 @@ export const carController = {
   createCar,
   getAllCars,
   getAllCarList,
+  getMyCars,
+  getMySIngleCar,
   getSingleCar,
   getCheckoutCar,
   updatCarInfo,

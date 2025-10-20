@@ -1,17 +1,12 @@
 import { z } from 'zod';
-import { driveTrain, engine, fuelType, transmission } from './carEngine.const';
+import { driveTrain, fuelType, transmission } from './carEngine.const';
 
 const engineInfoValidationSchema = z.object({
-  engine: z.enum([...engine] as [string, ...string[]], {
-    required_error: 'Engine is required',
-  }),
+  engine: z.string({ required_error: 'Engine is required' }),
   transmission: z.enum([...transmission] as [string, ...string[]], {
     required_error: 'Transmission is required',
   }),
-  mileage: z
-    .number()
-    .min(1, { message: 'milage is required' })
-    .max(100, { message: 'milage can`t be more than 100' }),
+  mileage: z.number().min(1, { message: 'milage is required' }),
   fuelType: z.enum([...fuelType] as [string, ...string[]], {
     required_error: 'Fuel type is required',
   }),
@@ -33,21 +28,13 @@ const engineInfoValidationSchema = z.object({
 });
 
 const updateEngineInfoValidationSchema = z.object({
-  engine: z
-    .enum([...engine] as [string, ...string[]], {
-      required_error: 'Engine is required',
-    })
-    .optional(),
+  engine: z.string({ required_error: 'Engine is required' }).optional(),
   transmission: z
     .enum([...transmission] as [string, ...string[]], {
       required_error: 'Transmission is required',
     })
     .optional(),
-  mileage: z
-    .number()
-    .min(1, { message: 'milage is required' })
-    .max(100, { message: 'milage can`t be more than 100' })
-    .optional(),
+  mileage: z.number().min(1, { message: 'milage is required' }).optional(),
   fuelType: z
     .enum([...fuelType] as [string, ...string[]], {
       required_error: 'Fuel type is required',

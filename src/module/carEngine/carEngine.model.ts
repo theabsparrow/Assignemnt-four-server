@@ -1,12 +1,11 @@
 import { model, Schema } from 'mongoose';
 import { TCarEngine } from './carEngine.interface';
-import { driveTrain, engine, fuelType, transmission } from './carEngine.const';
+import { driveTrain, fuelType, transmission } from './carEngine.const';
 
 const carEngineSchema = new Schema<TCarEngine>(
   {
     engine: {
       type: String,
-      enum: engine,
       required: [true, 'engine is required'],
     },
     transmission: {

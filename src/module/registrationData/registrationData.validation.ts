@@ -3,9 +3,8 @@ import { years } from '../car/car.const';
 
 const registrationDataValidationSchema = z.object({
   licensePlate: z
-    .string({ required_error: 'license plate is required' })
+    .string({ invalid_type_error: 'license plate should be string' })
     .trim()
-    .min(1, { message: 'License plate is required' })
     .max(20, { message: 'License plate cannot exceed 20 characters' })
     .optional(),
   vin: z
@@ -25,7 +24,6 @@ const registrationDataValidationSchema = z.object({
   registrationAuthority: z
     .string({ required_error: 'registration authority is required' })
     .trim()
-    .min(1, { message: 'Registration authority is required' })
     .max(50, {
       message: 'registration authority can`t be more than 50 character',
     })
@@ -47,12 +45,9 @@ const registrationDataValidationSchema = z.object({
   registrationCountry: z
     .string({ required_error: 'registration authority is required' })
     .trim()
-    .min(1, { message: 'Registration country is required' })
     .max(30, { message: 'country can`t be more than 30 character' })
     .optional(),
-  roadTaxPaid: z
-    .boolean({ invalid_type_error: ' road tax paid must be boolean value' })
-    .optional(),
+  roadTaxPaid: z.boolean().optional(),
 });
 
 const updateRegistrationDataValidationSchema = z.object({
