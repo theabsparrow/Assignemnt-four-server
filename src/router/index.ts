@@ -6,7 +6,6 @@ import { authRoute } from '../module/auth/auth.route';
 import { blogRoute } from '../module/blog/blog.router';
 import { reactionRoute } from '../module/reaction/reaction.route';
 import { carDeliveryRouter } from '../module/carDelivery/carDelivery.router';
-import { carEngineRouter } from '../module/carEngine/carEngine.router';
 import { registrationdataRouter } from '../module/registrationData/registrationdata.router';
 import { safetyFeatureRouter } from '../module/safetyFeatures/safetyfeature.router';
 import { serviceHistoryRouter } from '../module/serviceHistory/serviceHistory.router';
@@ -41,10 +40,6 @@ const moduleRoutes = [
   {
     path: '/delivery',
     route: carDeliveryRouter,
-  },
-  {
-    path: '/engine',
-    route: carEngineRouter,
   },
   {
     path: '/registration',

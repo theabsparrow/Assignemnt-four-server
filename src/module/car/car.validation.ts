@@ -78,7 +78,7 @@ const updateCArInfoValidationSchema = z.object({
       required_error: 'year is required',
     })
     .optional(),
-  price: z.string().optional(),
+  price: z.number().optional(),
   category: z.enum([...carCategory] as [string, ...string[]]).optional(),
   condition: z
     .enum([...condition] as [string, ...string[]], {

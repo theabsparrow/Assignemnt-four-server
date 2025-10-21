@@ -4,6 +4,8 @@ import validateRequest from '../../middlewire/validateRequest';
 import { carValidation } from './car.validation';
 import { auth } from '../../middlewire/auth';
 import { USER_ROLE } from '../users/user.constant';
+import { engineInfoValidation } from '../carEngine/carEngine.validation';
+import { carEngineController } from '../carEngine/carEngineController';
 
 const router = Router();
 
@@ -43,6 +45,12 @@ router.patch(
   validateRequest(carValidation.updateCArInfoValidationSchema),
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   carController.updatCarInfo,
+);
+router.patch(
+  '/update-carEngine/:id',
+  validateRequest(engineInfoValidation.updateEngineInfoValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
+  carEngineController.updateCarEngine,
 );
 router.delete(
   '/delete/:id',

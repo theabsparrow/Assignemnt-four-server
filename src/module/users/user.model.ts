@@ -59,11 +59,9 @@ const userSchema = new Schema<TUser>(
     },
     profileImage: {
       type: String,
-      default: '',
     },
     coverImage: {
       type: String,
-      default: '',
     },
     status: {
       type: String,
@@ -76,12 +74,10 @@ const userSchema = new Schema<TUser>(
     homeTown: {
       type: String,
       maxlength: [50, 'home town can`t be more than 50 character'],
-      default: '',
     },
     currentAddress: {
       type: String,
       maxlength: [50, 'current address can`t be more than 50 character'],
-      default: '',
     },
     verifyWithEmail: {
       type: Boolean,

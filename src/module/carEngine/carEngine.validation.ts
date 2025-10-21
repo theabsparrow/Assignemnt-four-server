@@ -6,7 +6,7 @@ const engineInfoValidationSchema = z.object({
   transmission: z.enum([...transmission] as [string, ...string[]], {
     required_error: 'Transmission is required',
   }),
-  mileage: z.number().min(1, { message: 'milage is required' }),
+  mileage: z.string().min(1, { message: 'milage is required' }),
   fuelType: z.enum([...fuelType] as [string, ...string[]], {
     required_error: 'Fuel type is required',
   }),
@@ -34,7 +34,7 @@ const updateEngineInfoValidationSchema = z.object({
       required_error: 'Transmission is required',
     })
     .optional(),
-  mileage: z.number().min(1, { message: 'milage is required' }).optional(),
+  mileage: z.string().min(1, { message: 'milage is required' }).optional(),
   fuelType: z
     .enum([...fuelType] as [string, ...string[]], {
       required_error: 'Fuel type is required',
