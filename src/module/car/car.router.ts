@@ -63,7 +63,7 @@ router.patch(
   validateRequest(
     registrationDataValidation.updateRegistrationDataValidationSchema,
   ),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   registrationController.updateRegistrationData,
 );
 router.patch(
@@ -71,13 +71,13 @@ router.patch(
   validateRequest(
     serviceHistoryValidation.updateServiceHistoryValidationSchema,
   ),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   serviceHistoryController.updateServiceHistory,
 );
 router.patch(
   '/update-safety-feature/:id',
   validateRequest(safetyFeatureValidation.updateSafetyFeatureValidationSchema),
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   safetyFeatireController.updateSafetyFeature,
 );
 

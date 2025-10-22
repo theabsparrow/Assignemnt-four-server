@@ -8,7 +8,9 @@ const updateRegistrationdata = async (
   id: string,
   payload: Partial<TRegistrationdata>,
 ) => {
-  const iscarExists = await Car.findOne({ carEngine: id }).select('isDeleted');
+  const iscarExists = await Car.findOne({ registrationData: id }).select(
+    'isDeleted',
+  );
   if (!iscarExists || iscarExists?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'this car info not found');
   }
