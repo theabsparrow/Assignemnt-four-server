@@ -17,7 +17,7 @@ const serviceHistoryValidationSchema = z.object({
     .max(500, { message: 'service details can`t be more than 500 character' })
     .trim(),
   cost: z.number(),
-  mileageAtService: z.number(),
+  mileageAtService: z.string(),
 });
 
 const updateServiceHistoryValidationSchema = z.object({
@@ -41,7 +41,7 @@ const updateServiceHistoryValidationSchema = z.object({
     .optional(),
   cost: z.number().min(0, { message: 'Cost cannot be negative' }).optional(),
   mileageAtService: z
-    .number()
+    .string()
     .min(1, { message: 'Mileage is required' })
     .optional(),
 });

@@ -6,9 +6,6 @@ import { authRoute } from '../module/auth/auth.route';
 import { blogRoute } from '../module/blog/blog.router';
 import { reactionRoute } from '../module/reaction/reaction.route';
 import { carDeliveryRouter } from '../module/carDelivery/carDelivery.router';
-import { registrationdataRouter } from '../module/registrationData/registrationdata.router';
-import { safetyFeatureRouter } from '../module/safetyFeatures/safetyfeature.router';
-import { serviceHistoryRouter } from '../module/serviceHistory/serviceHistory.router';
 import { commentRouter } from '../module/comment/comment.route';
 
 const router = Router();
@@ -40,18 +37,6 @@ const moduleRoutes = [
   {
     path: '/delivery',
     route: carDeliveryRouter,
-  },
-  {
-    path: '/registration',
-    route: registrationdataRouter,
-  },
-  {
-    path: '/safety-feature',
-    route: safetyFeatureRouter,
-  },
-  {
-    path: '/service-history',
-    route: serviceHistoryRouter,
   },
   {
     path: '/comment',

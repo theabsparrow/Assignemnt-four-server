@@ -477,7 +477,7 @@ const updateCarInfo = async ({
       result = await Car.findByIdAndUpdate(
         id,
         { $pull: { galleryImage: { $in: removeGalleryImage } } },
-        { session, new: true, runValidators: true },
+        { session, new: true, runValidators: false },
       );
       if (!result) {
         throw new AppError(

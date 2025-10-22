@@ -6,6 +6,12 @@ import { auth } from '../../middlewire/auth';
 import { USER_ROLE } from '../users/user.constant';
 import { engineInfoValidation } from '../carEngine/carEngine.validation';
 import { carEngineController } from '../carEngine/carEngineController';
+import { registrationDataValidation } from '../registrationData/registrationData.validation';
+import { registrationController } from '../registrationData/registrationData.controller';
+import { serviceHistoryValidation } from '../serviceHistory/serviceHistory.validation';
+import { serviceHistoryController } from '../serviceHistory/serviceHistory.controller';
+import { safetyFeatureValidation } from '../safetyFeatures/safetyFeature.validation';
+import { safetyFeatireController } from '../safetyFeatures/afetyFeature.controller';
 
 const router = Router();
 
@@ -52,6 +58,29 @@ router.patch(
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
   carEngineController.updateCarEngine,
 );
+router.patch(
+  '/update-registrationData/:id',
+  validateRequest(
+    registrationDataValidation.updateRegistrationDataValidationSchema,
+  ),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  registrationController.updateRegistrationData,
+);
+router.patch(
+  '/update-service-history/:id',
+  validateRequest(
+    serviceHistoryValidation.updateServiceHistoryValidationSchema,
+  ),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  serviceHistoryController.updateServiceHistory,
+);
+router.patch(
+  '/update-safety-feature/:id',
+  validateRequest(safetyFeatureValidation.updateSafetyFeatureValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  safetyFeatireController.updateSafetyFeature,
+);
+
 router.delete(
   '/delete/:id',
   auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.user),
