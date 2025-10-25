@@ -106,10 +106,11 @@ const updateMyBlog = async ({
   id: string;
   payload: Partial<TExtendedBlog>;
 }) => {
-  const BlogInfo = await Blog.findById(id).select('isDeleted');
+  const BlogInfo = await Blog.findById(id).select('isDeleted authorId');
   if (!BlogInfo || BlogInfo?.isDeleted) {
     throw new AppError(StatusCodes.NOT_FOUND, 'no blog found');
   }
+
   if (BlogInfo?.authorId.toString() !== userId) {
     throw new AppError(
       StatusCodes.UNAUTHORIZED,
@@ -117,6 +118,7 @@ const updateMyBlog = async ({
     );
   }
   const { addTags, removeTags, ...remainingData } = payload;
+
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -144,7 +146,7 @@ const updateMyBlog = async ({
       const update = await Blog.findByIdAndUpdate(
         id,
         { $pull: { tags: { $in: removeTags } } },
-        { session, new: true, runValidators: true },
+        { session, new: true },
       );
       if (!update) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update data');

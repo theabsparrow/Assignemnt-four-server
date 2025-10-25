@@ -26,7 +26,7 @@ router.get(
   blogController.getMySingleBlog,
 );
 router.patch(
-  '/update-myBlog',
+  '/update-myBlog/:id',
   validateRequest(blogValidation.updateBlogValidationSchema),
   auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.user),
   blogController.updateMyBlog,
