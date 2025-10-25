@@ -117,7 +117,7 @@ const updateMyBlog = async ({
       'you are not authorized to update this blog',
     );
   }
-  const { addTags, removeTags, ...remainingData } = payload;
+  const { addTags, removeTags, removePhoto, ...remainingData } = payload;
 
   const session = await mongoose.startSession();
   try {
@@ -147,6 +147,16 @@ const updateMyBlog = async ({
         id,
         { $pull: { tags: { $in: removeTags } } },
         { session, new: true },
+      );
+      if (!update) {
+        throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update data');
+      }
+    }
+    if (removePhoto && BlogInfo?.image) {
+      const update = await Blog.findByIdAndUpdate(
+        id,
+        { $unset: { image: 1 } },
+        { session, new: true, runValidators: true },
       );
       if (!update) {
         throw new AppError(StatusCodes.BAD_REQUEST, 'faild to update data');

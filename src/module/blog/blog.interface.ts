@@ -15,4 +15,5 @@ export type TBlog = {
 export interface TExtendedBlog extends TBlog {
   addTags: string[];
   removeTags: string[];
+  removePhoto: string;
 }

@@ -37,6 +37,7 @@ const updateBlogValidationSchema = z.object({
     .max(5000, 'content can`t be more than  5000 character')
     .optional(),
   image: z.string().url({ message: 'Invalid image URL' }).optional(),
+  removePhoto: z.string().url({ message: 'Invalid image URL' }).optional(),
   addTags: z.array(z.string()).optional(),
   removeTags: z.array(z.string()).optional(),
   status: z
